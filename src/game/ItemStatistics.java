@@ -8,5 +8,6 @@ package game;
  * we just need to know if it will break the {@code ContractedWorker}'s back.
  */
 public enum ItemStatistics {
+    /** The weight value of an item. */
     WEIGHT,
 }
