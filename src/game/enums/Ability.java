@@ -1,4 +1,4 @@
-package game.capabilities;
+package game.enums;
 
 /**
  * An enumeration representing the constant capabilities an actor or item can possess.

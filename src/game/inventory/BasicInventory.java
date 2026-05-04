@@ -1,4 +1,4 @@
-package game;
+package game.inventory;
 
 import edu.monash.fit2099.engine.items.Inventory;
 import edu.monash.fit2099.engine.items.Item;
