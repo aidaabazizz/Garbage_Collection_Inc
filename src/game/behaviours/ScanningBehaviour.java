@@ -6,7 +6,7 @@ import edu.monash.fit2099.engine.behaviours.Behaviour;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.TriggerAlarmAction;
-import game.capabilities.Ability;
+import game.enums.Ability;
 import game.managers.AlarmManager;
 
 /**

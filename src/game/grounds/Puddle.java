@@ -5,7 +5,7 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.ConsumeAction;
-import game.capabilities.Ability;
+import game.enums.Ability;
 import game.capabilities.Consumable;
 import game.capabilities.PoisonStatus;
 

@@ -7,6 +7,7 @@ import edu.monash.fit2099.engine.positions.World;
 import game.actors.ContractedWorker;
 import game.actors.SecurityCamera;
 import game.grounds.*;
+import game.inventory.WeightLimitedInventory;
 import game.items.*;
 
 import java.util.Arrays;

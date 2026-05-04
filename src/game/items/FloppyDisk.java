@@ -2,7 +2,7 @@ package game.items;
 
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
-import game.ItemStatistics;
+import game.enums.ItemStatistics;
 
 /**
  * A lightweight piece of ancient data storage scrap.

@@ -9,7 +9,7 @@ import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.displays.Menu;
 import edu.monash.fit2099.engine.items.Inventory;
 import edu.monash.fit2099.engine.positions.GameMap;
-import game.capabilities.Ability;
+import game.enums.Ability;
 import game.capabilities.UpdateNotifier;
 import game.managers.AlarmManager;
 

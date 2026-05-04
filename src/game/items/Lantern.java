@@ -5,7 +5,7 @@ import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
-import game.ItemStatistics;
+import game.enums.ItemStatistics;
 import game.capabilities.FireStackable;
 import game.capabilities.UpdateNotifier;
 import game.grounds.Fire;
