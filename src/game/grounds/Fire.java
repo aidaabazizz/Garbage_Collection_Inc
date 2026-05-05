@@ -21,7 +21,7 @@ import java.util.List;
 public class Fire extends Ground implements FireStackable {
 
     /** The duration a fire stack remains on the ground tile. */
-    private static final int STACK_DURATION = 5;
+    private final int STACK_DURATION = 5;
 
     /** The duration of the burning status effect applied to actors. */
     private static final int BURNING_EFFECT_DURATION = 5;
