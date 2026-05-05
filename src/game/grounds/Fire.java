@@ -43,12 +43,31 @@ public class Fire extends Ground implements FireStackable {
     }
 
     /**
+     * Constructs a new Fire instance with custom duration
+     * @param previousGround the ground type that existed before fire was created,
+     * @param duration the duration of the number of turns this fire stack should lsat
+     */
+    public Fire(Ground previousGround, int duration) {
+        super('^', "Fire");
+        this.previousGround = previousGround;
+        this.stacks.add(duration);
+    }
+
+    /**
      * Adds a new stack of fire to the current location, resetting
      * its individual duration.
      */
     @Override
     public void addStack() {
         this.stacks.add(STACK_DURATION);
+    }
+
+    /**
+     * Adds a new stack of fire with custom duration.
+     * @param duration the number of turns this new stack should last
+     */
+    public void addStack(int duration) {
+        this.stacks.add(duration);
     }
 
     /**
