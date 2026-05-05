@@ -8,21 +8,20 @@ import game.capabilities.TeleportStrategy;
 
 import java.util.List;
 
-public class FixedTeleporting implements TeleportStrategy {
+public class FixedTeleportStrategy implements TeleportStrategy {
 
-    private Location fixedLocation;
+    private final List<Location> destinations;
 
-    public FixedTeleporting(Location fixedLocation) {
-        this.fixedLocation = fixedLocation;
+    public FixedTeleportStrategy(List<Location> destinations) {
+        this.destinations = destinations;
     }
-
     @Override
-    public List<Location> generateOptions(GameMap map, int count) {
-        return List.of(fixedLocation);
+    public List<Location> generateOptions(GameMap map, Actor actor, int count) {
+        return destinations;
     }
 
     @Override
     public void teleport(ContractedWorker worker, Location destination, GameMap map) {
-        map.moveActor(worker, fixedLocation);
+        map.moveActor(worker, destination);
     }
 }
