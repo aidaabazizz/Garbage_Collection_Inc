@@ -8,6 +8,7 @@ import game.actors.ContractedWorker;
 import java.util.List;
 
 public interface TeleportStrategy {
-    List<Location> generateOptions(GameMap map, Actor actor, int count);
-    void teleport(ContractedWorker worker, Location destination, GameMap map);
+    Location getDestination(Actor actor, GameMap map);
+    void applySideEffects(Actor actor, Location source, Location destination, GameMap map);
+    String menuDescription(Actor actor);
 }
