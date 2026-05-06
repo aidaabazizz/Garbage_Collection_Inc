@@ -3,8 +3,8 @@ package game.items;
 
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
-import game.ItemStatistics;
-import game.capabilities.Ability;
+import game.enums.ItemStatistics;
+import game.enums.Ability;
 
 /**
  * A specialized piece of corporate equipment used to purify consumables.

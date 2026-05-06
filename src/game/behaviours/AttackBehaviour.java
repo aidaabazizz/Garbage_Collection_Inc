@@ -6,7 +6,7 @@ import edu.monash.fit2099.engine.behaviours.Behaviour;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.AttackAction;
-import game.capabilities.Ability;
+import game.enums.Ability;
 
 /**
  * A behavior that allows an actor to automatically attack adjacent targets.

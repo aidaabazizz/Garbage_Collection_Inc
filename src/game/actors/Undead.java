@@ -1,7 +1,7 @@
 package game.actors;
 
 
-import game.BasicInventory;
+import game.inventory.BasicInventory;
 import game.behaviours.AttackBehaviour;
 import game.behaviours.HuntBehaviour;
 import game.behaviours.WanderBehaviour;

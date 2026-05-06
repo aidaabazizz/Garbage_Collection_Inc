@@ -1,6 +1,6 @@
 package game.actors;
 
-import game.BasicInventory;
+import game.inventory.BasicInventory;
 import game.behaviours.ScanningBehaviour;
 
 /**

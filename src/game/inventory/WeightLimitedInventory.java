@@ -1,9 +1,10 @@
-package game;
+package game.inventory;
 
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.items.Inventory;
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.items.ItemAbility;
+import game.enums.ItemStatistics;
 
 /**
  * At its core, this is just an oversized {@code ArrayList}.

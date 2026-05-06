@@ -6,9 +6,9 @@ import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
-import game.ItemStatistics;
+import game.enums.ItemStatistics;
 import game.actions.ConsumeAction;
-import game.capabilities.Ability;
+import game.enums.Ability;
 import game.capabilities.Consumable;
 import game.capabilities.PoisonStatus;
 
