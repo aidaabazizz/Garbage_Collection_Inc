@@ -7,6 +7,7 @@ import edu.monash.fit2099.engine.positions.Location;
  * Facilitates the Dependency Inversion Principle between flora and environmental reactions.
  *
  * @author Jewell Gomes
+ * @author Chathya Attanayake
  */
 public interface Spawner {
     /**
@@ -19,4 +20,8 @@ public interface Spawner {
      * @param location The map location for the spawn.
      */
     public void spawnUndead(Location location);
+
+
+    //req4
+    void spawnParasite(Location location);
 }
