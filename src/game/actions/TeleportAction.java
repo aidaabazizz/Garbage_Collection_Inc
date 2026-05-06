@@ -4,19 +4,36 @@ import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.teleport.TeleportStrategy;
+import game.capabilities.TeleportStrategy;
 
 /**
- * Generic teleport action that delegates behaviour to a TeleportStrategy.
+ * This teleport action delegates its behaviour to the teleport strategies.
+ * This action follows the Strategy pattern, allowing different teleportation behaviours
+ *
+ * @author Victoria Tay Wen Xie
+ * @version 1.0
  */
 public class TeleportAction extends Action {
 
+    /**
+     * Teleportation strategy that defines specifc behabiour for each teleportable
+     */
     private final TeleportStrategy strategy;
 
+    /**
+     * Constructor for TeleportAction with the specified teleportation strategt
+     * @param strategy this defines how teleportation works
+     */
     public TeleportAction(TeleportStrategy strategy) {
         this.strategy = strategy;
     }
 
+    /**
+     * This executes the teleportation process
+     * @param actor The actor performing the action.
+     * @param map The map the actor is on.
+     * @return A string that describes the result of the teleportation
+     */
     @Override
     public String execute(Actor actor, GameMap map) {
 
@@ -39,6 +56,11 @@ public class TeleportAction extends Action {
         return actor + " teleported from " + source + " to " + destination;
     }
 
+    /**
+     * Returns the menu description for this teleportation action.
+     * @param actor The actor performing the action.
+     * @return a string that describes the action
+     */
     @Override
     public String menuDescription(Actor actor) {
         return strategy.menuDescription(actor);
