@@ -33,9 +33,9 @@ public enum AccessLevel {
     }
 
     /**
-     * Gets the displayable level number.
+     * Gets the numeric ranking of the access level.
      *
-     * @return level number
+     * @return numeric ranking of this access level
      */
     public int getRank() {
         return rank;

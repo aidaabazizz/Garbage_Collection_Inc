@@ -25,7 +25,6 @@ import game.finance.Wallet;
  */
 public class ContractedWorker extends  Actor {
 
-    private final Wallet wallet;
     /**
      * Constructor to initialize the worker with their starting statistics.
      *
@@ -36,17 +35,8 @@ public class ContractedWorker extends  Actor {
      */
     public ContractedWorker(String name, char displayChar, int hitPoints, Inventory inventory, Wallet wallet) {
         super(name, displayChar, hitPoints, inventory);
-        this.wallet = wallet;
         this.enableAbility(Ability.WORKER);
-    }
-
-    /**
-     * Gets the worker's wallet.
-     *
-     * @return the worker's wallet
-     */
-    public Wallet getWallet() {
-        return wallet;
+        this.getInventory().add(new Wallet());
     }
 
     /**

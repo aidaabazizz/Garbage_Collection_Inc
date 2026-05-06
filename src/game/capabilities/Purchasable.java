@@ -28,4 +28,16 @@ public interface Purchasable {
      * @return description of the purchase effect
      */
     String purchasedBy(Actor buyer, GameMap map, Wallet wallet);
+
+    /**
+     * Applies the effect that occurs when the purchase fails.
+     *
+     * @param buyer the actor attempting to buy the item
+     * @param map the current game map
+     * @param wallet the buyer's wallet
+     * @return description of the failed purchase effect
+     */
+    default String failedPurchaseBy(Actor buyer, GameMap map, Wallet wallet) {
+        return buyer + " does not have enough credits.";
+    }
 }

@@ -1,13 +1,15 @@
 package game.finance;
 
+import edu.monash.fit2099.engine.items.Item;
+
 /**
  * Represents a worker's credit storage for company transactions.
- * The wallet enforces the company credit limit of 1000 credits.
+ * The wallet is stored as a non-portable item in the worker's inventory.
  *
  * @author Suchir
  * @version 1.0
  */
-public class Wallet {
+public class Wallet extends Item {
     private static final int MAX_CREDITS = 1000;
     private int credits;
 
@@ -15,7 +17,9 @@ public class Wallet {
      * Constructor for Wallet.
      */
     public Wallet() {
+        super("Wallet", '$');
         this.credits = 0;
+        this.makeNonPortable();
     }
 
     /**
@@ -95,5 +99,15 @@ public class Wallet {
      */
     public int getMaxCredits() {
         return MAX_CREDITS;
+    }
+
+    /**
+     * Returns the wallet's display text.
+     *
+     * @return wallet display text
+     */
+    @Override
+    public String toString() {
+        return "Wallet (" + credits + "/" + MAX_CREDITS + " credits)";
     }
 }
