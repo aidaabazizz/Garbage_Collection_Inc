@@ -4,6 +4,7 @@ import game.behaviours.InfectBehaviour;
 import game.inventory.BasicInventory;
 import game.behaviours.WanderBehaviour;
 
+//req 4
 public class Parasite  extends NonPlayerCharacter{
     private static final int INITIAL_HEALTH = 30;
     private static final int WANDER_PRIORITY = 999;
