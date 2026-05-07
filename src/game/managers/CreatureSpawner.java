@@ -125,6 +125,14 @@ public class CreatureSpawner implements Spawner {
             return false;
         }
     }
+
+    /**
+     * REQ5: Spawns a CrazyChicken at the specified location.
+     * The CrazyChicken is a stateful creature with four distinct states:
+     * WANDER, MIMICKING, FRENZY, and HUNGRY.
+     *
+     * @param location The map location where the CrazyChicken should be created.
+     */
     @Override
     public void spawnCrazyChicken(Location location) {
         try {
