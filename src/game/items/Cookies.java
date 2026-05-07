@@ -124,30 +124,17 @@ public class Cookies extends Item implements Consumable, Infectable {
             count--;
         }
 
-        // 2. Actively spawns other Parasites on adjacent tiles.
-        // We do this every turn because the requirement says "actively spawns".
-        spawnParasiteNearby(location);
+        // UPDATED: Actively spawns Parasites every turn.
+        // We delegate the "Find adjacent spot" logic to the CreatureSpawner.
+        // This ensures the "Standard Spawning Effect" (2 damage) is applied.
+        new CreatureSpawner().spawnParasite(location);
+
 
         // 3. Cleanup logic: If the cookie is "consumed" by the infection, remove it.
         if (count <= 0) {
             location.removeItem(this);
         }
     }
-
-
-     //Helper method to find an empty adjacent tile and spawn a parasite.
-    private void spawnParasiteNearby(Location location) {
-        for (Exit exit : location.getExits()) {
-            Location destination = exit.getDestination();
-
-            // "Standard Parasite spawning effect" is triggered inside spawnParasite()
-            if (!destination.containsAnActor()) {
-                new CreatureSpawner().spawnParasite(destination);
-                return; // Requirement says "spawn a parasite", so we stop after one.
-            }
-        }
-    }
-
 
 
 
