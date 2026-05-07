@@ -1,7 +1,7 @@
 package game.actors;
 
+import game.behaviours.InfectBehaviour;
 import game.inventory.BasicInventory;
-import game.behaviours.HuntBehaviour;
 import game.behaviours.WanderBehaviour;
 
 public class Parasite  extends NonPlayerCharacter{
@@ -11,7 +11,7 @@ public class Parasite  extends NonPlayerCharacter{
 
     public Parasite(){
         super("Parasite",'x',INITIAL_HEALTH, new BasicInventory());
-        this.behaviours.put(INFECT_PRIORITY, new HuntBehaviour());
+        this.behaviours.put(INFECT_PRIORITY, new InfectBehaviour());
         this.behaviours.put(WANDER_PRIORITY, new WanderBehaviour());
     }
 
