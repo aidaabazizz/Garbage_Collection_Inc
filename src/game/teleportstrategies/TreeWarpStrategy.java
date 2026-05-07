@@ -1,4 +1,4 @@
-package game.strategies;
+package game.teleportstrategies;
 
 
 import edu.monash.fit2099.engine.actors.Actor;
