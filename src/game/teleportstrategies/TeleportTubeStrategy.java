@@ -6,17 +6,16 @@ import edu.monash.fit2099.engine.positions.Location;
 import game.capabilities.TeleportStrategy;
 import game.grounds.Fire;
 
-import java.util.List;
 import java.util.Random;
 
-public class FixedTeleportStrategy implements TeleportStrategy {
+public class TeleportTubeStrategy implements TeleportStrategy {
 
     private final static int ADJACENT_TILE_DISTANCE = 1;
     private final static int FIRE_DURATION = 2;
     private final Location destination;
     private final Random random = new Random();
 
-    public FixedTeleportStrategy(Location destination) {
+    public TeleportTubeStrategy(Location destination) {
         this.destination = destination;
     }
 
@@ -34,8 +33,8 @@ public class FixedTeleportStrategy implements TeleportStrategy {
 
         Location randomLocation;
         do {
-            int x = random.nextInt(maxX);
-            int y = random.nextInt(maxY);
+            int x = random.nextInt(maxX + 1);
+            int y = random.nextInt(maxY + 1);
             randomLocation = destMap.at(x,y);
         } while (!randomLocation.canActorEnter(actor));
         return randomLocation;
