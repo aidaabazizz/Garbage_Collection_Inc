@@ -24,4 +24,11 @@ public interface Spawner {
 
     //req4
     void spawnParasite(Location location);
+
+    /**
+     * REQ5: Creates a CrazyChicken.
+     * @param location The map location for the spawn.
+     */
+    void spawnCrazyChicken(Location location);
+
 }

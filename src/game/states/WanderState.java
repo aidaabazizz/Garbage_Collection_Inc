@@ -7,6 +7,7 @@ import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.WanderBehaviour;
 import game.enums.Ability;
+import game.enums.ChickenState;
 
 /**
  * WANDER STATE for CrazyChicken.

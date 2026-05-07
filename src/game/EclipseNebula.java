@@ -56,7 +56,6 @@ public class EclipseNebula extends World {
         spawnItemsOnOverflow(overflowMap);
 
         setupContractedWorkers(moonMap);
-        spawnCrazyChicken(moonMap); //REQ5 spawn CrazyChicken
     }
 
     /**
@@ -229,18 +228,7 @@ public class EclipseNebula extends World {
         }
     }
 
-    // REQ5 for CrazyChicken
-    private void spawnCrazyChicken(GameMap map) throws Exception {
-        // Spawn the CrazyChicken at a specific location
-        // Find a suitable empty location
-        for (int y : map.getYRange()) {
-            for (int x : map.getXRange()) {
-                Location loc = map.at(x, y);
-                if (!loc.containsAnActor() && loc.canActorEnter(new CrazyChicken())) {
-                    loc.addActor(new CrazyChicken());
-                    return;
-                }
-            }
-        }
-    }
+
+
+
 }

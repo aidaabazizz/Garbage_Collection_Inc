@@ -8,6 +8,7 @@ import game.behaviours.HuntBehaviour;
 import game.behaviours.AttackBehaviour;
 import game.enums.Ability;
 import game.actors.CrazyChicken;
+import game.enums.ChickenState;
 import game.weapons.CrazyChickenBeak;
 
 /**

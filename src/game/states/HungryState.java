@@ -8,6 +8,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.StealFromInventoryBehaviour;
 import game.behaviours.WanderBehaviour;
 import game.enums.Ability;
+import game.enums.ChickenState;
 
 import java.util.ArrayList;
 import java.util.List;

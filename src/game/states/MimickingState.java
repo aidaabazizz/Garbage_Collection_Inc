@@ -8,6 +8,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.MirrorMovementBehaviour;
 import game.capabilities.DisorientedStatus;
 import game.enums.Ability;
+import game.enums.ChickenState;
 
 /**
  * MIMICKING STATE for CrazyChicken.
