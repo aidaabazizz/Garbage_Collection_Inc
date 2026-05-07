@@ -1,6 +1,6 @@
 package game.grounds;
 
-import game.holestrayergies.ParasiticHoleStrategy;
+import game.holestrategies.ParasiticHoleStrategy;
 
 public class ParasiticHole extends Hole {
     public ParasiticHole() {

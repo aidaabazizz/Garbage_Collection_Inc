@@ -1,7 +1,7 @@
 
 package game.grounds;
 
-import game.holestrayergies.StandardHoleStrategy;
+import game.holestrategies.StandardHoleStrategy;
 
 public class StandardHole extends Hole {
     public StandardHole() {

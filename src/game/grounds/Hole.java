@@ -5,7 +5,7 @@ import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.capabilities.HoleMarker;
 import game.managers.CreatureSpawner;
-import game.holestrayergies.HoleSpawnStrategy;
+import game.holestrategies.HoleSpawnStrategy;
 import game.managers.Spawner;
 
 /**
