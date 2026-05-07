@@ -5,6 +5,8 @@ import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
+import game.capabilities.Infectable;
+import game.capabilities.InfectionStatus;
 import game.enums.ItemStatistics;
 import game.capabilities.FireStackable;
 import game.capabilities.UpdateNotifier;
@@ -18,8 +20,9 @@ import java.util.Random;
  * ground beneath the carrier.
  *
  * @author Jewell Gomes
+ * @author Chathya Attanayake (Modified by)
  */
-public class Lantern extends Item implements UpdateNotifier {
+public class Lantern extends Item implements UpdateNotifier, Infectable {
     private static final int INITIAL_OIL = 10;
     private static final double LEAK_CHANCE = 0.05;
     private int oil = INITIAL_OIL;
@@ -79,5 +82,15 @@ public class Lantern extends Item implements UpdateNotifier {
     @Override
     public String toString() {
         return super.toString() + " (Oil: " + oil + ")";
+    }
+
+    //req 4
+    @Override
+    public void reactToInfection(Location location) {
+        this.addStatus(new InfectionStatus());
+    }
+    @Override
+    public void updateInfection(Location location) {
+        this.oil = Math.max(0, this.oil - 1);
     }
 }
