@@ -15,6 +15,7 @@ import game.capabilities.InfectionStatus;
 import game.enums.Ability;
 import game.capabilities.UpdateNotifier;
 import game.managers.AlarmManager;
+import game.managers.CreatureSpawner;
 
 /**
  * The primary player-controlled actor representing a contracted worker.
@@ -28,6 +29,7 @@ import game.managers.AlarmManager;
  */
 public class ContractedWorker extends Actor implements Infectable {
     private int spawnCounter = 0;
+
 
     /**
      * Constructor to initialize the worker with their starting statistics.
@@ -110,7 +112,7 @@ public class ContractedWorker extends Actor implements Infectable {
     private void spawnParasiteNearby(Location loc) {
         for (var exit : loc.getExits()) {
             if (!exit.getDestination().containsAnActor()) {
-                new game.managers.CreatureSpawner().spawnParasite(exit.getDestination());
+                new CreatureSpawner().spawnParasite(exit.getDestination());
                 return;
             }
         }
