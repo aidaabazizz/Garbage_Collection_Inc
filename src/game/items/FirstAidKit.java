@@ -8,6 +8,8 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import edu.monash.fit2099.engine.statistics.StatisticOperations;
+import game.capabilities.Purchasable;
+import game.finance.Wallet;
 import game.enums.ItemStatistics;
 import game.actions.ConsumeAction;
 import game.enums.Ability;
@@ -20,10 +22,11 @@ import game.capabilities.Consumable;
  *
  * @author Jewell Gomes
  */
-public class FirstAidKit extends Item implements Consumable {
+public class FirstAidKit extends Item implements Consumable,Purchasable  {
     private static final int MAX_COOLDOWN = 20;
     private static final int MAX_HP_INCREASE = 1;
     private int cooldown = 0;
+    private static final int PURCHASE_PRICE = 1000;
 
     /**
      * Constructor for the First Aid Kit.
@@ -84,6 +87,48 @@ public class FirstAidKit extends Item implements Consumable {
             actions.add(new ConsumeAction(this, "First Aid Kit"));
         }
         return actions;
+    }
+
+    /**
+     * Gets the purchase price of the first aid kit.
+     *
+     * @return purchase price
+     */
+    @Override
+    public int getPurchasePrice() {
+        return PURCHASE_PRICE;
+    }
+
+    /**
+     * Applies the effect after purchasing the first aid kit.
+     *
+     * @param buyer the actor buying the item
+     * @param map the current game map
+     * @param wallet the buyer's wallet
+     * @return purchase effect description
+     */
+    @Override
+    public String purchasedBy(Actor buyer, GameMap map, Wallet wallet) {
+        return buyer + " purchases a First Aid Kit.";
+    }
+
+    /**
+     * Applies the failed purchase effect.
+     *
+     * @param buyer the actor attempting to buy the item
+     * @param map the current game map
+     * @param wallet the buyer's wallet
+     * @return failed purchase description
+     */
+    @Override
+    public String failedPurchaseBy(Actor buyer, GameMap map, Wallet wallet) {
+        buyer.hurt(Integer.MAX_VALUE);
+
+        if (!buyer.isConscious()) {
+            return buyer.unconscious(map);
+        }
+
+        return buyer + " is punished by the Supercomputer.";
     }
 
     /**

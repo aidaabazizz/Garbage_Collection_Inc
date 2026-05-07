@@ -12,4 +12,6 @@ public enum Ability {
     STERILIZER,
     /** Ability to interact with facility security systems (REQ3/REQ4). */
     WORKER,
+    /** Ability for items that should not be removed by random effects. */
+    ESSENTIAL,
 }

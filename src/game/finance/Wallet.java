@@ -1,5 +1,7 @@
 package game.finance;
-
+import edu.monash.fit2099.engine.statistics.BaseStatistic;
+import game.enums.Ability;
+import game.enums.ItemStatistics;
 import edu.monash.fit2099.engine.items.Item;
 
 /**
@@ -20,6 +22,8 @@ public class Wallet extends Item {
         super("Wallet", '$');
         this.credits = 0;
         this.makeNonPortable();
+        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(0));
+        this.enableAbility(Ability.ESSENTIAL);
     }
 
     /**
