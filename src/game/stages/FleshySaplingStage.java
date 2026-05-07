@@ -14,6 +14,7 @@ public class FleshySaplingStage extends AbstractTreeStage {
             age = 0;
 
             if (random.nextDouble() <= 0.50) {
+                System.out.println("Fleshy Tree Sapling ('v') at " + location + " matures into a Fleshy Mature Tree ('Y')!");
                 return new FleshyMatureStage();
             }
         }

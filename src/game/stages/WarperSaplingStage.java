@@ -13,6 +13,7 @@ public class WarperSaplingStage extends AbstractTreeStage {
             age = 0;
 
             if (random.nextDouble() <= 0.25) {
+                System.out.println("Warper Tree Sapling ('w') at " + location + " matures into a Warper Mature Tree ('W')!");
                 return new WarperMatureStage();
             }
         }
