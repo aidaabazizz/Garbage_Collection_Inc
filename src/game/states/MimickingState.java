@@ -6,18 +6,13 @@ import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.MirrorMovementBehaviour;
-import game.capabilities.DisorientedStatus;
+import game.capabilities.StatefulActor;
 import game.enums.Ability;
+import game.capabilities.DisorientedStatus;
 import game.enums.ChickenState;
 
 /**
  * MIMICKING STATE for CrazyChicken.
- * The chicken mirrors the movement of the nearest worker.
- *
- * Transitions to:
- * - FRENZY: after 2 or more turns in this state
- * - WANDER: if no worker within 5 tiles
- * - stays MIMICKING: otherwise
  *
  * @author Aida
  */
@@ -100,14 +95,17 @@ public class MimickingState implements State {
 
     @Override
     public void onEnter(Actor actor, Location location) {
+        // Update state name via interface
+        StatefulActor statefulActor = (StatefulActor) actor;
+        statefulActor.setCurrentStateName("MIMICKING");
+
         // IMMEDIATE EFFECT: The chicken lets out a mocking cackle
-        // All adjacent workers become disoriented (add a status that reduces accuracy)
+        // All adjacent workers become disoriented
         GameMap map = location.map();
         for (Exit exit : location.getExits()) {
             Location adj = exit.getDestination();
             if (adj.containsAnActor() && adj.getActor().hasAbility(Ability.WORKER)) {
                 Actor worker = adj.getActor();
-                // Add Disoriented status (reduces hit chance by 50% for 3 turns)
                 worker.addStatus(new DisorientedStatus(3));
             }
         }
