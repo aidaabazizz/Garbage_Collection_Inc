@@ -54,6 +54,7 @@ public class ContractedWorker extends  Actor {
     @Override
     public Action playTurn(ActionList actions, Action lastAction, GameMap map, Display display) {
 
+        display.endLine();
         // Check global facility state
         if (AlarmManager.getInstance().isActive()) {
             display.println("\u001B[31m" + "!!! RED ALERT: FACILITY LOCKED DOWN !!!" + "\u001B[0m");
