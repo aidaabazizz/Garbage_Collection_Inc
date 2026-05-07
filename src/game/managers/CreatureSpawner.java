@@ -11,6 +11,7 @@ import game.actors.Parasite;
 import game.actors.Slime;
 import game.actors.Undead;
 import game.enums.Ability;
+import game.actors.CrazyChicken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.List;
  *
  * @author Jewell Gomes
  * @author Chathya Attanayake
+ * @author Aida
  */
 public class CreatureSpawner implements Spawner{
 
@@ -102,6 +104,24 @@ public class CreatureSpawner implements Spawner{
                 }
             }
         } catch (GameEngineException ignored) {}
+    }
+
+    /**
+     * REQ5: Spawns a CrazyChicken at the specified location.
+     * The CrazyChicken is a stateful creature with four distinct states:
+     * WANDER, MIMICKING, FRENZY, and HUNGRY.
+     *
+     * @param location The map location where the CrazyChicken should be created.
+     */
+    @Override
+    public void spawnCrazyChicken(Location location) {
+        try {
+            if (!location.containsAnActor()) {
+                location.addActor(new CrazyChicken());
+            }
+        } catch (GameEngineException e) {
+            System.err.println("Failed to spawn CrazyChicken: " + e.getMessage());
+        }
     }
 
 }

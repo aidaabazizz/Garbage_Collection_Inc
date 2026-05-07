@@ -3,8 +3,10 @@ package game;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.DefaultGroundCreator;
 import edu.monash.fit2099.engine.positions.GameMap;
+import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.World;
 import game.actors.ContractedWorker;
+import game.actors.CrazyChicken;
 import game.actors.SecurityCamera;
 import game.grounds.*;
 import game.inventory.WeightLimitedInventory;
@@ -46,14 +48,16 @@ public class EclipseNebula extends World {
         GameMap moonMap = createMoonMap();
         this.addGameMap(moonMap);
         setupMoonInfrastructure(moonMap);
-        spawnItemsOnMoon(moonMap);
+        spawnCommonScrap(moonMap);
+
 
         GameMap overflowMap = createOverflowMap();
         this.addGameMap(overflowMap);
         setupOverflowInfrastructure(overflowMap);
-        spawnItemsOnOverflow(overflowMap);
+        spawnCommonScrap(overflowMap);
+        spawnOverflowUniqueItems(overflowMap);
 
-        setupContractedWorkers(moonMap);
+        setupContractedWorkers(overflowMap);
     }
 
     /**
@@ -68,6 +72,11 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('=', Door::new); // REQ2 (VICTORIA) (LTR CAN CHANGE TO ALUMINIUM DOOR)
         groundCreator.registerGround('o', Hole::new);
         // REQ 2 (VICTORIA) (ADD TELEPORTATION TUBE)
+        groundCreator.registerGround('≈', Dirt::new); // Toxic Waste
+        groundCreator.registerGround('Φ', Dirt::new); // Teleportation Tube
+        groundCreator.registerGround('◈', Dirt::new); // Alien Cube
+        groundCreator.registerGround('◎', Dirt::new); // Magic Circle
+        groundCreator.registerGround('≡', Dirt::new); // Supercomputer
     }
 
     /**
@@ -126,8 +135,8 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('w', WarperTree::new);
 
         List<String> overflowStrings = Arrays.asList(
-                ".....................≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
-                "...#######...........≈≈≈≈≈≈≈≈≈≈≈≈≈≈##################≈≈≈≈≈≈≈",
+                "......y......y.......≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
+                "...#######.....w.....≈≈≈≈≈≈≈≈≈≈≈≈≈≈##################≈≈≈≈≈≈≈",
                 "...#≡____#...........≈≈≈≈≈≈≈≈≈≈≈≈≈≈#________________#≈≈≈≈≈≈≈",
                 "...#__Φ__=...........≈≈≈≈≈≈≈≈#######_______◈________#≈≈≈≈≈≈≈",
                 "...#_____#...........≈≈≈≈≈≈≈≈#_____=________________#≈≈≈≈≈≈≈",
@@ -175,24 +184,20 @@ public class EclipseNebula extends World {
     }
 
     /**
-     * Spawns Requirement 2 items and markers onto the overflow factory moon.
+     * Populates a given game map with standard scrap materials and consumable items.
      *
-     * @param map The GameMap (20-overflow) to populate.
-     * @throws Exception if item placement logic encounters an error.
-     */
-    private void spawnItemsOnOverflow(GameMap map) throws Exception {
-        // REQ 2: Place Alien Cubes (◈) and Magic Circles (◎) as per the map string locations
-        // map.at(30, 3).addItem(new AlienCube());
-        // map.at(5, 5).addItem(new MagicCircleMarker()); // If implemented as an item
-    }
-    /**
-     * Populates the world with interactive items, scrap material, and mission-critical assets.
-     * This includes unique corporate assets (REQ1) and various scraps found across the moon (REQ2).
+     * This method centralises the spawning logic for items common to all lunar locations
+     * (such as Apples, Cookies, and CRT Monitors). By using this shared method, the
+     * implementation adheres to the DRY (Don't Repeat Yourself) principle, ensuring
+     * that the economy-related items from REQ 1 and REQ 2 are placed consistently
+     * across different moon maps without duplicating code.
      *
-     * @param map The GameMap where the items will be spawned.
-     * @throws Exception if item placement logic encounters an error.
+     * @param map The GameMap instance where the common scrap items will be deployed.
+     * @see game.items.Apple
+     * @see game.items.Cookies
+     * @see game.items.CRTMonitor
      */
-    private void spawnItemsOnMoon(GameMap map) throws Exception {
+    private void spawnCommonScrap(GameMap map) {
         // REQ2
         map.at(16, 3).addItem(new Apple());
         map.at(17, 4).addItem(new Cookies());
@@ -204,6 +209,18 @@ public class EclipseNebula extends World {
         map.at(4, 3).addItem(new AccessCard());
         map.at(5, 3).addItem(new FirstAidKit());
         map.at(6, 3).addItem(new SterilisationBox());
+    }
+
+    /**
+     * Spawns Requirement 2 items and markers onto the overflow factory moon.
+     *
+     * @param map The GameMap (20-overflow) to populate.
+     * @throws Exception if item placement logic encounters an error.
+     */
+    private void spawnOverflowUniqueItems(GameMap map) throws Exception {
+        // REQ 2: Place Alien Cubes (◈) and Magic Circles (◎) as per the map string locations
+        // map.at(30, 3).addItem(new AlienCube());
+        // map.at(5, 5).addItem(new MagicCircleMarker()); // If implemented as an item
     }
 
     /**
@@ -225,4 +242,8 @@ public class EclipseNebula extends World {
             this.addPlayer(worker, map.at(startX++, 2));
         }
     }
+
+
+
+
 }
