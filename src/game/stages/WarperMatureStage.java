@@ -5,7 +5,7 @@ import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.TeleportAction;
 import game.grounds.AbstractTree;
-import game.strategies.TreeWarpStrategy;
+import game.teleportstrategies.TreeWarpStrategy;
 
 public class WarperMatureStage extends AbstractTreeStage {
 
