@@ -7,7 +7,11 @@ public class FleshyMatureStage extends AbstractTreeStage {
     @Override
     public TreeStage execute(Location location, AbstractTree tree) {
         if (getNearbyWorker(location) != null) {
-            spawner.spawnUndead(location);
+            Location targetLocation = getSpawnLocation(location);
+
+            if (targetLocation != null) {
+                spawner.spawnUndead(targetLocation);
+            }
         }
         return this;
     }
