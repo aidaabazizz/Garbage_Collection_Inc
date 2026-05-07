@@ -5,7 +5,7 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.TeleportAction;
-import game.teleportstrategies.FixedTeleportStrategy;
+import game.teleportstrategies.TeleportTubeStrategy;
 
 import java.util.List;
 
@@ -43,7 +43,10 @@ public class TeleportationTube extends Ground {
     @Override
     public ActionList allowableActions(Actor actor, Location location, String direction) {
         ActionList actions = new ActionList();
-        actions.add(new TeleportAction(new FixedTeleportStrategy(destinations)));
+        // This will loop through every pre-determined actions in the list
+        for (Location dest : this.destinations) {
+            actions.add(new TeleportAction(new TeleportTubeStrategy(dest)));
+        }
         return actions;
     };
 }
