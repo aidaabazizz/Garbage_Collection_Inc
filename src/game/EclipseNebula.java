@@ -3,8 +3,10 @@ package game;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.DefaultGroundCreator;
 import edu.monash.fit2099.engine.positions.GameMap;
+import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.World;
 import game.actors.ContractedWorker;
+import game.actors.CrazyChicken;
 import game.actors.SecurityCamera;
 import game.grounds.*;
 import game.inventory.WeightLimitedInventory;
@@ -54,6 +56,7 @@ public class EclipseNebula extends World {
         spawnItemsOnOverflow(overflowMap);
 
         setupContractedWorkers(moonMap);
+        spawnCrazyChicken(moonMap); //REQ5 spawn CrazyChicken
     }
 
     /**
@@ -223,6 +226,21 @@ public class EclipseNebula extends World {
 
             ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory);
             this.addPlayer(worker, map.at(startX++, 2));
+        }
+    }
+
+    // REQ5 for CrazyChicken
+    private void spawnCrazyChicken(GameMap map) throws Exception {
+        // Spawn the CrazyChicken at a specific location
+        // Find a suitable empty location
+        for (int y : map.getYRange()) {
+            for (int x : map.getXRange()) {
+                Location loc = map.at(x, y);
+                if (!loc.containsAnActor() && loc.canActorEnter(new CrazyChicken())) {
+                    loc.addActor(new CrazyChicken());
+                    return;
+                }
+            }
         }
     }
 }
