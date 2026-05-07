@@ -1,4 +1,4 @@
-package game.states;
+package game.enums;
 
 /**
  * Enum representing the 4 states of the CrazyChicken.
