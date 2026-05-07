@@ -18,7 +18,7 @@ import game.enums.Ability;
 public class TeleportAction extends Action {
 
     /**
-     * Teleportation strategy that defines specifc behabiour for each teleportable
+     * Teleportation strategy that defines specific behaviour for each teleportable
      */
     private final TeleportStrategy strategy;
 
