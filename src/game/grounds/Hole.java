@@ -1,11 +1,12 @@
 package game.grounds;
 
+import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
-import game.actors.Slime;
-import game.actors.Undead;
-
-import java.util.Random;
+import game.capabilities.HoleMarker;
+import game.managers.CreatureSpawner;
+import game.strategies.HoleSpawnStrategy;
+import game.managers.Spawner;
 
 /**
  * A specialized ground type that acts as a creature spawner.
@@ -14,12 +15,16 @@ import java.util.Random;
  * if the tile is unoccupied.
  *
  * @author Jewell Gomes
+ * @author Chathya Attanayake (Modified by)
  */
-public class Hole extends Ground {
+public class Hole extends Ground implements HoleMarker {
     /** The number of turns that must pass before a creature is spawned. */
     private static final int SPAWN_INTERVAL = 20;
     private int turnCounter = 0;
-    private final Random random = new Random();
+    private final HoleSpawnStrategy strategy;
+    private final Spawner spawner = new CreatureSpawner();
+    //private final Random random = new Random();
+    private static final double EXPANSION_CHANCE = 0.01; // 1% (req4)
 
     /**
      * Constructs a new Hole instance.
@@ -27,8 +32,9 @@ public class Hole extends Ground {
      * The hole begins with a turn counter at zero, counting upward until the
      * spawning threshold is reached.
      */
-    public Hole() {
+    public Hole(HoleSpawnStrategy strategy) {
         super('o', "Hole");
+        this.strategy = strategy;
     }
 
     /**
@@ -41,25 +47,30 @@ public class Hole extends Ground {
         turnCounter++;
         if (turnCounter >= SPAWN_INTERVAL) {
             turnCounter = 0;
-            spawnCreature(location);
+
+            if (!location.containsAnActor()) {
+                // The strategy decides WHAT to spawn
+                // The spawner handles the REQ4 environmental reactions
+                strategy.spawn(location, spawner);
+
+                // 1% chance to expand
+                rollForExpansion(location);
+            }
         }
     }
 
-    /**
-     * Randomly selects a moon creature and adds it to the current location
-     * if no other actor is occupying the space. If the tile is empty, it randomly selects either an Undead or a Slime with
-     * a 50/50 probability and places that creature at the location.
-     * @param location The map location where the creature will spawn.
-     */
-    private void spawnCreature(Location location) {
-        if (!location.containsAnActor()) {
-            try {
-                if (random.nextBoolean()) {
-                    location.addActor(new Undead());
-                } else {
-                    location.addActor(new Slime());
+    private void rollForExpansion(Location location) {
+        if (Math.random() < EXPANSION_CHANCE) {
+            for (Exit exit : location.getExits()) {
+                Location adj = exit.getDestination();
+
+                // Use getGroundAs with the Marker Interface
+                if (adj.getGroundAs(HoleMarker.class) == null) {
+                    // Inherit the exact same strategy (capability)
+                    adj.setGround(new Hole(this.strategy));
+                    return;
                 }
-            } catch (Exception ignored) {}
+            }
         }
     }
 }
