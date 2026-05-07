@@ -70,13 +70,16 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('~', Puddle::new);
         groundCreator.registerGround('_', Floor::new);
         groundCreator.registerGround('=', Door::new); // REQ2 (VICTORIA) (LTR CAN CHANGE TO ALUMINIUM DOOR)
-        groundCreator.registerGround('o', Hole::new);
+        groundCreator.registerGround('o', StandardHole::new); //req 4
         // REQ 2 (VICTORIA) (ADD TELEPORTATION TUBE)
         groundCreator.registerGround('≈', Dirt::new); // Toxic Waste
         groundCreator.registerGround('Φ', Dirt::new); // Teleportation Tube
         groundCreator.registerGround('◈', Dirt::new); // Alien Cube
         groundCreator.registerGround('◎', Dirt::new); // Magic Circle
         groundCreator.registerGround('≡', Dirt::new); // Supercomputer
+
+        //req4
+        groundCreator.registerGround('V', Vent::new); //vent
     }
 
     /**
@@ -133,6 +136,10 @@ public class EclipseNebula extends World {
         // REQ 3 FLORA REGISTRATION
         groundCreator.registerGround('y', FleshyTree::new);
         groundCreator.registerGround('w', WarperTree::new);
+
+        //REQ4
+        groundCreator.registerGround('o', ParasiticHole::new); //req 4
+        groundCreator.registerGround('V', Vent::new); //vent
 
         List<String> overflowStrings = Arrays.asList(
                 "......y......y.......≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",

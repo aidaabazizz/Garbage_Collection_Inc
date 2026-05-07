@@ -9,9 +9,13 @@ import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.displays.Menu;
 import edu.monash.fit2099.engine.items.Inventory;
 import edu.monash.fit2099.engine.positions.GameMap;
+import edu.monash.fit2099.engine.positions.Location;
+import game.capabilities.Infectable;
+import game.capabilities.InfectionStatus;
 import game.enums.Ability;
 import game.capabilities.UpdateNotifier;
 import game.managers.AlarmManager;
+import game.managers.CreatureSpawner;
 
 /**
  * The primary player-controlled actor representing a contracted worker.
@@ -21,8 +25,12 @@ import game.managers.AlarmManager;
  * under the employment of Garbage Collection Inc.
  *
  * @author Jewell Gomes
+ * @author Chathya Attanayake (Modified by)
  */
-public class ContractedWorker extends  Actor {
+public class ContractedWorker extends Actor implements Infectable {
+    private int spawnCounter = 0;
+    private static final int SPAWN_THRESHOLD = 5;
+
 
     /**
      * Constructor to initialize the worker with their starting statistics.
@@ -88,4 +96,25 @@ public class ContractedWorker extends  Actor {
         Menu menu = new Menu(actions);
         return menu.showMenu(this, display);
     }
+
+    //req 4
+    @Override
+    public void reactToInfection(Location location) {
+        this.addStatus(new InfectionStatus());
+    }
+
+    @Override
+    public void updateInfection(Location location) {
+        spawnCounter++;
+        if (spawnCounter >= SPAWN_THRESHOLD) {
+            spawnCounter = 0;
+            //UPDATED: Delegate spawning to the Spawner.
+            // We don't need a manual loop here. The CreatureSpawner's getSpawnLocation
+            // will see that the Worker is blocking 'location' and automatically
+            // find the adjacent empty tile for the Parasite.
+            new CreatureSpawner().spawnParasite(location);
+        }
+    }
+
+
 }
