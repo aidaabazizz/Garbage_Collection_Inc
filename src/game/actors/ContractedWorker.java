@@ -29,6 +29,7 @@ import game.managers.CreatureSpawner;
  */
 public class ContractedWorker extends Actor implements Infectable {
     private int spawnCounter = 0;
+    private static final int SPAWN_THRESHOLD = 5;
 
 
     /**
@@ -100,21 +101,19 @@ public class ContractedWorker extends Actor implements Infectable {
     public void reactToInfection(Location location) {
         this.addStatus(new InfectionStatus());
     }
+
     @Override
     public void updateInfection(Location location) {
         spawnCounter++;
-        if (spawnCounter >= 5) {
+        if (spawnCounter >= SPAWN_THRESHOLD) {
             spawnCounter = 0;
-            spawnParasiteNearby(location);
+            //UPDATED: Delegate spawning to the Spawner.
+            // We don't need a manual loop here. The CreatureSpawner's getSpawnLocation
+            // will see that the Worker is blocking 'location' and automatically
+            // find the adjacent empty tile for the Parasite.
+            new CreatureSpawner().spawnParasite(location);
         }
     }
 
-    private void spawnParasiteNearby(Location loc) {
-        for (var exit : loc.getExits()) {
-            if (!exit.getDestination().containsAnActor()) {
-                new CreatureSpawner().spawnParasite(exit.getDestination());
-                return;
-            }
-        }
-    }
+
 }
