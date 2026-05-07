@@ -9,8 +9,9 @@ public class FleshySproutStage extends AbstractTreeStage {
     @Override
     public TreeStage execute(Location location, AbstractTree tree) {
         if (getNearbyWorker(location) != null) {
-            spawner.spawnSlime(location);
-            return this;
+            if (spawner.spawnSlime(location)) {
+                return this; // Action performed, skip aging/growth
+            }
         }
         age++;
         if (age >= 20) {
@@ -19,6 +20,7 @@ public class FleshySproutStage extends AbstractTreeStage {
             age = 0;
 
             if (random.nextDouble() <= 0.25) {
+                System.out.println("Fleshy Tree Sprout ('y') at " + location + " grows into a Fleshy Sapling ('v')!");
                 return new FleshySaplingStage();
             }
         }
