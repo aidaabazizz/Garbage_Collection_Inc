@@ -13,20 +13,19 @@ public class FixedTeleportStrategy implements TeleportStrategy {
 
     private final static int ADJACENT_TILE_DISTANCE = 1;
     private final static int FIRE_DURATION = 2;
-    private final List<Location> destinations;
+    private final Location destination;
     private final Random random = new Random();
 
-    public FixedTeleportStrategy(List<Location> destinations) {
-        this.destinations = destinations;
+    public FixedTeleportStrategy(Location destination) {
+        this.destination = destination;
     }
 
     @Override
     public Location getDestination(Actor actor, GameMap map) {
-        Location chosenDestination = destinations.get(random.nextInt(destinations.size()));
         if (random.nextBoolean()){
-            return getRandomValidLocation(chosenDestination.map(), actor);
+            return getRandomValidLocation(destination.map(), actor);
         }
-        return chosenDestination;
+        return destination;
     }
 
     private Location getRandomValidLocation(GameMap destMap, Actor actor) {
@@ -56,6 +55,6 @@ public class FixedTeleportStrategy implements TeleportStrategy {
 
     @Override
     public String menuDescription(Actor actor) {
-        return "Teleport " + actor + " through Teleportation Tube to other location.";
+        return "Teleport " + actor + " to " + destination.map().toString() + "(" + destination.x() + "," + destination.y() + ")";
     }
 }
