@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actors.ContractedWorker;
 import game.capabilities.TeleportStrategy;
+import game.enums.Ability;
 
 /**
  * This teleport action delegates its behaviour to the teleport strategies.
@@ -55,7 +56,7 @@ public class TeleportAction extends Action {
      */
     @Override
     public String menuDescription(Actor actor) {
-        if (actor instanceof ContractedWorker) {
+        if (actor.hasAbility(Ability.WORKER)) {
             return strategy.menuDescription(actor);
         }
         return null;
