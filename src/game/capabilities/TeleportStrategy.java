@@ -14,6 +14,6 @@ import edu.monash.fit2099.engine.positions.Location;
  */
 public interface TeleportStrategy {
     Location getDestination(Actor actor, GameMap map);
-    void applySideEffects(Actor actor, Location source, Location destination, GameMap map);
+    default void applySideEffects(Actor actor, Location source, Location destination, GameMap map) {}
     String menuDescription(Actor actor);
 }
