@@ -8,14 +8,12 @@ public class FleshySproutStage extends AbstractTreeStage {
 
     @Override
     public TreeStage execute(Location location, AbstractTree tree) {
-        age++;
         if (getNearbyWorker(location) != null) {
-            Location targetLocation = getSpawnLocation(location);
-            if (targetLocation != null) {
-                spawner.spawnSlime(targetLocation);
-                return this;
+            if (spawner.spawnSlime(location)) {
+                return this; // Action performed, skip aging/growth
             }
         }
+        age++;
         if (age >= 20) {
             // reset the counter here
             // if the 25% fails, we start counting another 20 turns.
