@@ -77,6 +77,9 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('◈', Dirt::new); // Alien Cube
         groundCreator.registerGround('◎', Dirt::new); // Magic Circle
         groundCreator.registerGround('≡', Dirt::new); // Supercomputer
+
+        //req4
+        groundCreator.registerGround('V', Vent::new); //vent
     }
 
     /**
