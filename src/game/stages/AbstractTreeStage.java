@@ -35,20 +35,4 @@ public abstract class AbstractTreeStage implements TreeStage {
         }
         return null;
     }
-
-    /**
-     * Finds a valid, empty, and passable location adjacent to the current one.
-     * @param location The current location of the tree.
-     * @return A valid neighbor Location, or null if all surroundings are blocked.
-     */
-    protected Location getSpawnLocation(Location location) {
-        for (Exit exit : location.getExits()) {
-            Location adj = exit.getDestination();
-            // Check if the tile is empty AND passable (not a wall/locked door)
-            if (!adj.containsAnActor() && adj.getGround().canActorEnter(null)) {
-                return adj;
-            }
-        }
-        return null;
-    }
 }
