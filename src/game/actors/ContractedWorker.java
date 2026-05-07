@@ -9,6 +9,9 @@ import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.displays.Menu;
 import edu.monash.fit2099.engine.items.Inventory;
 import edu.monash.fit2099.engine.positions.GameMap;
+import edu.monash.fit2099.engine.positions.Location;
+import game.capabilities.Infectable;
+import game.capabilities.InfectionStatus;
 import game.enums.Ability;
 import game.capabilities.UpdateNotifier;
 import game.managers.AlarmManager;
@@ -21,8 +24,10 @@ import game.managers.AlarmManager;
  * under the employment of Garbage Collection Inc.
  *
  * @author Jewell Gomes
+ * @author Chathya Attanayake (Modified by)
  */
-public class ContractedWorker extends  Actor {
+public class ContractedWorker extends Actor implements Infectable {
+    private int spawnCounter = 0;
 
     /**
      * Constructor to initialize the worker with their starting statistics.
@@ -86,5 +91,28 @@ public class ContractedWorker extends  Actor {
         // return/print the console menu
         Menu menu = new Menu(actions);
         return menu.showMenu(this, display);
+    }
+
+    //req 4
+    @Override
+    public void reactToInfection(Location location) {
+        this.addStatus(new InfectionStatus());
+    }
+    @Override
+    public void updateInfection(Location location) {
+        spawnCounter++;
+        if (spawnCounter >= 5) {
+            spawnCounter = 0;
+            spawnParasiteNearby(location);
+        }
+    }
+
+    private void spawnParasiteNearby(Location loc) {
+        for (var exit : loc.getExits()) {
+            if (!exit.getDestination().containsAnActor()) {
+                new game.managers.CreatureSpawner().spawnParasite(exit.getDestination());
+                return;
+            }
+        }
     }
 }
