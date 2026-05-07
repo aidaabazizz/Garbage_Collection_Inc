@@ -47,12 +47,11 @@ public class Hole extends Ground implements HoleMarker {
         turnCounter++;
         if (turnCounter >= SPAWN_INTERVAL) {
             turnCounter = 0;
+            // The strategy decides WHAT to spawn
+            // The spawner handles the REQ4 environmental reactions
+            boolean success = strategy.spawn(location, new CreatureSpawner());
 
-            if (!location.containsAnActor()) {
-                // The strategy decides WHAT to spawn
-                // The spawner handles the REQ4 environmental reactions
-                strategy.spawn(location, spawner);
-
+            if (success && Math.random() < EXPANSION_CHANCE) {
                 // 1% chance to expand
                 rollForExpansion(location);
             }
@@ -60,17 +59,15 @@ public class Hole extends Ground implements HoleMarker {
     }
 
     private void rollForExpansion(Location location) {
-        if (Math.random() < EXPANSION_CHANCE) {
-            for (Exit exit : location.getExits()) {
-                Location adj = exit.getDestination();
-
-                // Use getGroundAs with the Marker Interface
-                if (adj.getGroundAs(HoleMarker.class) == null) {
-                    // Inherit the exact same strategy (capability)
-                    adj.setGround(new Hole(this.strategy));
-                    return;
-                }
+        for (Exit exit : location.getExits()) {
+            Location adj = exit.getDestination();
+            // Use getGroundAs with the Marker Interface
+            if (adj.getGroundAs(HoleMarker.class) == null) {
+                // Inherit the exact same strategy (capability)
+                adj.setGround(new Hole(this.strategy));
+                return;
             }
+
         }
     }
 }
