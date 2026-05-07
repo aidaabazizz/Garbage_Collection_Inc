@@ -4,14 +4,18 @@ import edu.monash.fit2099.engine.actions.ActionList;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.actors.ActorStatistics;
 import edu.monash.fit2099.engine.items.Item;
+import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import edu.monash.fit2099.engine.statistics.StatisticOperations;
+import game.capabilities.Infectable;
+import game.capabilities.InfectionStatus;
 import game.enums.ItemStatistics;
 import game.actions.ConsumeAction;
 import game.enums.Ability;
 import game.capabilities.Consumable;
+import game.managers.CreatureSpawner;
 
 /**
  * A multi-charge consumable item representing a pack of cookies.
@@ -19,8 +23,9 @@ import game.capabilities.Consumable;
  * depending on the presence of a sterilization box.
  *
  * @author Jewell Gomes
+ * @author Chathya Attanayake (Modified by)
  */
-public class Cookies extends Item implements Consumable {
+public class Cookies extends Item implements Consumable, Infectable {
     private static final int INITIAL_COUNT = 5;
 
     private static final int HEAL_POINTS = 1;
@@ -29,13 +34,15 @@ public class Cookies extends Item implements Consumable {
 
     private int count = INITIAL_COUNT;
 
+    private static final int MAXIMUM_POINTS = 2;
+
     /**
      * Constructor for the Cookies.
      * Sets the initial weight to two units and marks the item as portable.
      */
     public Cookies() {
         super("Cookies", '◍');
-        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(2));
+        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(MAXIMUM_POINTS));
         this.makePortable();
     }
 
@@ -101,4 +108,47 @@ public class Cookies extends Item implements Consumable {
     public String toString() {
         return super.toString() + " (" + count + " left)";
     }
+
+
+    //req4
+    @Override
+    public void reactToInfection(Location location) {
+        // Add the status to this item so it starts ticking updateInfection
+        this.addStatus(new InfectionStatus());
+    }
+
+    @Override
+    public void updateInfection(Location location) {
+        // 1. Reduces the Cookie's content by 1 each turn.
+        if (count > 0) {
+            count--;
+        }
+
+        // 2. Actively spawns other Parasites on adjacent tiles.
+        // We do this every turn because the requirement says "actively spawns".
+        spawnParasiteNearby(location);
+
+        // 3. Cleanup logic: If the cookie is "consumed" by the infection, remove it.
+        if (count <= 0) {
+            location.removeItem(this);
+        }
+    }
+
+
+     //Helper method to find an empty adjacent tile and spawn a parasite.
+    private void spawnParasiteNearby(Location location) {
+        for (Exit exit : location.getExits()) {
+            Location destination = exit.getDestination();
+
+            // "Standard Parasite spawning effect" is triggered inside spawnParasite()
+            if (!destination.containsAnActor()) {
+                new CreatureSpawner().spawnParasite(destination);
+                return; // Requirement says "spawn a parasite", so we stop after one.
+            }
+        }
+    }
+
+
+
+
 }
