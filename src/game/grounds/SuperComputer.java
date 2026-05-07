@@ -55,9 +55,9 @@ public class SuperComputer extends Ground {
 
         addPurchaseOption(actions, new FirstAidKit());
         addPurchaseOption(actions, new SterilisationBox());
-//        addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_ONE));
-//        addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_TWO));
-//        addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_THREE));
+        addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_ONE));
+        addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_TWO));
+        addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_THREE));
 
         return actions;
     }
