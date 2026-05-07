@@ -4,6 +4,7 @@ import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
+import game.actors.ContractedWorker;
 import game.capabilities.TeleportStrategy;
 
 /**
@@ -63,6 +64,9 @@ public class TeleportAction extends Action {
      */
     @Override
     public String menuDescription(Actor actor) {
-        return strategy.menuDescription(actor);
-    }
+        if (actor instanceof ContractedWorker) {
+            return strategy.menuDescription(actor);
+        }
+        return null;
+    };
 }
