@@ -3,6 +3,7 @@ package game.behaviours;
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.behaviours.Behaviour;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.ConsumeAction;
@@ -17,6 +18,7 @@ import game.capabilities.Consumable;
  */
 public class ConsumeBehaviour implements Behaviour<Actor, Action> {
 
+    private final Display display = new Display();
     /**
      * Evaluates the items at the current location and returns a consumption action
      * for the first valid consumable item found.
@@ -34,7 +36,7 @@ public class ConsumeBehaviour implements Behaviour<Actor, Action> {
                 if (!item.allowableActions(actor, location.map()).getUnmodifiableActionList().isEmpty()) {
                     return new ConsumeAction(consumable, item.toString());
                 } else {
-                    System.out.println(actor + " found " + item + " but it's not functional!");
+                    display.println(String.format("%s found %s but it's not functional!", actor, item));
                 }
             }
         }
