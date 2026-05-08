@@ -14,12 +14,12 @@ public interface Spawner {
      * Creates a Slime and handles its associated environmental triggers.
      * @param location The map location for the spawn.
      */
-    public boolean spawnSlime(Location location);
+    boolean spawnSlime(Location location);
     /**
      * Creates an Undead and handles its health-buff side effects.
      * @param location The map location for the spawn.
      */
-    public boolean spawnUndead(Location location);
+    boolean spawnUndead(Location location);
 
 
     //req4
