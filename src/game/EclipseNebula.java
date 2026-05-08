@@ -70,7 +70,6 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('~', Puddle::new);
         groundCreator.registerGround('_', Floor::new);
         groundCreator.registerGround('=', Door::new); // REQ2 (VICTORIA) (LTR CAN CHANGE TO ALUMINIUM DOOR)
-        groundCreator.registerGround('o', StandardHole::new); //req 4
         // REQ 2 (VICTORIA) (ADD TELEPORTATION TUBE)
         groundCreator.registerGround('≈', Dirt::new); // Toxic Waste
         groundCreator.registerGround('Φ', Dirt::new); // Teleportation Tube
@@ -78,8 +77,7 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('◎', Dirt::new); // Magic Circle
         groundCreator.registerGround('≡', Dirt::new); // Supercomputer
 
-        //req4
-        groundCreator.registerGround('V', Vent::new); //vent
+
     }
 
     /**
@@ -93,6 +91,13 @@ public class EclipseNebula extends World {
     private GameMap createMoonMap() throws Exception{
         DefaultGroundCreator groundCreator = new DefaultGroundCreator();
         registerCommonGrounds(groundCreator);
+
+        // REQ4: Hole in 99-deprecated spawns Undead and Slimes
+        groundCreator.registerGround('o', StandardHole::new);
+
+        // REQ4 Ed Clarification: Vents should be on both maps
+        groundCreator.registerGround('V', Vent::new);
+
 
         List<String> moon99Deprecated = Arrays.asList(
                 "....................########################################",
