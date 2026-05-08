@@ -26,9 +26,11 @@ public interface Spawner {
     boolean spawnParasite(Location location);
 
     /**
-     * REQ5: Creates a CrazyChicken.
-     * @param location The map location for the spawn.
+     * REQ5: Spawns a CrazyChicken at or near the center location.
+     * @param center The preferred spawn location
+     * @return true if spawn was successful, false otherwise
      */
-    void spawnCrazyChicken(Location location);
+    boolean spawnCrazyChicken(Location center);
+}
 
 }
