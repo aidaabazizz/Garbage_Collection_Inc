@@ -33,4 +33,4 @@ public interface Spawner {
     boolean spawnCrazyChicken(Location center);
 }
 
-}
+
