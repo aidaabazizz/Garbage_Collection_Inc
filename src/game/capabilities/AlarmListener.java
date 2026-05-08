@@ -10,7 +10,7 @@ package game.capabilities;
  */
 public interface AlarmListener {
     /** Routine executed when the facility-wide alarm is engaged. */
-    public void onAlarmActivated();
+    void onAlarmActivated();
     /** Routine executed when the facility-wide alarm is disengaged. */
-    public void onAlarmDeactivated();
+    void onAlarmDeactivated();
 }
