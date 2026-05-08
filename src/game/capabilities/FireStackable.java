@@ -9,5 +9,5 @@ package game.capabilities;
  */
 public interface FireStackable {
     /** Increases the intensity or duration of the fire at the implementing location. */
-    public void addStack();
+    void addStack();
 }

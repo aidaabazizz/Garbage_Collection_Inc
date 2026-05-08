@@ -27,6 +27,7 @@ public class EclipseNebula extends World {
 
     /** The initial health points assigned to a new contracted worker. */
     private static final int WORKER_STARTING_HEALTH = 10;
+
     /**
      * Constructor for the EclipseNebula world.
      *
@@ -37,43 +38,68 @@ public class EclipseNebula extends World {
     }
 
     /**
-     * Initialises the game world by constructing the primary map and populating it with entities.
-     * This method follows a structured initialization sequence, delegating specific setup
-     * tasks to private helper methods to maintain a clean and modular architecture.
+     * Initialises the game world by constructing the maps and populating them with entities.
      *
-     * @throws Exception if map creation or entity placement fails during initialization.
+     * @throws Exception if map creation or entity placement fails during initialization
      */
     public void initialise() throws Exception {
         GameMap moonMap = createMoonMap();
         this.addGameMap(moonMap);
+        setupMoonInfrastructure(moonMap);
+        spawnCommonScrap(moonMap);
 
-        setupInfrastructure(moonMap);
-        spawnItems(moonMap);
-        setupContractedWorkers(moonMap);
+        GameMap overflowMap = createOverflowMap();
+        this.addGameMap(overflowMap);
+        setupOverflowInfrastructure(overflowMap);
+        spawnCommonScrap(overflowMap);
+        spawnOverflowUniqueItems(overflowMap);
+
+        setupContractedWorkers(overflowMap);
     }
 
     /**
-     * Creates and configures the "99-Deprecated" moon map.
-     * This method registers all valid ground types (Dirt, Wall, Puddle, etc.) and
-     * defines the ASCII representation of the lunar facility layout.
+     * Registers ground types that are found on all maps.
      *
-     * @return A fully configured GameMap instance representing the moon facility.
-     * @throws Exception if the map strings are invalid or ground registration fails.
+     * @param groundCreator the ground creator used to register map symbols
+     * @throws Exception if ground registration fails
      */
-    private GameMap createMoonMap() throws Exception{
-        DefaultGroundCreator groundCreator = new DefaultGroundCreator();
+    private void registerCommonGrounds(DefaultGroundCreator groundCreator) throws Exception {
         groundCreator.registerGround('.', Dirt::new);
         groundCreator.registerGround('#', Wall::new);
         groundCreator.registerGround('~', Puddle::new);
         groundCreator.registerGround('_', Floor::new);
         groundCreator.registerGround('=', Door::new);
-        groundCreator.registerGround('o', Hole::new);
+
+        // REQ2
+        groundCreator.registerGround('≈', Dirt::new); // Toxic Waste
+        groundCreator.registerGround('Φ', Dirt::new); // Teleportation Tube
+        groundCreator.registerGround('◈', Dirt::new); // Alien Cube
+        groundCreator.registerGround('◎', Dirt::new); // Magic Circle
+
+        // REQ1
         groundCreator.registerGround('≡', SuperComputer::new);
+    }
+
+    /**
+     * Creates and configures the "99-Deprecated" moon map.
+     *
+     * @return a configured GameMap instance representing the moon facility
+     * @throws Exception if the map strings are invalid or ground registration fails
+     */
+    private GameMap createMoonMap() throws Exception {
+        DefaultGroundCreator groundCreator = new DefaultGroundCreator();
+        registerCommonGrounds(groundCreator);
+
+        // REQ4: Hole in 99-Deprecated spawns Undead and Slimes.
+        groundCreator.registerGround('o', StandardHole::new);
+
+        // REQ4: Vents should be on both maps.
+        groundCreator.registerGround('V', Vent::new);
 
         List<String> moon99Deprecated = Arrays.asList(
                 "....................########################################",
                 "...#######....o.....#__________________#________________o__#",
-                "...#≡____#..........=__________________=___________________#",
+                "...#_____#..........=__________________=___________________#",
                 "...#_____=...~......#__________________#___________________#",
                 "...#_____#..~~~.....########=#####=#####___#############___#",
                 "...#######.~~~~.....#______#_#_________#___#___________#___#",
@@ -92,50 +118,110 @@ public class EclipseNebula extends World {
                 "..~.................#______=___________=___=___________=___#",
                 "....................########################################"
         );
+
         return new GameMap("99-Deprecated", groundCreator, moon99Deprecated);
     }
 
     /**
-     * Installs the facility infrastructure components onto the map.
-     * Handles the placement of the system clock (AlarmTimer) and surveillance systems
-     * (SecurityCamera) required for Requirement 4.
+     * Creates and configures the "20-overflow" factory complex map.
      *
-     * @param map The GameMap where infrastructure is being placed.
-     * @throws Exception if an actor cannot be successfully added to the specified location.
+     * @return a configured GameMap instance representing the factory moon
+     * @throws Exception if the map strings are invalid or ground registration fails
      */
-    private void setupInfrastructure(GameMap map) throws Exception {
+    private GameMap createOverflowMap() throws Exception {
+        DefaultGroundCreator groundCreator = new DefaultGroundCreator();
+        registerCommonGrounds(groundCreator);
+
+        // REQ3 flora registration
+        groundCreator.registerGround('y', FleshyTree::new);
+        groundCreator.registerGround('w', WarperTree::new);
+
         // REQ4
+        groundCreator.registerGround('o', ParasiticHole::new);
+        groundCreator.registerGround('V', Vent::new);
+
+        List<String> overflowStrings = Arrays.asList(
+                "......y..............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
+                "...#######.....w.....≈≈≈≈≈≈≈≈≈≈≈≈≈≈##################≈≈≈≈≈≈≈",
+                "...#≡____#...........≈≈≈≈≈≈≈≈≈≈≈≈≈≈#________________#≈≈≈≈≈≈≈",
+                "...#__Φ__=...........≈≈≈≈≈≈≈≈#######_______◈________#≈≈≈≈≈≈≈",
+                "...#_____#.....y.....≈≈≈≈≈≈≈≈#_____=________________#≈≈≈≈≈≈≈",
+                "...#######...≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_◎___###########=######≈≈≈≈≈≈≈",
+                ".............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_____#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
+                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#########=#####≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
+                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#_____________#≈≈≈≈≈≈≈≈≈#___◎__#≈≈≈≈≈≈≈",
+                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#______o______#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
+                ".............≈≈≈≈≈≈≈≈######=########≈≈≈≈≈≈≈≈≈####=###≈≈≈≈≈≈≈",
+                "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈",
+                "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈###############_#######≈≈≈",
+                ".............≈≈≈≈≈≈≈≈≈≈≈≈≈#_____________________________#≈≈≈",
+                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈#_______=__________◈__≈≈≈≈____#≈≈≈",
+                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈#___◎___#_____________≈≈≈≈≈≈__≈≈≈≈",
+                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈######################≈≈≈≈≈≈≈≈≈≈≈≈",
+                ".............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
+                ".....................≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
+                ".....................≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈"
+        );
+
+        return new GameMap("20-overflow", groundCreator, overflowStrings);
+    }
+
+    /**
+     * Installs infrastructure on the 99-Deprecated moon.
+     *
+     * @param map the GameMap where infrastructure is being placed
+     * @throws Exception if an actor cannot be successfully added
+     */
+    private void setupMoonInfrastructure(GameMap map) throws Exception {
+        // A1REQ4
         map.at(0, 0).addItem(new AlarmTimer());
         map.at(10, 6).addActor(new SecurityCamera());
     }
 
     /**
-     * Populates the world with interactive items, scrap material, and mission-critical assets.
-     * This includes unique corporate assets (REQ1) and various scraps found across the moon (REQ2).
+     * Installs infrastructure on the 20-overflow moon.
      *
-     * @param map The GameMap where the items will be spawned.
-     * @throws Exception if item placement logic encounters an error.
+     * @param map the GameMap where infrastructure is being placed
+     * @throws Exception if entity placement fails
      */
-    private void spawnItems(GameMap map) throws Exception {
-        // REQ2
+    private void setupOverflowInfrastructure(GameMap map) throws Exception {
+        // Infrastructure is currently represented through registered map symbols.
+    }
+
+    /**
+     * Populates a given game map with standard scrap materials and purchasable items.
+     *
+     * @param map the GameMap where common scrap items will be deployed
+     */
+    private void spawnCommonScrap(GameMap map) {
+        // REQ2 / REQ1 sellable scrap
         map.at(16, 3).addItem(new Apple());
         map.at(17, 4).addItem(new Cookies());
         map.at(17, 5).addItem(new FloppyDisk());
         map.at(5, 8).addItem(new Lantern());
         map.at(16, 4).addItem(new CRTMonitor());
 
-        // REQ1
+        // REQ1 items
         map.at(4, 3).addItem(new AccessCard());
         map.at(5, 3).addItem(new FirstAidKit());
         map.at(6, 3).addItem(new SterilisationBox());
     }
 
     /**
-     * Initializes the player-controlled contracted workers and deploys them to the map.
-     * Each worker is initialized with a weight-limited inventory and standard-issue equipment.
+     * Spawns Requirement 2 items and markers onto the overflow factory moon.
      *
-     * @param map The GameMap where the players will be added.
-     * @throws Exception if a player cannot be added to the game world.
+     * @param map the GameMap to populate
+     * @throws Exception if item placement logic encounters an error
+     */
+    private void spawnOverflowUniqueItems(GameMap map) throws Exception {
+        // REQ2 unique overflow-map items can be placed here when implemented.
+    }
+
+    /**
+     * Initializes the player-controlled contracted workers and deploys them to the map.
+     *
+     * @param map the GameMap where the players will be added
+     * @throws Exception if a player cannot be added to the game world
      */
     private void setupContractedWorkers(GameMap map) throws Exception {
         String[] names = {"#1 Bob", "#2 Tom", "#3 Sarah", "#4 Julie", "#5 Rick"};
@@ -144,12 +230,7 @@ public class EclipseNebula extends World {
         for (String name : names) {
             WeightLimitedInventory inventory = new WeightLimitedInventory(WORKER_INVENTORY_CAPACITY);
             inventory.add(new Flask());
-            inventory.add(new FloppyDisk());
-            inventory.add(new CRTMonitor());
-            Wallet wallet = new Wallet();
-            wallet.addCredits(1000);
-            inventory.add(wallet);
-
+            inventory.add(new Wallet());
 
             ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory);
             this.addPlayer(worker, map.at(startX++, 2));

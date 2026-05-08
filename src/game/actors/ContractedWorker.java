@@ -9,11 +9,15 @@ import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.displays.Menu;
 import edu.monash.fit2099.engine.items.Inventory;
 import edu.monash.fit2099.engine.positions.GameMap;
+import edu.monash.fit2099.engine.positions.Location;
+import game.capabilities.Infectable;
+import game.capabilities.InfectionStatus;
 import game.enums.Ability;
 import game.capabilities.UpdateNotifier;
 import game.managers.AlarmManager;
 import edu.monash.fit2099.engine.items.Item;
 import game.finance.Wallet;
+import game.managers.CreatureSpawner;
 
 /**
  * The primary player-controlled actor representing a contracted worker.
@@ -23,8 +27,12 @@ import game.finance.Wallet;
  * under the employment of Garbage Collection Inc.
  *
  * @author Jewell Gomes
+ * @author Chathya Attanayake (Modified by)
  */
-public class ContractedWorker extends  Actor {
+public class ContractedWorker extends Actor implements Infectable {
+    private int spawnCounter = 0;
+    private static final int SPAWN_THRESHOLD = 5;
+
 
     /**
      * Constructor to initialize the worker with their starting statistics.
@@ -56,6 +64,7 @@ public class ContractedWorker extends  Actor {
     @Override
     public Action playTurn(ActionList actions, Action lastAction, GameMap map, Display display) {
 
+        display.endLine();
         // Check global facility state
         if (AlarmManager.getInstance().isActive()) {
             display.println("\u001B[31m" + "!!! RED ALERT: FACILITY LOCKED DOWN !!!" + "\u001B[0m");
@@ -89,4 +98,25 @@ public class ContractedWorker extends  Actor {
         Menu menu = new Menu(actions);
         return menu.showMenu(this, display);
     }
+
+    //req 4
+    @Override
+    public void reactToInfection(Location location) {
+        this.addStatus(new InfectionStatus());
+    }
+
+    @Override
+    public void updateInfection(Location location) {
+        spawnCounter++;
+        if (spawnCounter >= SPAWN_THRESHOLD) {
+            spawnCounter = 0;
+            //UPDATED: Delegate spawning to the Spawner.
+            // We don't need a manual loop here. The CreatureSpawner's getSpawnLocation
+            // will see that the Worker is blocking 'location' and automatically
+            // find the adjacent empty tile for the Parasite.
+            new CreatureSpawner().spawnParasite(location);
+        }
+    }
+
+
 }

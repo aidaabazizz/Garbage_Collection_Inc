@@ -7,18 +7,18 @@ import game.enums.AccessLevel;
  * This interface facilitates the security bypass mechanics used by access cards
  * and facility doors (REQ1).
  *
+ * @author Jewell Gomes
  * @author Suchir
- *
  */
 public interface Unlockable {
     /** Transitions the object from a locked state to an unlocked state. */
-    void unlock();
+    public void unlock();
 
     /**
      * Queries the current access state of the object.
      * @return True if the object is passable, false if it is locked.
      */
-    boolean isUnlocked();
+    public boolean isUnlocked();
 
     /**
      * Gets the access level required to unlock this object.

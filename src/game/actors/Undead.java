@@ -1,6 +1,8 @@
 package game.actors;
 
 
+import edu.monash.fit2099.engine.positions.Location;
+import game.capabilities.Infectable;
 import game.inventory.BasicInventory;
 import game.behaviours.AttackBehaviour;
 import game.behaviours.HuntBehaviour;
@@ -14,14 +16,17 @@ import game.weapons.UndeadFist;
  * hierarchical behavior system that prioritizes combat over movement.
  *
  * @author Jewell Gomes
+ * @author Chathya Attanayake (Modified by)
  */
-public class Undead extends NonPlayerCharacter {
+public class Undead extends NonPlayerCharacter implements Infectable {
     private static final int INITIAL_HEALTH = 15;
     private static final int WANDER_PRIORITY = 999;
     private static final int ATTACK_PRIORITY = 1;
     private static final int HUNT_PRIORITY = 10;
     private static final int PUNCH_HIT_RATE = 10;
     private static final int PUNCH_DAMAGE = 1;
+    private static final int INSTANT_DEATH_DAMAGE = 999;
+
 
     /**
      * Constructor for the Undead class.
@@ -36,4 +41,11 @@ public class Undead extends NonPlayerCharacter {
         this.behaviours.put(WANDER_PRIORITY, new WanderBehaviour());
         this.setIntrinsicWeapon(new UndeadFist(PUNCH_DAMAGE, PUNCH_HIT_RATE));
     }
+
+    @Override
+    public void reactToInfection(Location location) {
+        this.hurt(INSTANT_DEATH_DAMAGE); // Instantly blows up
+    }
+
+
 }
