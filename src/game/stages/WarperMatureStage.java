@@ -15,7 +15,9 @@ public class WarperMatureStage extends AbstractTreeStage {
         if (worker != null) {
             TeleportAction warp = new TeleportAction(new TreeWarpStrategy());
             String result = warp.execute(worker, location.map());
-            new Display().println(result);
+            if (result != null && !result.isEmpty()) {
+                display.println(result);
+            }
         }
         return this;
     }
