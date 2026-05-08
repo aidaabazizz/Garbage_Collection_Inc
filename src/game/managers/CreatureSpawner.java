@@ -11,6 +11,7 @@ import edu.monash.fit2099.engine.statistics.StatisticOperations;
 import game.actors.Parasite;
 import game.actors.Slime;
 import game.actors.Undead;
+import game.capabilities.DisorientedStatus;
 import game.enums.Ability;
 import game.actors.CrazyChicken;
 
@@ -131,15 +132,34 @@ public class CreatureSpawner implements Spawner {
      * The CrazyChicken is a stateful creature with four distinct states:
      * WANDER, MIMICKING, FRENZY, and HUNGRY.
      *
-     * @param location The map location where the CrazyChicken should be created.
+     * Environmental Reaction: When a CrazyChicken spawns, all adjacent workers
+     * become disoriented by its sudden appearance for 3 turns.
+     *
+     * @param center The map location where the CrazyChicken should be created.
+     * @return true if spawn was successful, false otherwise
      */
     @Override
-    public void spawnCrazyChicken(Location location) {
+    public boolean spawnCrazyChicken(Location center) {
+        Location spot = getSpawnLocation(center);
+        if (spot == null) return false;
+
         try {
-            if (!location.containsAnActor()) {
-                location.addActor(new CrazyChicken());
+            spot.addActor(new CrazyChicken());
+            display.println("🐔 A CrazyChicken has emerged at " + spot + "! BUK BUK BUK!");
+
+            // Adjacent workers become disoriented (matches the Slime/Parasite pattern)
+            for (Exit exit : spot.getExits()) {
+                Location adj = exit.getDestination();
+                if (adj.containsAnActor() && adj.getActor().hasAbility(Ability.WORKER)) {
+                    Actor worker = adj.getActor();
+                    worker.addStatus(new DisorientedStatus(3));
+                    display.println(">>> " + worker + " is disoriented by the CrazyChicken!");
+                }
             }
-        } catch (GameEngineException ignored) {}
+            return true;
+        } catch (GameEngineException e) {
+            return false;
+        }
     }
 }
 
