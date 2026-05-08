@@ -4,36 +4,39 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
-import game.enums.Ability;
 import game.enums.ItemStatistics;
+import game.enums.Ability;
 import game.capabilities.Purchasable;
-import game.finance.Wallet;
+import game.capabilities.CreditHolder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 /**
- * A sterilisation box that protects the worker from certain poisonous effects.
- * It can be purchased from the Supercomputer.
+ * A specialized piece of corporate equipment used to purify consumables.
+ * While in a worker's inventory, it grants the ability to safely
+ * consume spoiled food and toxic water.
  *
  * @author Suchir
  * @version 1.0
  */
 public class SterilisationBox extends Item implements Purchasable {
-    private static final int WEIGHT = 3;
+    private static final int WEIGHT = 7;
     private static final int PURCHASE_PRICE = 750;
 
     private final Random random = new Random();
 
     /**
-     * Constructor for SterilisationBox.
+     * Constructor for the Sterilisation Box.
+     * Sets the weight to seven units and enables the sterilizer ability
+     * for the carrier.
      */
     public SterilisationBox() {
-        super("Sterilisation Box", 'S');
+        super("Sterilisation Box", '▣');
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(WEIGHT));
-        this.enableAbility(Ability.STERILIZER);
         this.makePortable();
+        this.enableAbility(Ability.STERILIZER);
     }
 
     /**
@@ -47,7 +50,8 @@ public class SterilisationBox extends Item implements Purchasable {
     }
 
     /**
-     * Applies the purchase effect.
+     * Applies the effect after purchasing the sterilisation box.
+     * One random non-essential item in the buyer's inventory is permanently erased.
      *
      * @param buyer the actor buying the item
      * @param map the current game map
@@ -55,7 +59,7 @@ public class SterilisationBox extends Item implements Purchasable {
      * @return purchase effect description
      */
     @Override
-    public String purchasedBy(Actor buyer, GameMap map, Wallet wallet) {
+    public String purchasedBy(Actor buyer, GameMap map, CreditHolder wallet) {
         List<Item> removableItems = new ArrayList<>();
 
         for (Item item : buyer.getInventory().getItems()) {

@@ -4,8 +4,8 @@ import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.GameMap;
+import game.capabilities.CreditHolder;
 import game.capabilities.Sellable;
-import game.finance.Wallet;
 
 /**
  * Action for selling an item to the Supercomputer.
@@ -37,7 +37,7 @@ public class SellAction extends Action {
      */
     @Override
     public String execute(Actor actor, GameMap map) {
-        Wallet wallet = getWallet(actor);
+        CreditHolder wallet = getWallet(actor);
 
         if (wallet == null) {
             return actor + " does not have a wallet.";
@@ -61,16 +61,16 @@ public class SellAction extends Action {
     }
 
     /**
-     * Finds the actor's wallet from inventory.
+     * Finds the actor's wallet through the CreditHolder contract.
      *
      * @param actor the actor whose inventory is checked
-     * @return the wallet, or null if no wallet exists
+     * @return the credit holder, or null if none exists
      */
-    private Wallet getWallet(Actor actor) {
-        if (actor.getInventory().getItemsAs(Wallet.class).isEmpty()) {
+    private CreditHolder getWallet(Actor actor) {
+        if (actor.getInventory().getItemsAs(CreditHolder.class).isEmpty()) {
             return null;
         }
-        return actor.getInventory().getItemsAs(Wallet.class).get(0);
+        return actor.getInventory().getItemsAs(CreditHolder.class).get(0);
     }
 
     /**

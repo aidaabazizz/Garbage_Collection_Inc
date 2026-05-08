@@ -7,12 +7,12 @@ import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
-import game.enums.ItemStatistics;
 import game.actions.UnlockDoorAction;
 import game.capabilities.Purchasable;
 import game.capabilities.Unlockable;
 import game.enums.AccessLevel;
-import game.finance.Wallet;
+import game.enums.ItemStatistics;
+import game.capabilities.CreditHolder;
 import game.managers.AlarmManager;
 
 import java.util.Random;
@@ -26,6 +26,7 @@ import java.util.Random;
  * @version 1.0
  */
 public class AccessCard extends Item implements Purchasable {
+
     private static final int LEVEL_ONE_PRICE = 50;
     private static final int LEVEL_TWO_PRICE = 100;
     private static final int LEVEL_THREE_PRICE = 200;
@@ -43,7 +44,6 @@ public class AccessCard extends Item implements Purchasable {
 
     /**
      * Constructor for a Level 1 Access Card.
-     * This keeps compatibility with old code that creates new AccessCard().
      */
     public AccessCard() {
         this(AccessLevel.LEVEL_ONE);
@@ -93,7 +93,7 @@ public class AccessCard extends Item implements Purchasable {
      * @return description of the purchase effect
      */
     @Override
-    public String purchasedBy(Actor buyer, GameMap map, Wallet wallet) {
+    public String purchasedBy(Actor buyer, GameMap map, CreditHolder wallet) {
         if (accessLevel == AccessLevel.LEVEL_TWO) {
             buyer.hurt(LEVEL_TWO_DAMAGE);
             return buyer + " takes " + LEVEL_TWO_DAMAGE + " damage from the blood calibration.";
@@ -102,16 +102,19 @@ public class AccessCard extends Item implements Purchasable {
         if (accessLevel == AccessLevel.LEVEL_THREE) {
             if (random.nextInt(100) < HIDDEN_FEE_CHANCE) {
                 int deducted = wallet.forceDeductCredits(HIDDEN_FEE);
-                return "The Supercomputer applies a hidden fee and deducts " + deducted + " extra credits.";
+                return "The Supercomputer applies a hidden fee and deducts "
+                        + deducted + " extra credits.";
             }
-            return "No hidden fee is applied.";
+
+            return buyer + " purchases an Access Card (Level 3). No hidden fee is applied.";
         }
 
-        return buyer + " purchases a Level 1 Access Card.";
+        return buyer + " purchases an Access Card (Level 1).";
     }
 
     /**
-     * Generates unlock actions for adjacent locked doors.
+     * Generates unlock actions for adjacent locked doors if this card has
+     * enough access clearance.
      *
      * @param owner the actor carrying the access card
      * @param map the game map containing the actor
@@ -129,9 +132,11 @@ public class AccessCard extends Item implements Purchasable {
 
         for (Exit exit : currentLocation.getExits()) {
             Location destination = exit.getDestination();
-
             Unlockable target = destination.getGroundAs(Unlockable.class);
-            if (target != null && !target.isUnlocked()) {
+
+            if (target != null
+                    && !target.isUnlocked()
+                    && accessLevel.canOpen(target.getRequiredAccessLevel())) {
                 actions.add(new UnlockDoorAction(target, exit.getName()));
             }
         }

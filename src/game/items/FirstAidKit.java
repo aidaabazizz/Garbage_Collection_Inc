@@ -9,7 +9,7 @@ import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import edu.monash.fit2099.engine.statistics.StatisticOperations;
 import game.capabilities.Purchasable;
-import game.finance.Wallet;
+import game.capabilities.CreditHolder;
 import game.enums.ItemStatistics;
 import game.actions.ConsumeAction;
 import game.enums.Ability;
@@ -20,7 +20,8 @@ import game.capabilities.Consumable;
  * It features a mandatory cooldown period between uses to prevent
  * over-utilization.
  *
- * @author Jewell Gomes
+ * @author Suchir
+ * @version 1.0
  */
 public class FirstAidKit extends Item implements Consumable,Purchasable  {
     private static final int MAX_COOLDOWN = 20;
@@ -108,7 +109,7 @@ public class FirstAidKit extends Item implements Consumable,Purchasable  {
      * @return purchase effect description
      */
     @Override
-    public String purchasedBy(Actor buyer, GameMap map, Wallet wallet) {
+    public String purchasedBy(Actor buyer, GameMap map, CreditHolder wallet) {
         return buyer + " purchases a First Aid Kit.";
     }
 
@@ -121,7 +122,7 @@ public class FirstAidKit extends Item implements Consumable,Purchasable  {
      * @return failed purchase description
      */
     @Override
-    public String failedPurchaseBy(Actor buyer, GameMap map, Wallet wallet) {
+    public String failedPurchaseBy(Actor buyer, GameMap map, CreditHolder wallet) {
         buyer.hurt(Integer.MAX_VALUE);
 
         if (!buyer.isConscious()) {

@@ -1,5 +1,7 @@
 package game.finance;
+
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
+import game.capabilities.CreditHolder;
 import game.enums.Ability;
 import game.enums.ItemStatistics;
 import edu.monash.fit2099.engine.items.Item;
@@ -11,7 +13,7 @@ import edu.monash.fit2099.engine.items.Item;
  * @author Suchir
  * @version 1.0
  */
-public class Wallet extends Item {
+public class Wallet extends Item implements CreditHolder {
     private static final int MAX_CREDITS = 1000;
     private int credits;
 
@@ -32,11 +34,11 @@ public class Wallet extends Item {
      * @param amount the amount of credits to add
      * @return the actual number of credits added
      */
+    @Override
     public int addCredits(int amount) {
         if (amount <= 0) {
             return 0;
         }
-
         int current = credits;
         credits = Math.min(MAX_CREDITS, credits + amount);
         return credits - current;
@@ -48,15 +50,14 @@ public class Wallet extends Item {
      * @param amount the amount of credits to deduct
      * @return true if the deduction succeeds, false otherwise
      */
+    @Override
     public boolean deductCredits(int amount) {
         if (amount <= 0) {
             return true;
         }
-
         if (credits < amount) {
             return false;
         }
-
         credits -= amount;
         return true;
     }
@@ -67,11 +68,11 @@ public class Wallet extends Item {
      * @param amount the amount of credits to deduct
      * @return the actual number of credits deducted
      */
+    @Override
     public int forceDeductCredits(int amount) {
         if (amount <= 0) {
             return 0;
         }
-
         int before = credits;
         credits = Math.max(0, credits - amount);
         return before - credits;
@@ -83,6 +84,7 @@ public class Wallet extends Item {
      * @param amount the required amount
      * @return true if enough credits are available
      */
+    @Override
     public boolean hasEnough(int amount) {
         return credits >= amount;
     }
@@ -92,6 +94,7 @@ public class Wallet extends Item {
      *
      * @return current credits
      */
+    @Override
     public int getCredits() {
         return credits;
     }
@@ -101,6 +104,7 @@ public class Wallet extends Item {
      *
      * @return maximum credits
      */
+    @Override
     public int getMaxCredits() {
         return MAX_CREDITS;
     }

@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.World;
 import game.actors.ContractedWorker;
 import game.actors.SecurityCamera;
+import game.finance.Wallet;
 import game.grounds.*;
 import game.inventory.WeightLimitedInventory;
 import game.items.*;
@@ -67,11 +68,12 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('_', Floor::new);
         groundCreator.registerGround('=', Door::new);
         groundCreator.registerGround('o', Hole::new);
+        groundCreator.registerGround('≡', SuperComputer::new);
 
         List<String> moon99Deprecated = Arrays.asList(
                 "....................########################################",
                 "...#######....o.....#__________________#________________o__#",
-                "...#_____#..........=__________________=___________________#",
+                "...#≡____#..........=__________________=___________________#",
                 "...#_____=...~......#__________________#___________________#",
                 "...#_____#..~~~.....########=#####=#####___#############___#",
                 "...#######.~~~~.....#______#_#_________#___#___________#___#",
@@ -142,6 +144,12 @@ public class EclipseNebula extends World {
         for (String name : names) {
             WeightLimitedInventory inventory = new WeightLimitedInventory(WORKER_INVENTORY_CAPACITY);
             inventory.add(new Flask());
+            inventory.add(new FloppyDisk());
+            inventory.add(new CRTMonitor());
+            Wallet wallet = new Wallet();
+            wallet.addCredits(1000);
+            inventory.add(wallet);
+
 
             ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory);
             this.addPlayer(worker, map.at(startX++, 2));

@@ -8,59 +8,63 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import edu.monash.fit2099.engine.statistics.StatisticOperations;
-import game.enums.ItemStatistics;
 import game.actions.ConsumeAction;
-import game.enums.Ability;
 import game.capabilities.Consumable;
+import game.capabilities.Sellable;
+import game.enums.Ability;
+import game.enums.ItemStatistics;
+import game.capabilities.CreditHolder;
 
 /**
- * A multi-charge consumable item representing a pack of cookies.
- * Each charge provides either nutritional value or a health penalty
- * depending on the presence of a sterilization box.
+ * A packet of cookies that can be consumed or sold.
  *
- * @author Jewell Gomes
+ * @author Suchir
+ * @version 1.0
  */
-public class Cookies extends Item implements Consumable {
+public class Cookies extends Item implements Consumable, Sellable {
     private static final int INITIAL_COUNT = 5;
-
     private static final int HEAL_POINTS = 1;
-
     private static final int MAX_HP_PENALTY = 1;
+    private static final int WEIGHT = 2;
 
     private int count = INITIAL_COUNT;
 
     /**
-     * Constructor for the Cookies.
-     * Sets the initial weight to two units and marks the item as portable.
+     * Constructor for Cookies.
      */
     public Cookies() {
         super("Cookies", '◍');
-        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(2));
+        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(WEIGHT));
         this.makePortable();
     }
 
     /**
-     * Processes the consumption of a single cookie charge.
-     * Decreases the consumer's maximum health if unsterilized, or restores
-     * current health if sterilized.
-     * @param actor The actor eating a cookie.
-     * @return A description of the health changes.
+     * Processes the consumption of one cookie.
+     *
+     * @param actor the actor consuming the cookie
+     * @return consumption effect description
      */
     @Override
     public String consumedBy(Actor actor) {
+        if (count <= 0) {
+            return "There are no cookies left.";
+        }
+
         count--;
+
         if (actor.hasAbility(Ability.STERILIZER)) {
             actor.heal(HEAL_POINTS);
-            return String.format("%s eats a sterilized cookie and heals %d HP.", actor, HEAL_POINTS);
-        } else {
-            actor.modifyStatisticMaximum(ActorStatistics.HEALTH, StatisticOperations.DECREASE, MAX_HP_PENALTY);
-            return String.format("%s eats an expired cookie. Max HP decreased by %d!", actor, MAX_HP_PENALTY);
+            return actor + " eats a sterilized cookie and heals " + HEAL_POINTS + " HP.";
         }
+
+        actor.modifyStatisticMaximum(ActorStatistics.HEALTH, StatisticOperations.DECREASE, MAX_HP_PENALTY);
+        return actor + " eats a contaminated cookie and loses " + MAX_HP_PENALTY + " maximum HP.";
     }
 
     /**
-     * Checks if all cookie charges have been depleted.
-     * @return True if the count reaches zero, false otherwise.
+     * Checks whether all cookies are gone.
+     *
+     * @return true if no cookies remain
      */
     @Override
     public boolean isFinished() {
@@ -68,34 +72,65 @@ public class Cookies extends Item implements Consumable {
     }
 
     /**
-     * Handles the removal of the cookie pack once all charges are used.
-     * @param actor The actor who consumed the final charge.
-     * @param location The map location of the actor.
+     * Removes the cookie pack if finished.
+     *
+     * @param actor the actor consuming the item
+     * @param location the current location
      */
     @Override
     public void cleanUp(Actor actor, Location location) {
-        if (this.isFinished()) {
+        if (isFinished()) {
             actor.getInventory().remove(this);
             location.removeItem(this);
         }
     }
 
     /**
-     * Provides the action to consume one cookie from the pack.
-     * @param owner The actor in possession of the cookies.
-     * @param map The current game map.
-     * @return A collection of valid actions.
+     * Provides the consume action.
+     *
+     * @param owner the actor holding the cookies
+     * @param map the current game map
+     * @return available actions
      */
     @Override
     public ActionList allowableActions(Actor owner, GameMap map) {
         ActionList actions = new ActionList();
-        actions.add(new ConsumeAction(this, this.toString()));
+
+        if (count > 0) {
+            actions.add(new ConsumeAction(this, "Cookies"));
+        }
+
         return actions;
     }
 
     /**
-     * Returns a string representation of the cookies including the remaining count.
-     * @return The name of the item and its current charge count.
+     * Gets the selling price based on remaining cookies.
+     *
+     * @return selling price
+     */
+    @Override
+    public int getSellPrice() {
+        return count;
+    }
+
+    /**
+     * Applies the selling effect.
+     *
+     * @param seller the actor selling the item
+     * @param map the current game map
+     * @param wallet the seller's wallet
+     * @return selling effect description
+     */
+    @Override
+    public String soldBy(Actor seller, GameMap map, CreditHolder wallet) {
+        seller.hurt(count);
+        return seller + " pays an organic processing fee of " + count + " health points.";
+    }
+
+    /**
+     * Returns the cookie display text.
+     *
+     * @return cookie description
      */
     @Override
     public String toString() {

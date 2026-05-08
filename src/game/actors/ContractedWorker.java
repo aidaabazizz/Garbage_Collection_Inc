@@ -12,6 +12,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import game.enums.Ability;
 import game.capabilities.UpdateNotifier;
 import game.managers.AlarmManager;
+import edu.monash.fit2099.engine.items.Item;
 import game.finance.Wallet;
 
 /**
@@ -33,10 +34,9 @@ public class ContractedWorker extends  Actor {
      * @param hitPoints The initial health points of the worker.
      * @param inventory The inventory system assigned to the worker.
      */
-    public ContractedWorker(String name, char displayChar, int hitPoints, Inventory inventory, Wallet wallet) {
+    public ContractedWorker(String name, char displayChar, int hitPoints, Inventory inventory) {
         super(name, displayChar, hitPoints, inventory);
         this.enableAbility(Ability.WORKER);
-        this.getInventory().add(new Wallet());
     }
 
     /**
