@@ -3,10 +3,8 @@ package game.grounds;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
-import game.capabilities.HoleMarker;
 import game.managers.CreatureSpawner;
 import game.holestrategies.HoleSpawnStrategy;
-import game.managers.Spawner;
 
 /**
  * A specialized ground type that acts as a creature spawner.
@@ -17,13 +15,11 @@ import game.managers.Spawner;
  * @author Jewell Gomes
  * @author Chathya Attanayake (Modified by)
  */
-public class Hole extends Ground implements HoleMarker {
+public class Hole extends Ground {
     /** The number of turns that must pass before a creature is spawned. */
     private static final int SPAWN_INTERVAL = 20;
     private int turnCounter = 0;
     private final HoleSpawnStrategy strategy;
-    private final Spawner spawner = new CreatureSpawner();
-    //private final Random random = new Random();
     private static final double EXPANSION_CHANCE = 0.01; // 1% (req4)
 
     /**
@@ -61,13 +57,13 @@ public class Hole extends Ground implements HoleMarker {
     private void rollForExpansion(Location location) {
         for (Exit exit : location.getExits()) {
             Location adj = exit.getDestination();
-            // Use getGroundAs with the Marker Interface
-            if (adj.getGroundAs(HoleMarker.class) == null) {
-                // Inherit the exact same strategy (capability)
-                adj.setGround(new Hole(this.strategy));
-                return;
-            }
 
+            // We check if it's passable (Dirt/Floor) so we don't destroy Walls
+            if (adj.getGround().canActorEnter(null)) {
+                // Transform it! If it's already a hole, it just overwrites itself.
+                adj.setGround(new Hole(this.strategy));
+                return; // Stop after expanding once
+            }
         }
     }
 }
