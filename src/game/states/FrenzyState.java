@@ -6,8 +6,8 @@ import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.HuntBehaviour;
 import game.behaviours.AttackBehaviour;
+import game.capabilities.StatefulActor;
 import game.enums.Ability;
-import game.actors.CrazyChicken;
 import game.enums.ChickenState;
 import game.weapons.CrazyChickenBeak;
 
@@ -20,7 +20,7 @@ import game.weapons.CrazyChickenBeak;
  * - WANDER: after 3 rounds (frenzy duration ends)
  * - stays FRENZY: otherwise
  *
- * @author Aida
+ * @author AI Assistant
  */
 public class FrenzyState implements State {
     private final HuntBehaviour huntBehaviour = new HuntBehaviour();
@@ -68,15 +68,18 @@ public class FrenzyState implements State {
 
     @Override
     public void onEnter(Actor actor, Location location) {
-        // Store original weapon stats using the protected fields via our getter
-        CrazyChickenBeak originalBeak = (CrazyChickenBeak) actor.getIntrinsicWeapon();
+        // Cast to the interface - no instanceof needed!
+        // The state machine guarantees this actor implements StatefulActor
+        StatefulActor statefulActor = (StatefulActor) actor;
+
+        // Store original weapon stats using the interface methods
+        CrazyChickenBeak originalBeak = statefulActor.getBeak();
         this.originalDamage = originalBeak.getDamageValue();
         this.originalHitRate = originalBeak.getHitRateValue();
 
-        // Replace with frenzy beak
-        if (actor instanceof CrazyChicken) {
-            ((CrazyChicken) actor).setBeak(new FrenzyBeak(originalDamage, originalHitRate));
-        }
+        // Replace with frenzy beak using the interface
+        statefulActor.setBeak(new FrenzyBeak(originalDamage, originalHitRate));
+        statefulActor.setCurrentStateName("FRENZY");
 
         // IMMEDIATE EFFECT: The chicken screeches loudly
         // All workers within 8 tiles take 2 damage and are pushed back 2 tiles
@@ -132,10 +135,10 @@ public class FrenzyState implements State {
 
     @Override
     public void onExit(Actor actor, Location location) {
-        // Restore original beak
-        if (actor instanceof CrazyChicken) {
-            ((CrazyChicken) actor).setBeak(new CrazyChickenBeak(originalDamage, originalHitRate));
-        }
+        // Restore original beak using the interface
+        StatefulActor statefulActor = (StatefulActor) actor;
+        statefulActor.setBeak(new CrazyChickenBeak(originalDamage, originalHitRate));
+        statefulActor.setCurrentStateName("WANDER");
     }
 
     @Override
