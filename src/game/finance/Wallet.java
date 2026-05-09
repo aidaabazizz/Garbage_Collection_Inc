@@ -1,13 +1,19 @@
 package game.finance;
 
+import edu.monash.fit2099.engine.statistics.BaseStatistic;
+import game.capabilities.CreditHolder;
+import game.enums.Ability;
+import game.enums.ItemStatistics;
+import edu.monash.fit2099.engine.items.Item;
+
 /**
  * Represents a worker's credit storage for company transactions.
- * The wallet enforces the company credit limit of 1000 credits.
+ * The wallet is stored as a non-portable item in the worker's inventory.
  *
  * @author Suchir
  * @version 1.0
  */
-public class Wallet {
+public class Wallet extends Item implements CreditHolder {
     private static final int MAX_CREDITS = 1000;
     private int credits;
 
@@ -15,7 +21,11 @@ public class Wallet {
      * Constructor for Wallet.
      */
     public Wallet() {
+        super("Wallet", '$');
         this.credits = 0;
+        this.makeNonPortable();
+        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(0));
+        this.enableAbility(Ability.ESSENTIAL);
     }
 
     /**
@@ -24,11 +34,11 @@ public class Wallet {
      * @param amount the amount of credits to add
      * @return the actual number of credits added
      */
+    @Override
     public int addCredits(int amount) {
         if (amount <= 0) {
             return 0;
         }
-
         int current = credits;
         credits = Math.min(MAX_CREDITS, credits + amount);
         return credits - current;
@@ -40,15 +50,14 @@ public class Wallet {
      * @param amount the amount of credits to deduct
      * @return true if the deduction succeeds, false otherwise
      */
+    @Override
     public boolean deductCredits(int amount) {
         if (amount <= 0) {
             return true;
         }
-
         if (credits < amount) {
             return false;
         }
-
         credits -= amount;
         return true;
     }
@@ -59,11 +68,11 @@ public class Wallet {
      * @param amount the amount of credits to deduct
      * @return the actual number of credits deducted
      */
+    @Override
     public int forceDeductCredits(int amount) {
         if (amount <= 0) {
             return 0;
         }
-
         int before = credits;
         credits = Math.max(0, credits - amount);
         return before - credits;
@@ -75,6 +84,7 @@ public class Wallet {
      * @param amount the required amount
      * @return true if enough credits are available
      */
+    @Override
     public boolean hasEnough(int amount) {
         return credits >= amount;
     }
@@ -84,6 +94,7 @@ public class Wallet {
      *
      * @return current credits
      */
+    @Override
     public int getCredits() {
         return credits;
     }
@@ -93,7 +104,18 @@ public class Wallet {
      *
      * @return maximum credits
      */
+    @Override
     public int getMaxCredits() {
         return MAX_CREDITS;
+    }
+
+    /**
+     * Returns the wallet's display text.
+     *
+     * @return wallet display text
+     */
+    @Override
+    public String toString() {
+        return "Wallet (" + credits + "/" + MAX_CREDITS + " credits)";
     }
 }

@@ -17,7 +17,7 @@ public interface Consumable {
      * @param actor The entity performing the consumption.
      * @return A description of the resulting effect on the actor.
      */
-    public String consumedBy(Actor actor);
+    String consumedBy(Actor actor);
 
     /**
      * Determines if the object has been completely depleted.
