@@ -1,6 +1,7 @@
 package game.grounds;
 
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Ground;
 import game.capabilities.AlarmListener;
 import game.capabilities.Unlockable;
@@ -109,5 +110,10 @@ public class Door extends Ground implements Unlockable, AlarmListener {
     @Override
     public boolean canActorEnter(Actor actor) {
         return isUnlocked && !alarmLock;
+    }
+
+    @Override
+    public String applyUnlockEffect(Actor actor, GameMap map) {
+        return "";
     }
 }
