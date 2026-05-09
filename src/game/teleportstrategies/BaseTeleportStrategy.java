@@ -35,7 +35,7 @@ public abstract class BaseTeleportStrategy implements TeleportStrategy {
      * @param actor The actor intended to be moved.
      * @return A randomly selected valid Location, or null if no valid spots exist.
      */
-    public Location getRandomValidLocation(GameMap map, Actor actor) {
+    protected Location getRandomValidLocation(GameMap map, Actor actor) {
         List<Location> validSpots = new ArrayList<>();
         for (int x : map.getXRange()) {
             for (int y : map.getYRange()) {
