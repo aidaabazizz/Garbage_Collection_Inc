@@ -42,7 +42,7 @@ public class TeleportAction extends Action {
         Location destination = strategy.getDestination(actor, map);
 
         if (destination == null) {
-            return actor + " cancels teleportation.";
+            return "No valid teleport location found!";
         }
         map.moveActor(actor, destination);
         strategy.applySideEffects(actor, source, destination, map);
