@@ -11,19 +11,24 @@ import game.actions.ConsumeAction;
 import game.enums.Ability;
 import game.capabilities.Consumable;
 import game.capabilities.PoisonStatus;
+import game.capabilities.Sellable;
+import game.capabilities.CreditHolder;
 
 /**
  * A spoiled food item found within the facility.
  * Consuming this item results in toxic effects unless the consumer possesses
  * a sterilization box.
  *
- * @author Jewell Gomes
+ * @author Suchir
+ * @version 1.0
  */
-public class Apple extends Item implements Consumable {
-
+public class Apple extends Item implements Consumable, Sellable {
     private static final int HEAL_POINTS = 3;
-
     private static final int POISON_DURATION = 5;
+
+    private static final int SELL_PRICE = 1;
+    private static final int SELL_POISON_DURATION = 2;
+
     /**
      * Constructor for the Apple.
      * Initializes the apple with a weight of one unit and sets it as portable.
@@ -38,6 +43,7 @@ public class Apple extends Item implements Consumable {
      * Processes the consumption logic for the apple.
      * Provides healing if the actor has sterilization capabilities; otherwise,
      * inflicts a poison status that lasts for five turns.
+     *
      * @param actor The actor consuming the apple.
      * @return A description of the consumption outcome.
      */
@@ -54,6 +60,7 @@ public class Apple extends Item implements Consumable {
     /**
      * Removes the apple from the game world after use.
      * Deletes the item from both the actor's inventory and the map location.
+     *
      * @param actor The actor who consumed the item.
      * @param location The map location where the item was consumed.
      */
@@ -65,8 +72,9 @@ public class Apple extends Item implements Consumable {
 
     /**
      * Provides the action to consume the apple.
+     *
      * @param owner The actor who can interact with the apple.
-     * @param map he current game map.
+     * @param map the current game map
      * @return A list containing a single consume action.
      */
     @Override
@@ -74,5 +82,36 @@ public class Apple extends Item implements Consumable {
         ActionList actions = new ActionList();
         actions.add(new ConsumeAction(this, "Apple"));
         return actions;
+    }
+
+    /**
+     * Gets the selling price of the apple.
+     *
+     * @return selling price
+     */
+    @Override
+    public int getSellPrice() {
+        return SELL_PRICE;
+    }
+
+    /**
+     * Applies the effect after selling the apple.
+     *
+     * @param seller the actor selling the item
+     * @param map the current game map
+     * @param wallet the seller's wallet
+     * @return selling effect description
+     */
+    @Override
+    public String soldBy(Actor seller, GameMap map, CreditHolder wallet) {
+        if (seller.hasAbility(Ability.STERILIZER)) {
+            return seller + " is protected by a Sterilisation Box and avoids poisoning.";
+        }
+
+        seller.addStatus(new PoisonStatus(SELL_POISON_DURATION));
+        seller.addStatus(new PoisonStatus(SELL_POISON_DURATION));
+
+        return seller + " is poisoned for " + SELL_POISON_DURATION
+                + " turns, taking 2 damage per turn.";
     }
 }

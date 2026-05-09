@@ -15,6 +15,8 @@ import game.capabilities.InfectionStatus;
 import game.enums.Ability;
 import game.capabilities.UpdateNotifier;
 import game.managers.AlarmManager;
+import edu.monash.fit2099.engine.items.Item;
+import game.finance.Wallet;
 import game.managers.CreatureSpawner;
 
 /**
