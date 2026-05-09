@@ -43,7 +43,7 @@ public class UnlockDoorAction extends Action {
     public String execute(Actor actor, GameMap map) {
         target.unlock();
         String unlockEffect = target.applyUnlockEffect(actor, map);
-        return actor + " swipes the card and unlocks the door to the " + direction;
+        return actor + " swipes the card and unlocks the door to the " + direction + ". " + unlockEffect;
     }
 
     /**
