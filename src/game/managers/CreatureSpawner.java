@@ -49,6 +49,11 @@ public class CreatureSpawner implements Spawner {
         return null;
     }
 
+    /**
+     * This method creates a slime. When a slime emerges it causes nearby
+     * workers to become terrified and drop every item in their inventory
+     * onto the ground.
+     */
     @Override
     public boolean spawnSlime(Location center) {
         Location spot = getSpawnLocation(center);
@@ -76,6 +81,11 @@ public class CreatureSpawner implements Spawner {
         }
     }
 
+    /**
+     * This method creates an undead creature. It gives the undead a
+     * health bonus based on the number of other creatures already
+     * standing in the surrounding tiles.
+     */
     @Override
     public boolean spawnUndead(Location center) {
         Location spot = getSpawnLocation(center);
