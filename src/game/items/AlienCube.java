@@ -22,7 +22,7 @@ public class AlienCube extends Item implements Sellable {
 
     public AlienCube() {
         super("Alien Cube", '◈');
-        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(0));
+        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(1));
         this.makePortable();
     }
 
@@ -30,16 +30,11 @@ public class AlienCube extends Item implements Sellable {
     public ActionList allowableActions(Actor owner, GameMap map) {
         ActionList actions = new ActionList();
 
-        if (used) {
-            this.makeNonPortable();
-            return actions;
-        }
-
-        AlienCubeStrategy strategy = new AlienCubeStrategy(map.at(0, 0));
+        AlienCubeStrategy strategy = new AlienCubeStrategy(map.at(0, 0), this);
 
         List<Location> targets = strategy.getRandomDestinations(map, owner, NUM_OPTIONS);
         for (Location loc : targets) {
-            actions.add(new TeleportAction(new AlienCubeStrategy(loc)));
+            actions.add(new TeleportAction(new AlienCubeStrategy(loc, this)));
         }
         return actions;
     }
@@ -47,10 +42,6 @@ public class AlienCube extends Item implements Sellable {
     @Override
     public int getSellPrice() {
         return SELL_PRICE;
-    }
-
-    public boolean isUsed() {
-        return used;
     }
 
     @Override
@@ -62,6 +53,7 @@ public class AlienCube extends Item implements Sellable {
                 try {
                     Undead undead = new Undead();
                     map.addActor(undead, adjacent);
+                    seller.getInventory().remove(this);
                     return "An Undead spawns next to " + seller + "!";
                 } catch (Exception e) {
                     continue;

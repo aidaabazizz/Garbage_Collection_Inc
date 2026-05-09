@@ -4,15 +4,19 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.grounds.ToxicWaste;
+import game.items.AlienCube;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class AlienCubeStrategy extends BaseTeleportStrategy {
     private final Location destination;
     private final static int ADJACENT_TILE = 1;
+    private final AlienCube cube;
 
-    public AlienCubeStrategy(Location destination) {
+    public AlienCubeStrategy(Location destination, AlienCube cube) {
         this.destination = destination;
+        this.cube = cube;
     }
 
     /**
@@ -39,6 +43,10 @@ public class AlienCubeStrategy extends BaseTeleportStrategy {
     public void applySideEffects(Actor actor, Location source, Location destination, GameMap map) {
         for (Location adj : source.getNearbyLocations(ADJACENT_TILE)) {
             adj.setGround(new ToxicWaste());
+        }
+
+        if (cube != null) {
+            actor.getInventory().remove(cube);
         }
     }
 
