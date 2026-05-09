@@ -154,7 +154,7 @@ public class EclipseNebula extends World {
                 ".............≈≈≈≈≈≈≈≈######=########≈≈≈≈≈≈≈≈≈####=###≈≈≈≈≈≈≈",
                 "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈",
                 "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈###############_#######≈≈≈",
-                "............≈≈≈≈≈≈≈≈≈≈≈≈≈#_____________________________#≈≈≈",
+                ".............≈≈≈≈≈≈≈≈≈≈≈≈≈#_____________________________#≈≈≈",
                 "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈#_______=__________◈__≈≈≈≈____#≈≈≈",
                 "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈#___◎___#_____________≈≈≈≈≈≈__≈≈≈≈",
                 "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈######################≈≈≈≈≈≈≈≈≈≈≈≈",
@@ -224,16 +224,28 @@ public class EclipseNebula extends World {
      * @throws Exception if a player cannot be added to the game world
      */
     private void setupContractedWorkers(GameMap map) throws Exception {
-        String[] names = {"#1 Bob", "#2 Tom", "#3 Sarah", "#4 Julie", "#5 Rick"};
-        int startX = 4;
+//        String[] names = {"#1 Bob", "#2 Tom", "#3 Sarah", "#4 Julie", "#5 Rick"};
+//        int startX = 4;
+//
+//        for (String name : names) {
+//            WeightLimitedInventory inventory = new WeightLimitedInventory(WORKER_INVENTORY_CAPACITY);
+//            inventory.add(new Flask());
+//            inventory.add(new Wallet());
+//
+//            ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory);
+//            this.addPlayer(worker, map.at(startX++, 2));
+//        }
 
-        for (String name : names) {
-            WeightLimitedInventory inventory = new WeightLimitedInventory(WORKER_INVENTORY_CAPACITY);
-            inventory.add(new Flask());
-            inventory.add(new Wallet());
+        // 1. Setup the inventory for the single player
+        WeightLimitedInventory inventory = new WeightLimitedInventory(WORKER_INVENTORY_CAPACITY);
+        inventory.add(new Flask());
+        inventory.add(new Wallet());
 
-            ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory);
-            this.addPlayer(worker, map.at(startX++, 2));
-        }
+        // 2. Create only one worker (e.g., Bob)
+        // You can choose any name and display character you like
+        ContractedWorker worker = new ContractedWorker("Bob", 'ඞ', WORKER_STARTING_HEALTH, inventory);
+
+        // 3. Add the player to a specific location (e.g., x=4, y=2)
+        this.addPlayer(worker, map.at(4, 2));
     }
 }
