@@ -4,20 +4,17 @@ package game.teleportstrategies;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.capabilities.TeleportStrategy;
-
-import java.util.Random;
 
 /**
  * A teleportation strategy specific to the Mature Warper Tree.
  * This class implements the logic for finding a random destination on the map
  * when a worker is grabbed by the tree's roots. It integrates with the
- * Requirement 2 teleportation system by implementing the TeleportStrategy interface.
+ * Requirement 2 teleportation system by extending from the BaseTeleportStrategy
+ * which implements the TeleportStrategy.
  *
  * @author Jewell Gomes
  */
-public class TreeWarpStrategy implements TeleportStrategy {
-    private final Random random = new Random();
+public class TreeWarpStrategy extends BaseTeleportStrategy {
 
     /**
      * Determines a random valid destination on the current map for the warp event.
@@ -30,13 +27,7 @@ public class TreeWarpStrategy implements TeleportStrategy {
      */
     @Override
     public Location getDestination(Actor actor, GameMap map) {
-        Location dest;
-        do {
-            int x = random.nextInt(map.getXRange().max() + 1);
-            int y = random.nextInt(map.getYRange().max() + 1);
-            dest = map.at(x, y);
-        } while (dest.containsAnActor() || !dest.canActorEnter(actor));
-        return dest;
+        return getRandomValidLocation(map, actor);
     }
 
     /**
