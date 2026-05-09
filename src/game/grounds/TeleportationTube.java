@@ -43,10 +43,11 @@ public class TeleportationTube extends Ground {
     @Override
     public ActionList allowableActions(Actor actor, Location location, String direction) {
         ActionList actions = new ActionList();
-        // This will loop through every pre-determined actions in the list
-        for (Location dest : this.destinations) {
-            actions.add(new TeleportAction(new TeleportTubeStrategy(dest)));
+        if (direction.isEmpty()) {
+            for (Location dest : this.destinations) {
+                actions.add(new TeleportAction(new TeleportTubeStrategy(dest)));
+            }
         }
         return actions;
-    };
+    }
 }
