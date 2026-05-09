@@ -24,11 +24,7 @@ public class TeleportTubeStrategy extends BaseTeleportStrategy {
     public void applySideEffects(Actor actor, Location source, Location destination, GameMap map) {
         // Burn adjacent tiles at destination (2 turns)
         for (Location adjacent : destination.getNearbyLocations(ADJACENT_TILE_DISTANCE)) {
-            if (adjacent.getGround() instanceof Fire fire) {
-                fire.addStack(FIRE_DURATION);
-            } else {
-                adjacent.setGround(new Fire(adjacent.getGround(), FIRE_DURATION));
-            }
+            adjacent.setGround(new Fire(adjacent.getGround(), FIRE_DURATION));
         }
     }
     @Override
