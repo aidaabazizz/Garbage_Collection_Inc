@@ -6,15 +6,16 @@ import edu.monash.fit2099.engine.positions.Location;
 import game.capabilities.TeleportStrategy;
 import game.grounds.ToxicWaste;
 
-public class AlienCubeStrategy implements TeleportStrategy {
+public class AlienCubeStrategy extends BaseTeleportStrategy {
 
-    private final static int ADJACENT_TILE_DISTANCE = 1;
+    private static final int ADJACENT_TILE_DISTANCE = 1;
     private final Location destination;
 
     public AlienCubeStrategy(Location destination) {
         this.destination = destination;
     }
 
+    @Override
     public Location getDestination(Actor actor, GameMap map) {
         return destination;
     }
@@ -28,7 +29,6 @@ public class AlienCubeStrategy implements TeleportStrategy {
 
     @Override
     public String menuDescription(Actor actor) {
-        return "Teleport " + actor + "to (" + destination.x() + ", " + destination.y() + ") via Alien Cube";
+        return "Teleport " + actor + " to (" + destination.x() + ", " + destination.y() + ") via Alien Cube";
     }
-
 }

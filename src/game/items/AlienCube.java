@@ -29,26 +29,16 @@ public class AlienCube extends Item {
 
     @Override
     public ActionList allowableActions(Actor owner, GameMap map) {
-
         ActionList actions = new ActionList();
-        int maxX = map.getXRange().max();
-        int maxY = map.getYRange().max();
+        // Use BaseTeleportStrategy's robust random location finder
+        AlienCubeStrategy tempStrategy = new AlienCubeStrategy(map.at(0, 0));
         List<Location> targets = new ArrayList<>();
 
-        for (int i = 0; i < NUM_LOCATIONS; i++) {
-            Location randomLoc;
-            int attempts = 0;
-            do {
-                int randomX = random.nextInt(maxX + 1);
-                int randomY = random.nextInt(maxY + 1);
-                randomLoc = map.at(randomX, randomY);
-                attempts++;
-            } while ((!randomLoc.canActorEnter(owner) || targets.contains(randomLoc)) && attempts < MAX_ATTEMPT_RANDOM_LOCATIONS);
-
-            if (attempts < MAX_ATTEMPT_RANDOM_LOCATIONS) {
-                targets.add(randomLoc);
-                actions.add(new TeleportAction(new AlienCubeStrategy(randomLoc)));
-            }
+        while (targets.size() < NUM_OPTIONS) {
+            Location loc = tempStrategy.getRandomValidLocation(map, owner);
+            if (loc == null || targets.contains(loc)) continue;
+            targets.add(loc);
+            actions.add(new TeleportAction(new AlienCubeStrategy(loc)));
         }
         return actions;
     }
