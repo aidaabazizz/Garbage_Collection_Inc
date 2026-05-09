@@ -1,6 +1,7 @@
 package game.teleportstrategies;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
+import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.grounds.Fire;
 public class TeleportTubeStrategy extends BaseTeleportStrategy {
@@ -24,7 +25,10 @@ public class TeleportTubeStrategy extends BaseTeleportStrategy {
     public void applySideEffects(Actor actor, Location source, Location destination, GameMap map) {
         // Burn adjacent tiles at destination (2 turns)
         for (Location adjacent : destination.getNearbyLocations(ADJACENT_TILE_DISTANCE)) {
-            adjacent.setGround(new Fire(adjacent.getGround(), FIRE_DURATION));
+            Ground ground = adjacent.getGround();
+            if (ground.canActorEnter(actor)) {
+                adjacent.setGround(new Fire(ground, FIRE_DURATION));
+            }
         }
     }
     @Override
