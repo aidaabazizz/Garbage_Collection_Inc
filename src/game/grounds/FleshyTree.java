@@ -1,5 +1,6 @@
 package game.grounds;
 
+import game.managers.Spawner;
 import game.stages.FleshySproutStage;
 
 /**
@@ -17,7 +18,7 @@ public class FleshyTree extends AbstractTree {
      * state to the sprout stage so the tree can begin its lifecycle
      * from the very beginning.
      */
-    public FleshyTree() {
-        super('y', "Fleshy Tree", new FleshySproutStage());
+    public FleshyTree(Spawner spawner) {
+        super("Fleshy Tree", new FleshySproutStage(spawner));
     }
 }
