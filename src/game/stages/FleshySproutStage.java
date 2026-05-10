@@ -3,6 +3,7 @@ package game.stages;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Location;
 import game.grounds.AbstractTree;
+import game.managers.Spawner;
 
 import java.util.List;
 
@@ -14,11 +15,16 @@ import java.util.List;
  *
  * @author Jewell Gomes
  */
-public class FleshySproutStage extends AbstractTreeStage {
+public class FleshySproutStage extends FleshyTreeStage {
     private static final int GROWTH_THRESHOLD = 20;
     private static final double GROWTH_CHANCE = 0.25;
     private int age = 0;
 
+    /**
+     * Constructor for the Sprout stage.
+     * @param spawner The spawning manager used to handle Slime creation.
+     */
+    public FleshySproutStage(Spawner spawner) { super(spawner); }
     /**
      * This method manages the behavior of the sprout during every turn.
      * It first identifies all workers in the surrounding tiles. If a
@@ -29,14 +35,20 @@ public class FleshySproutStage extends AbstractTreeStage {
     @Override
     public TreeStage execute(Location location, AbstractTree tree) {
         List<Actor> targets = getNearbyWorkers(location);
-        boolean spawned = false;
-        for (Actor worker : targets) {
-            if (spawner.spawnSlime(location)) {
-                spawned = true; // At least one slime was spawned
+        if (!targets.isEmpty()) {
+            display.println(String.format("Fleshy Sprout at %s current age: (%d/%d)",
+                    location, age, GROWTH_THRESHOLD));
+            display.println("Fleshy Sprout Tree at " + location + " is producing Slime!");
+            for (Actor worker : targets) {
+                spawner.spawnSlime(location);
             }
+            return this;
         }
+        // aging/growing (only if not spawning)
         age++;
-        if (!spawned && age >= GROWTH_THRESHOLD) {
+        display.println(String.format("Fleshy Sprout at %s current age: (%d/%d)",
+                location, age, GROWTH_THRESHOLD));
+        if (age >= GROWTH_THRESHOLD) {
             // reset the counter here
             // if the 25% fails, we start counting another 20 turns.
             age = 0;
@@ -45,7 +57,9 @@ public class FleshySproutStage extends AbstractTreeStage {
                 display.println(String.format(
                         "Fleshy Tree Sprout ('%s') at %s grows into a Fleshy Sapling ('v')!",
                         getDisplayChar(), location));
-                return new FleshySaplingStage();
+                return new FleshySaplingStage(spawner);
+            } else {
+                display.println("Fleshy Sprout at " + location + " failed the 25% growth roll. Resetting counter.");
             }
         }
         return this;
