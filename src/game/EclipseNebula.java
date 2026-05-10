@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.World;
 import game.actors.ContractedWorker;
 import game.actors.SecurityCamera;
+import game.enums.AccessLevel;
 import game.finance.Wallet;
 import game.grounds.*;
 import game.inventory.WeightLimitedInventory;
@@ -43,17 +44,24 @@ public class EclipseNebula extends World {
      * @throws Exception if map creation or entity placement fails during initialization
      */
     public void initialise() throws Exception {
+        // 1. Create the maps
         GameMap moonMap = createMoonMap();
-        this.addGameMap(moonMap);
-        setupMoonInfrastructure(moonMap);
-        spawnCommonScrap(moonMap);
-
         GameMap overflowMap = createOverflowMap();
-        this.addGameMap(overflowMap);
-        setupOverflowInfrastructure(overflowMap);
-        spawnCommonScrap(overflowMap);
-        spawnOverflowUniqueItems(overflowMap);
 
+        // 2. Add them to the world
+        this.addGameMap(moonMap);
+        this.addGameMap(overflowMap);
+        moonMap.at(4, 3).addItem(new AccessCard(AccessLevel.LEVEL_ONE));
+
+        // 3. Setup infrastructure
+        setupMoonInfrastructure(moonMap);
+        setupOverflowInfrastructure(overflowMap);
+
+        // 4. Spawn Scrap (Apples, Cookies, Lanterns) on both maps
+        spawnCommonScrap(moonMap);
+        spawnCommonScrap(overflowMap);
+
+        // 5. Setup workers on the OVERFLOW map
         setupContractedWorkers(overflowMap);
     }
 
@@ -71,7 +79,7 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('=', Door::new);
 
         // REQ2
-        groundCreator.registerGround('≈', Dirt::new); // Toxic Waste
+        groundCreator.registerGround('≈', ToxicWaste::new); // Toxic Waste
         groundCreator.registerGround('Φ', Dirt::new); // Teleportation Tube
         groundCreator.registerGround('◈', Dirt::new); // Alien Cube
         groundCreator.registerGround('◎', Dirt::new); // Magic Circle
@@ -200,11 +208,6 @@ public class EclipseNebula extends World {
         map.at(17, 5).addItem(new FloppyDisk());
         map.at(5, 8).addItem(new Lantern());
         map.at(16, 4).addItem(new CRTMonitor());
-
-        // REQ1 items
-        map.at(4, 3).addItem(new AccessCard());
-        map.at(5, 3).addItem(new FirstAidKit());
-        map.at(6, 3).addItem(new SterilisationBox());
     }
 
     /**
