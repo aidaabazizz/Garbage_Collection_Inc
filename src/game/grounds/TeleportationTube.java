@@ -6,7 +6,6 @@ import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.TeleportAction;
 import game.capabilities.TeleportStrategy;
-import game.teleportstrategies.TeleportTubeStrategy;
 
 import java.util.List;
 
