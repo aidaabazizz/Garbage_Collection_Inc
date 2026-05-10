@@ -13,7 +13,7 @@ import game.stages.TreeStage;
  *
  * @author Jewell Gomes
  */
-public class AbstractTree extends Ground {
+public abstract class AbstractTree extends Ground {
     private TreeStage stage;
 
     /**
