@@ -10,6 +10,7 @@ import game.actors.SecurityCamera;
 import game.doors.AluminiumDoor;
 import game.doors.IronDoor;
 import game.doors.TitaniumDoor;
+import game.enums.AccessLevel;
 import game.finance.Wallet;
 import game.grounds.*;
 import game.inventory.WeightLimitedInventory;
@@ -19,27 +20,41 @@ import game.managers.Spawner;
 import game.teleportstrategies.TeleportTubeStrategy;
 import game.capabilities.TeleportStrategy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * The master class for the Eclipse Nebula world.
- * Orchestrates REQ1 (Economy), REQ2 (Teleportation), REQ3 (Flora), and REQ4 (Spawners).
+ * The game class representing the Eclipse Nebula.
+ * It manages the creation and placement of maps, actors, and items.
  *
+ * @author Suchir
+ * @author Victoria
  * @author Jewell Gomes
+ * @author Chathya
+ * @author Aida
  */
 public class EclipseNebula extends World {
 
+    /** The maximum weight a contracted worker can carry. */
     private static final int WORKER_INVENTORY_CAPACITY = 50;
+
+    /** The initial health points assigned to a new contracted worker. */
     private static final int WORKER_STARTING_HEALTH = 10;
 
+    /**
+     * Constructor for the EclipseNebula world.
+     *
+     * @param display The display used to show the world.
+     */
     public EclipseNebula(Display display) {
         super(display);
     }
 
     /**
-     * Initialises the game world by building maps and establishing connections.
-     * Fulfills REQ2 by linking the 99-Deprecated and 20-overflow moons.
+     * Initialises the game world by constructing the maps and populating them with entities.
+     *
+     * @throws Exception if map creation or entity placement fails during initialization
      */
     public void initialise() throws Exception {
         // 1. Create the Map instances
@@ -56,7 +71,6 @@ public class EclipseNebula extends World {
 
         // 4. Setup map-specific infrastructure (Alarms, Cameras)
         setupMoonInfrastructure(moonMap);
-        setupOverflowInfrastructure(overflowMap);
 
         // 5. REQ 1: Spawn Scrap (Items the player SELLS to earn credits)
         // Spawned on both maps to provide income.
@@ -65,7 +79,7 @@ public class EclipseNebula extends World {
 
         // 6. REQ 2: Spawn Starting Card and Unique Items
         // "Starting Access Card spawned at the beginning" = Map 99
-        moonMap.at(4, 3).addItem(new AccessCard());
+        moonMap.at(4, 3).addItem(new AccessCard(AccessLevel.LEVEL_ONE));
 
         // Alien Cubes are found scattered in 20-overflow
         spawnOverflowUniqueItems(overflowMap);
@@ -76,7 +90,10 @@ public class EclipseNebula extends World {
     }
 
     /**
-     * Fulfills DRY Principle: Registers grounds used by both maps.
+     * Registers ground types that are found on all maps.
+     *
+     * @param groundCreator the ground creator used to register map symbols
+     * @throws Exception if ground registration fails
      */
     private void registerCommonGrounds(DefaultGroundCreator groundCreator) throws Exception {
         groundCreator.registerGround('.', Dirt::new);
@@ -92,19 +109,26 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('N', IronDoor::new);
         groundCreator.registerGround('M', TitaniumDoor::new);
         groundCreator.registerGround('≈', ToxicWaste::new);
-        groundCreator.registerGround('◎', Dirt::new);
+        groundCreator.registerGround('◎', MagicCircle::new);
 
         // Placeholders to prevent registration errors during map string parsing
         groundCreator.registerGround('Φ', Dirt::new);
-        groundCreator.registerGround('◈', Dirt::new);
     }
 
+    /**
+     * Creates and configures the "99-Deprecated" moon map.
+     *
+     * @return a configured GameMap instance representing the moon facility
+     * @throws Exception if the map strings are invalid or ground registration fails
+     */
     private GameMap createMoonMap() throws Exception {
         DefaultGroundCreator groundCreator = new DefaultGroundCreator();
         registerCommonGrounds(groundCreator);
 
-        // REQ 4: Spawner logic specific to Moon 99
+        // REQ4: Hole in 99-Deprecated spawns Undead and Slimes.
         groundCreator.registerGround('o', StandardHole::new);
+
+        // REQ4: Vents should be on both maps.
         groundCreator.registerGround('V', Vent::new);
 
         List<String> moonStrings = Arrays.asList(
@@ -132,16 +156,22 @@ public class EclipseNebula extends World {
         return new GameMap("99-Deprecated", groundCreator, moonStrings);
     }
 
+    /**
+     * Creates and configures the "20-overflow" factory complex map.
+     *
+     * @return a configured GameMap instance representing the factory moon
+     * @throws Exception if the map strings are invalid or ground registration fails
+     */
     private GameMap createOverflowMap() throws Exception {
         DefaultGroundCreator groundCreator = new DefaultGroundCreator();
         registerCommonGrounds(groundCreator);
-// 1. Create ONE instance of the spawner for this map
+
+        // 1. Create ONE instance of the spawner for this map
         Spawner overflowSpawner = new CreatureSpawner();
 
         // REQ3 flora registration
         groundCreator.registerGround('y', () -> new FleshyTree(overflowSpawner));
         groundCreator.registerGround('w', WarperTree::new);
-
 
         // REQ 4: Spawner logic specific to 20-overflow
         groundCreator.registerGround('o', ParasiticHole::new);
@@ -151,7 +181,7 @@ public class EclipseNebula extends World {
                 "......y..............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
                 "...#####M_N....w.....≈≈≈≈≈≈≈≈≈≈≈≈≈≈##################≈≈≈≈≈≈≈",
                 "...#≡____#...........≈≈≈≈≈≈≈≈≈≈≈≈≈≈#___M____________#≈≈≈≈≈≈≈",
-                "...#__Φ__=...........≈≈≈≈≈≈≈≈#######_______◈________#≈≈≈≈≈≈≈",
+                "...#__Φ__=...........≈≈≈≈≈≈≈≈#######________________#≈≈≈≈≈≈≈",
                 "...#_____#.....y....=≈≈≈≈≈≈≈≈#_____=_____________N__#≈≈≈≈≈≈≈",
                 "...#######...≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_◎___###########=######≈≈≈≈≈≈≈",
                 ".............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_____#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
@@ -162,7 +192,7 @@ public class EclipseNebula extends World {
                 "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈",
                 "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈###############_#######≈≈≈",
                 ".............≈≈≈≈≈≈≈≈≈≈≈≈≈#_____________________________#≈≈≈",
-                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈#_______=__________◈__≈≈≈≈____#≈≈≈",
+                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈#_______=_____________≈≈≈≈____#≈≈≈",
                 "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈#___◎___#_____________≈≈≈≈≈≈__≈≈≈≈",
                 "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈######################≈≈≈≈≈≈≈≈≈≈≈≈",
                 ".............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
@@ -178,23 +208,38 @@ public class EclipseNebula extends World {
      */
     private void linkTeleportationTubes(GameMap moonMap, GameMap overflowMap) {
         Location moonTubeLoc = moonMap.at(28, 3);
-        Location overflowTubeLoc = overflowMap.at(5, 3);
+        Location overflowTubeLoc = overflowMap.at(6, 3);
 
-        // Connect Moon -> Overflow
-        moonTubeLoc.setGround(new TeleportationTube(List.of(new TeleportTubeStrategy(overflowTubeLoc))));
-        // Connect Overflow -> Moon
-        overflowTubeLoc.setGround(new TeleportationTube(List.of(new TeleportTubeStrategy(moonTubeLoc))));
+        // Configure Moon Tube: Dest 1 (Internal), Dest 2 (Overflow)
+        // Note: TeleportTubeStrategy must handle the 50% malfunction and fire side effects
+        List<TeleportStrategy> moonStrategies = new ArrayList<>();
+        moonStrategies.add(new TeleportTubeStrategy(moonMap.at(5, 15))); // Within-map
+        moonStrategies.add(new TeleportTubeStrategy(overflowTubeLoc));  // Between-map
+        moonTubeLoc.setGround(new TeleportationTube(moonStrategies));
+
+        // Configure Overflow Tube: Dest 1 (Moon 99)
+        List<TeleportStrategy> overflowStrategies = new ArrayList<>();
+        overflowStrategies.add(new TeleportTubeStrategy(moonTubeLoc)); // Between-map
+        overflowStrategies.add(new TeleportTubeStrategy(overflowMap.at(10, 10))); // Within-map
+        overflowTubeLoc.setGround(new TeleportationTube(overflowStrategies));
     }
 
+    /**
+     * Installs infrastructure on the 99-Deprecated moon.
+     *
+     * @param map the GameMap where infrastructure is being placed
+     * @throws Exception if an actor cannot be successfully added
+     */
     private void setupMoonInfrastructure(GameMap map) throws Exception {
         map.at(0, 0).addItem(new AlarmTimer());
         map.at(10, 6).addActor(new SecurityCamera());
     }
 
-    private void setupOverflowInfrastructure(GameMap map) throws Exception {
-        map.at(10, 6).addActor(new SecurityCamera());
-    }
-
+    /**
+     * Populates a given game map with standard scrap materials and purchasable items.
+     *
+     * @param map the GameMap where common scrap items will be deployed
+     */
     private void spawnCommonScrap(GameMap map) {
         // Items to SELL for credits. No high-value items here!
         map.at(16, 3).addItem(new Apple());
@@ -204,12 +249,24 @@ public class EclipseNebula extends World {
         map.at(16, 4).addItem(new CRTMonitor());
     }
 
+    /**
+     * Spawns Requirement 2 items and markers onto the overflow factory moon.
+     *
+     * @param map the GameMap to populate
+     * @throws Exception if item placement logic encounters an error
+     */
     private void spawnOverflowUniqueItems(GameMap map) {
         // REQ 2: Alien Cubes spawned as portable items in factory moon
         map.at(45, 3).addItem(new AlienCube());
         map.at(45, 14).addItem(new AlienCube());
     }
 
+    /**
+     * Initializes the player-controlled contracted workers and deploys them to the map.
+     *
+     * @param map the GameMap where the players will be added
+     * @throws Exception if a player cannot be added to the game world
+     */
     private void setupContractedWorkers(GameMap map) throws Exception {
         String[] names = {"#1 Bob", "#2 Tom", "#3 Sarah", "#4 Julie", "#5 Rick"};
         int startX = 4;

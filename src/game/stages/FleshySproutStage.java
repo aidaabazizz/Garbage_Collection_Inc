@@ -18,7 +18,6 @@ import java.util.List;
 public class FleshySproutStage extends FleshyTreeStage {
     private static final int GROWTH_THRESHOLD = 20;
     private static final double GROWTH_CHANCE = 0.25;
-    private int age = 0;
 
     /**
      * Constructor for the Sprout stage.
@@ -35,32 +34,23 @@ public class FleshySproutStage extends FleshyTreeStage {
     @Override
     public TreeStage execute(Location location, AbstractTree tree) {
         List<Actor> targets = getNearbyWorkers(location);
+
         if (!targets.isEmpty()) {
             display.println(String.format("Fleshy Sprout at %s current age: (%d/%d)",
-                    location, age, GROWTH_THRESHOLD));
+                    location, getAge(), GROWTH_THRESHOLD));
             display.println("Fleshy Sprout Tree at " + location + " is producing Slime!");
             for (Actor worker : targets) {
                 spawner.spawnSlime(location);
             }
             return this;
         }
-        // aging/growing (only if not spawning)
-        age++;
-        display.println(String.format("Fleshy Sprout at %s current age: (%d/%d)",
-                location, age, GROWTH_THRESHOLD));
-        if (age >= GROWTH_THRESHOLD) {
-            // reset the counter here
-            // if the 25% fails, we start counting another 20 turns.
-            age = 0;
 
-            if (random.nextDouble() <= GROWTH_CHANCE) {
-                display.println(String.format(
-                        "Fleshy Tree Sprout ('%s') at %s grows into a Fleshy Sapling ('v')!",
-                        getDisplayChar(), location));
-                return new FleshySaplingStage(spawner);
-            } else {
-                display.println("Fleshy Sprout at " + location + " failed the 25% growth roll. Resetting counter.");
-            }
+        // aging/growing (only if not spawning)
+        if (incrementAgeAndCheckGrowth(location, GROWTH_THRESHOLD, GROWTH_CHANCE, "Fleshy Sprout")) {
+            display.println(String.format(
+                    "Fleshy Tree Sprout ('%s') at %s grows into a Fleshy Sapling ('v')!",
+                    getDisplayChar(), location));
+            return new FleshySaplingStage(spawner);
         }
         return this;
     }
