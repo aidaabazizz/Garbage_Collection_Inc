@@ -15,7 +15,6 @@ import game.teleportstrategies.TreeWarpStrategy;
 public class WarperSaplingStage extends AbstractTreeStage {
     private static final int GROWTH_THRESHOLD = 20;
     private static final double GROWTH_CHANCE = 0.25;
-    private int age = 0;
 
     /**
      * Executes the lifecycle logic for the Warper Sapling.
@@ -28,21 +27,12 @@ public class WarperSaplingStage extends AbstractTreeStage {
      */
     @Override
     public TreeStage execute(Location location, AbstractTree tree) {
-        age++;
-        display.println(String.format("Warper Sapling at %s current age: (%d/%d)",
-                location, age, GROWTH_THRESHOLD));
-        if (age >= GROWTH_THRESHOLD) {
-            age = 0;
-
-            if (random.nextDouble() <= GROWTH_CHANCE) {
-                display.println(String.format(
-                        "Warper Tree Sapling ('%s') at %s matures into a Warper Mature Tree ('W')!",
-                        getDisplayChar(), location));
-                var action = new TeleportAction(new TreeWarpStrategy());
-                return new WarperMatureStage(action);
-            } else {
-                display.println("Warper Sapling at " + location + " failed the 25% maturation roll. Resetting counter.");
-            }
+        if (incrementAgeAndCheckGrowth(location, GROWTH_THRESHOLD, GROWTH_CHANCE, "Warper Sapling")) {
+            display.println(String.format(
+                    "Warper Tree Sapling ('%s') at %s matures into a Warper Mature Tree ('W')!",
+                    getDisplayChar(), location));
+            var action = new TeleportAction(new TreeWarpStrategy());
+            return new WarperMatureStage(action);
         }
         return this;
     }
