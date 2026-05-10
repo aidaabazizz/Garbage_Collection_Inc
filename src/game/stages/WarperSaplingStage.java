@@ -1,8 +1,6 @@
 package game.stages;
 
 import edu.monash.fit2099.engine.positions.Location;
-import game.actions.TeleportAction;
-import game.grounds.AbstractTree;
 import game.teleportstrategies.TreeWarpStrategy;
 
 /**

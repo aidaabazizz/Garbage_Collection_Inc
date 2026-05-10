@@ -2,7 +2,6 @@ package game.stages;
 
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Location;
-import game.grounds.AbstractTree;
 import game.managers.Spawner;
 
 import java.util.List;

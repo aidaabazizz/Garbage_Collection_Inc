@@ -1,7 +1,6 @@
 package game.stages;
 
 import edu.monash.fit2099.engine.positions.Location;
-import game.grounds.AbstractTree;
 
 /**
  * An interface representing a specific stage in the lifecycle of a tree.

@@ -1,9 +1,9 @@
 package game.stages;
 
-import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Location;
-import game.grounds.AbstractTree;
+import game.actions.TeleportAction;
+import game.capabilities.TeleportStrategy;
 
 import java.util.List;
 
@@ -15,15 +15,16 @@ import java.util.List;
  * @author Jewell Gomes
  */
 public class WarperMatureStage extends AbstractTreeStage {
-    private final Action teleportBehavior;
+    private final TeleportStrategy strategy;
 
     /**
      * Constructor Injection.
-     * @param teleportBehavior The action that handles move logic and side effects.
+     * @param strategy The strategy defining how the tree warps workers.
      */
-    public WarperMatureStage(Action teleportBehavior) {
-        this.teleportBehavior = teleportBehavior;
+    public WarperMatureStage(TeleportStrategy strategy) {
+        this.strategy = strategy;
     }
+
 
     /**
      * Executes the behavior for the Mature Warper Tree.
@@ -31,14 +32,14 @@ public class WarperMatureStage extends AbstractTreeStage {
      * a TeleportAction and displays the resulting outcome.
      *
      * @param location The current location of the mature tree.
-     * @param tree The AbstractTree object this stage belongs to.
      * @return This stage instance (WarperMatureStage), as it is the final growth stage.
      */
     @Override
-    public TreeStage execute(Location location, AbstractTree tree) {
+    public TreeStage execute(Location location) {
         List<Actor> targets = getNearbyWorkers(location);
         for (Actor worker : targets) {
-            String result = teleportBehavior.execute(worker, location.map());
+            TeleportAction warpAction = new TeleportAction(strategy);
+            String result = warpAction.execute(worker, location.map());
             if (result != null && !result.isEmpty()) {
                 display.println(result);
             }
