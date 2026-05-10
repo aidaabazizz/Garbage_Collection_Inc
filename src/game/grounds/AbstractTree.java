@@ -40,7 +40,7 @@ public abstract class AbstractTree extends Ground {
      */
     @Override
     public void tick(Location location) {
-        this.stage = stage.execute(location, this);
+        this.stage = stage.execute(location);
     }
 
     /**
