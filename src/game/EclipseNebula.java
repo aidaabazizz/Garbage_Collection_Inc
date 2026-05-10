@@ -135,10 +135,13 @@ public class EclipseNebula extends World {
     private GameMap createOverflowMap() throws Exception {
         DefaultGroundCreator groundCreator = new DefaultGroundCreator();
         registerCommonGrounds(groundCreator);
+// 1. Create ONE instance of the spawner for this map
+        Spawner overflowSpawner = new CreatureSpawner();
 
         // REQ3 flora registration
-        groundCreator.registerGround('y', FleshyTree::new);
+        groundCreator.registerGround('y', () -> new FleshyTree(overflowSpawner));
         groundCreator.registerGround('w', WarperTree::new);
+
 
         // REQ 4: Spawner logic specific to 20-overflow
         groundCreator.registerGround('o', ParasiticHole::new);

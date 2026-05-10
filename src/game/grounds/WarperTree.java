@@ -16,6 +16,6 @@ public class WarperTree extends AbstractTree {
      * directly at the sapling stage.
      */
     public WarperTree() {
-        super('w', "Warper Tree", new WarperSaplingStage());
+        super("Warper Tree", new WarperSaplingStage());
     }
 }
