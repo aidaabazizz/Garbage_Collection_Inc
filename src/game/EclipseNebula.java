@@ -11,6 +11,8 @@ import game.finance.Wallet;
 import game.grounds.*;
 import game.inventory.WeightLimitedInventory;
 import game.items.*;
+import game.managers.CreatureSpawner;
+import game.managers.Spawner;
 
 import java.util.Arrays;
 import java.util.List;
@@ -140,8 +142,11 @@ public class EclipseNebula extends World {
         DefaultGroundCreator groundCreator = new DefaultGroundCreator();
         registerCommonGrounds(groundCreator);
 
+        // 1. Create ONE instance of the spawner for this map
+        Spawner overflowSpawner = new CreatureSpawner();
+
         // REQ3 flora registration
-        groundCreator.registerGround('y', FleshyTree::new);
+        groundCreator.registerGround('y', () -> new FleshyTree(overflowSpawner));
         groundCreator.registerGround('w', WarperTree::new);
 
         // REQ4

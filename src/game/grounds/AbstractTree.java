@@ -13,15 +13,15 @@ import game.stages.TreeStage;
  *
  * @author Jewell Gomes
  */
-public class AbstractTree extends Ground {
+public abstract class AbstractTree extends Ground {
     private TreeStage stage;
 
     /**
      * This method initializes the tree with a starting character and
      * name and sets the first stage of its lifecycle.
      */
-    public AbstractTree(char displayChar, String name, TreeStage initialStage) {
-        super(displayChar, name);
+    public AbstractTree(String name, TreeStage initialStage) {
+        super(initialStage.getDisplayChar(), name);
         this.stage = initialStage;
     }
 
