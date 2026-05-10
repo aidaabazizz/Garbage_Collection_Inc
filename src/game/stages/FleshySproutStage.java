@@ -2,7 +2,6 @@ package game.stages;
 
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Location;
-import game.grounds.AbstractTree;
 import game.managers.Spawner;
 
 import java.util.List;
@@ -32,7 +31,7 @@ public class FleshySproutStage extends FleshyTreeStage {
      * a chance to mature into a fleshy sapling stage.
      */
     @Override
-    public TreeStage execute(Location location, AbstractTree tree) {
+    public TreeStage execute(Location location) {
         List<Actor> targets = getNearbyWorkers(location);
 
         if (!targets.isEmpty()) {

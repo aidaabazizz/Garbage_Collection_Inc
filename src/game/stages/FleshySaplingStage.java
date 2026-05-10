@@ -1,7 +1,6 @@
 package game.stages;
 
 import edu.monash.fit2099.engine.positions.Location;
-import game.grounds.AbstractTree;
 import game.managers.Spawner;
 
 /**
@@ -27,7 +26,7 @@ public class FleshySaplingStage extends FleshyTreeStage {
      * chance to mature into a fleshy mature tree.
      */
     @Override
-    public TreeStage execute(Location location, AbstractTree tree) {
+    public TreeStage execute(Location location) {
         if (incrementAgeAndCheckGrowth(location, GROWTH_THRESHOLD, GROWTH_CHANCE, "Fleshy Sapling")) {
             display.println(String.format(
                     "Fleshy Tree Sapling ('%s') at %s matures into a Fleshy Mature Tree ('Y')!",

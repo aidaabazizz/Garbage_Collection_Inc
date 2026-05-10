@@ -1,8 +1,6 @@
 package game.stages;
 
 import edu.monash.fit2099.engine.positions.Location;
-import game.actions.TeleportAction;
-import game.grounds.AbstractTree;
 import game.teleportstrategies.TreeWarpStrategy;
 
 /**
@@ -22,17 +20,15 @@ public class WarperSaplingStage extends AbstractTreeStage {
      * to determine if the tree matures into the next stage.
      *
      * @param location The current location of the tree on the map.
-     * @param tree The AbstractTree object this stage belongs to.
      * @return A new WarperMatureStage if maturation occurs; otherwise, this instance.
      */
     @Override
-    public TreeStage execute(Location location, AbstractTree tree) {
+    public TreeStage execute(Location location) {
         if (incrementAgeAndCheckGrowth(location, GROWTH_THRESHOLD, GROWTH_CHANCE, "Warper Sapling")) {
             display.println(String.format(
                     "Warper Tree Sapling ('%s') at %s matures into a Warper Mature Tree ('W')!",
                     getDisplayChar(), location));
-            var action = new TeleportAction(new TreeWarpStrategy());
-            return new WarperMatureStage(action);
+            return new WarperMatureStage(new TreeWarpStrategy());
         }
         return this;
     }

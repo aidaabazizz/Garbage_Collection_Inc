@@ -2,7 +2,6 @@ package game.stages;
 
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Location;
-import game.grounds.AbstractTree;
 import game.managers.Spawner;
 
 import java.util.List;
@@ -26,7 +25,7 @@ public class FleshyMatureStage extends FleshyTreeStage {
      * always returns itself to remain in the mature state.
      */
     @Override
-    public TreeStage execute(Location location, AbstractTree tree) {
+    public TreeStage execute(Location location) {
         List<Actor> targets = getNearbyWorkers(location);
         if (!targets.isEmpty()) {
             display.println("Fleshy Mature Tree at " + location + " is producing Undead!");
