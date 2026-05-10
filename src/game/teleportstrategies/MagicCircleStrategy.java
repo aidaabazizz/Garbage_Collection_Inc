@@ -34,7 +34,7 @@ public class MagicCircleStrategy implements TeleportStrategy {
     public Location getDestination(Actor actor, GameMap map) {
         List<Location> otherCircles = new ArrayList<>();
         Location currentLocation = map.locationOf(actor);
-
+        // This will scan the map for other magic circles
         for (int x: map.getXRange()) {
             for (int y: map.getYRange()) {
                 Location loc = map.at(x,y);
