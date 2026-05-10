@@ -26,7 +26,7 @@ public class FleshyMatureStage extends FleshyTreeStage {
      * always returns itself to remain in the mature state.
      */
     @Override
-    public TreeStage execute(Location location, AbstractTree tree) {
+    public TreeStage execute(Location location) {
         List<Actor> targets = getNearbyWorkers(location);
         if (!targets.isEmpty()) {
             display.println("Fleshy Mature Tree at " + location + " is producing Undead!");

@@ -19,12 +19,11 @@ public interface TreeStage {
      * and determining if the tree should mature into a new stage.
      *
      * @param location The current location of the tree ground object.
-     * @param tree The AbstractTree instance that is currently in this stage.
      * @return The next stage of the tree. This could be a new instance
      *         (e.g., transitioning from Sapling to Mature) or 'this' to
      *         remain in the current stage.
      */
-    TreeStage execute(Location location, AbstractTree tree);
+    TreeStage execute(Location location);
     /**
      * Provides the visual representation of the tree for its current lifecycle stage.
      *

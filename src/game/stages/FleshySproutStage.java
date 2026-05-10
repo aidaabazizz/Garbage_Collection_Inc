@@ -32,7 +32,7 @@ public class FleshySproutStage extends FleshyTreeStage {
      * a chance to mature into a fleshy sapling stage.
      */
     @Override
-    public TreeStage execute(Location location, AbstractTree tree) {
+    public TreeStage execute(Location location) {
         List<Actor> targets = getNearbyWorkers(location);
 
         if (!targets.isEmpty()) {
