@@ -18,7 +18,6 @@ public class AlienCube extends Item implements Sellable {
 
     private static final int SELL_PRICE = 25;
     private static final int NUM_OPTIONS = 3;
-    private boolean used = false;
 
     public AlienCube() {
         super("Alien Cube", '◈');
