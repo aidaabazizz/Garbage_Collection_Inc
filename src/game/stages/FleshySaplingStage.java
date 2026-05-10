@@ -15,7 +15,6 @@ import game.managers.Spawner;
 public class FleshySaplingStage extends FleshyTreeStage {
     private static final int GROWTH_THRESHOLD = 25;
     private static final double GROWTH_CHANCE = 0.50;
-    private int age = 0;
     /**
      * Constructor for the Sapling stage.
      * @param spawner The spawning manager to be passed forward to the mature stage.
@@ -29,23 +28,13 @@ public class FleshySaplingStage extends FleshyTreeStage {
      */
     @Override
     public TreeStage execute(Location location, AbstractTree tree) {
-        age++;
-        display.println(String.format("Fleshy Sapling at %s current age: (%d/%d)",
-                location, age, GROWTH_THRESHOLD));
-        if (age >= GROWTH_THRESHOLD) {
-            // reset the age here when the 50% fails, we wait another 25 turns before trying again
-            age = 0;
-
-            if (random.nextDouble() <= GROWTH_CHANCE) {
-                display.println(String.format(
-                        "Fleshy Tree Sapling ('%s') at %s matures into a Fleshy Mature Tree ('Y')!",
-                        getDisplayChar(),
-                        location.toString()
-                ));
-                return new FleshyMatureStage(spawner);
-            } else {
-                display.println("Fleshy Sapling at " + location + " failed the 50% maturation roll. Resetting counter.");
-            }
+        if (incrementAgeAndCheckGrowth(location, GROWTH_THRESHOLD, GROWTH_CHANCE, "Fleshy Sapling")) {
+            display.println(String.format(
+                    "Fleshy Tree Sapling ('%s') at %s matures into a Fleshy Mature Tree ('Y')!",
+                    getDisplayChar(),
+                    location.toString()
+            ));
+            return new FleshyMatureStage(spawner);
         }
         return this;
     }
