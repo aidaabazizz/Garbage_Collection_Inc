@@ -39,5 +39,6 @@ public class Slime extends NonPlayerCharacter implements Hypnotizable {
     public void hypnotize(int duration) {
         this.addStatus(new HypnotizedStatus(duration));
     }
+
 }
 
