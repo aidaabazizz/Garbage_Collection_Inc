@@ -1,7 +1,7 @@
 package game.stages;
 
 import edu.monash.fit2099.engine.positions.Location;
-import game.grounds.AbstractTree;
+import game.managers.Spawner;
 
 /**
  * This class represents the fleshy sapling stage which is the second phase
@@ -11,11 +11,14 @@ import game.grounds.AbstractTree;
  *
  * @author Jewell Gomes
  */
-public class FleshySaplingStage extends AbstractTreeStage {
+public class FleshySaplingStage extends FleshyTreeStage {
     private static final int GROWTH_THRESHOLD = 25;
     private static final double GROWTH_CHANCE = 0.50;
-    private int age = 0;
-
+    /**
+     * Constructor for the Sapling stage.
+     * @param spawner The spawning manager to be passed forward to the mature stage.
+     */
+    public FleshySaplingStage(Spawner spawner) { super(spawner); }
     /**
      * The execute method is called every turn to process the behavior of
      * the sapling. It adds one to the age and checks if the maturation
@@ -23,20 +26,14 @@ public class FleshySaplingStage extends AbstractTreeStage {
      * chance to mature into a fleshy mature tree.
      */
     @Override
-    public TreeStage execute(Location location, AbstractTree tree) {
-        age++;
-        if (age >= GROWTH_THRESHOLD) {
-            // reset the age here when the 50% fails, we wait another 25 turns before trying again
-            age = 0;
-
-            if (random.nextDouble() <= GROWTH_CHANCE) {
-                display.println(String.format(
-                        "Fleshy Tree Sapling ('%s') at %s matures into a Fleshy Mature Tree ('Y')!",
-                        getDisplayChar(),
-                        location.toString()
-                ));
-                return new FleshyMatureStage();
-            }
+    public TreeStage execute(Location location) {
+        if (incrementAgeAndCheckGrowth(location, GROWTH_THRESHOLD, GROWTH_CHANCE, "Fleshy Sapling")) {
+            display.println(String.format(
+                    "Fleshy Tree Sapling ('%s') at %s matures into a Fleshy Mature Tree ('Y')!",
+                    getDisplayChar(),
+                    location.toString()
+            ));
+            return new FleshyMatureStage(spawner);
         }
         return this;
     }

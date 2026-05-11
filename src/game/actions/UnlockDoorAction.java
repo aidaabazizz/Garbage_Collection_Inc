@@ -42,7 +42,8 @@ public class UnlockDoorAction extends Action {
     @Override
     public String execute(Actor actor, GameMap map) {
         target.unlock();
-        return actor + " swipes the card and unlocks the door to the " + direction;
+        String unlockEffect = target.applyUnlockEffect(actor, map);
+        return actor + " swipes the card and unlocks the door to the " + direction + ". " + unlockEffect;
     }
 
     /**

@@ -8,12 +8,9 @@ import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.StatisticOperations;
-import game.actors.Parasite;
-import game.actors.Slime;
-import game.actors.Undead;
+import game.actors.*;
 import game.capabilities.DisorientedStatus;
 import game.enums.Ability;
-import game.actors.CrazyChicken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +102,9 @@ public class CreatureSpawner implements Spawner {
             if (count > 0) {
                 undead.modifyStatisticMaximum(ActorStatistics.HEALTH, StatisticOperations.INCREASE, count);
                 undead.heal(count);
-                display.println("!!! An Undead spawned at " + spot + " with a +" + count + " HP bonus !!!");
+                int newMaxHealth = undead.getStatistic(ActorStatistics.HEALTH);
+                display.println(String.format("!!! %s at %s has evolved! Nearby lifeforms increased its Max HP by %d. New Max Health: %d !!!",
+                        undead, spot, count, newMaxHealth));
             }
 
             spot.addActor(undead);
@@ -155,7 +154,7 @@ public class CreatureSpawner implements Spawner {
 
         try {
             spot.addActor(new CrazyChicken());
-            display.println("🐔 A CrazyChicken has emerged at " + spot + "! BUK BUK BUK!");
+            display.println("A CrazyChicken has emerged at " + spot + "! BUK BUK BUK!");
 
             // Adjacent workers become disoriented (matches the Slime/Parasite pattern)
             for (Exit exit : spot.getExits()) {
@@ -164,6 +163,27 @@ public class CreatureSpawner implements Spawner {
                     Actor worker = adj.getActor();
                     worker.addStatus(new DisorientedStatus(3));
                     display.println(">>> " + worker + " is disoriented by the CrazyChicken!");
+                }
+            }
+            return true;
+        } catch (GameEngineException e) {
+            return false;
+        }
+    }
+    // Add to CreatureSpawner.java
+    @Override
+    public boolean spawnElsa(Location center) {
+        Location spot = getSpawnLocation(center);
+        if (spot == null) return false;
+
+        try {
+            spot.addActor(new Elsa());
+            display.println("Elsa has emerged at " + spot + "! The air grows cold...");
+
+            for (Exit exit : spot.getExits()) {
+                Location adj = exit.getDestination();
+                if (adj.containsAnActor()) {
+                    display.println(">>> " + adj.getActor() + " feels a sudden chill!");
                 }
             }
             return true;
