@@ -6,7 +6,7 @@ import java.util.Optional;
 //req4
 public class InfectionStatus extends DamageOverTimeStatus {
     public InfectionStatus() {
-        super("Infected", Integer.MAX_VALUE);//double check?
+        super("Infection", Integer.MAX_VALUE);//double check?
     }
 
     @Override
@@ -21,5 +21,10 @@ public class InfectionStatus extends DamageOverTimeStatus {
             Infectable host = maybeHost.get();
             host.updateInfection(location);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Infection";
     }
 }
