@@ -57,9 +57,12 @@ public class EclipseNebula extends World {
      * @throws Exception if map creation or entity placement fails during initialization
      */
     public void initialise() throws Exception {
+        // Create a SINGLE shared instance of the Creature Spawner
+        Spawner globalSpawner = new CreatureSpawner();
+
         // 1. Create the Map instances
-        GameMap moonMap = createMoonMap();
-        GameMap overflowMap = createOverflowMap();
+        GameMap moonMap = createMoonMap(globalSpawner);
+        GameMap overflowMap = createOverflowMap(globalSpawner);
 
         // 2. Add maps to the world
         this.addGameMap(moonMap);
@@ -118,22 +121,19 @@ public class EclipseNebula extends World {
     /**
      * Creates and configures the "99-Deprecated" moon map.
      *
+     * @param spawner the spawning service used to handle creature creation and environmental side effects.
      * @return a configured GameMap instance representing the moon facility
      * @throws Exception if the map strings are invalid or ground registration fails
      */
-    private GameMap createMoonMap() throws Exception {
+    private GameMap createMoonMap(Spawner spawner) throws Exception {
         DefaultGroundCreator groundCreator = new DefaultGroundCreator();
         registerCommonGrounds(groundCreator);
 
-        // 1. Create ONE instance of the spawner for this map
-        Spawner deprecatedSpawner = new CreatureSpawner();
-
         // REQ4: Hole in 99-Deprecated spawns Undead and Slimes.
-        groundCreator.registerGround('o', () -> new StandardHole(deprecatedSpawner));
-
+        groundCreator.registerGround('o', () -> new StandardHole(spawner));
 
         // REQ4: Vents should be on both maps.
-        groundCreator.registerGround('V', () -> new Vent(deprecatedSpawner));
+        groundCreator.registerGround('V', () -> new Vent(spawner));
 
         List<String> moonStrings = Arrays.asList(
                 "....................########################################",
@@ -163,23 +163,21 @@ public class EclipseNebula extends World {
     /**
      * Creates and configures the "20-overflow" factory complex map.
      *
+     * @param spawner the spawning service used to handle creature creation and environmental side effects.
      * @return a configured GameMap instance representing the factory moon
      * @throws Exception if the map strings are invalid or ground registration fails
      */
-    private GameMap createOverflowMap() throws Exception {
+    private GameMap createOverflowMap(Spawner spawner) throws Exception {
         DefaultGroundCreator groundCreator = new DefaultGroundCreator();
         registerCommonGrounds(groundCreator);
 
-        // 1. Create ONE instance of the spawner for this map
-        Spawner overflowSpawner = new CreatureSpawner();
-
         // REQ3 flora registration
-        groundCreator.registerGround('y', () -> new FleshyTree(overflowSpawner));
+        groundCreator.registerGround('y', () -> new FleshyTree(spawner));
         groundCreator.registerGround('w', WarperTree::new);
 
         // REQ 4: Spawner logic specific to 20-overflow
-        groundCreator.registerGround('o', () -> new ParasiticHole(overflowSpawner));
-        groundCreator.registerGround('V', () -> new Vent(overflowSpawner));
+        groundCreator.registerGround('o', () -> new ParasiticHole(spawner));
+        groundCreator.registerGround('V', () -> new Vent(spawner));
 
         List<String> overflowStrings = Arrays.asList(
                 "......y..............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
