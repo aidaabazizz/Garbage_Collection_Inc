@@ -31,6 +31,8 @@ public interface Spawner {
      * @return true if spawn was successful, false otherwise
      */
     boolean spawnCrazyChicken(Location center);
+    
+    boolean spawnElsa(Location center);
 }
 
 

@@ -10,10 +10,8 @@ import edu.monash.fit2099.engine.displays.Menu;
 import edu.monash.fit2099.engine.items.Inventory;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.capabilities.Infectable;
-import game.capabilities.InfectionStatus;
+import game.capabilities.*;
 import game.enums.Ability;
-import game.capabilities.UpdateNotifier;
 import game.managers.AlarmManager;
 import edu.monash.fit2099.engine.items.Item;
 import game.finance.Wallet;
@@ -29,7 +27,7 @@ import game.managers.CreatureSpawner;
  * @author Jewell Gomes
  * @author Chathya Attanayake (Modified by)
  */
-public class ContractedWorker extends Actor implements Infectable {
+public class ContractedWorker extends Actor implements Infectable, Freezable, Disorientable {
     private int spawnCounter = 0;
     private static final int SPAWN_THRESHOLD = 5;
 
@@ -116,6 +114,16 @@ public class ContractedWorker extends Actor implements Infectable {
             // find the adjacent empty tile for the Parasite.
             new CreatureSpawner().spawnParasite(location);
         }
+    }
+
+    @Override
+    public void freeze(int duration) {
+        this.addStatus(new FrozenStatus(duration));
+    }
+
+    @Override
+    public void disorient(int duration) {
+        this.addStatus(new BlizzardDisorientationStatus(duration));
     }
 
 

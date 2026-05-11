@@ -1,3 +1,4 @@
+// game/states/WanderState.java (updated)
 package game.states;
 
 import edu.monash.fit2099.engine.actions.Action;
@@ -6,21 +7,16 @@ import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.WanderBehaviour;
+import game.capabilities.Consumable;
 import game.enums.Ability;
 import game.enums.ChickenState;
 
 /**
  * WANDER STATE for CrazyChicken.
- * The chicken wanders aimlessly around the map.
- *
- * Transitions to:
- * - MIMICKING: if worker within 5 tiles
- * - HUNGRY: if worker with consumable within 10 tiles AND not within 5 tiles (mimicking prioritized)
- * - stays WANDER: otherwise
  *
  * @author Aida
  */
-public class WanderState implements State {
+public class WanderingChicken implements State<ChickenState> {
     private final WanderBehaviour wanderBehaviour = new WanderBehaviour();
     private static final int MIMIC_TRIGGER_DISTANCE = 5;
     private static final int HUNGRY_TRIGGER_DISTANCE = 10;
@@ -33,9 +29,6 @@ public class WanderState implements State {
     @Override
     public ChickenState getNextState(Actor actor, Location location, int turnsInCurrentState) {
         GameMap map = location.map();
-        Location myLoc = location;
-
-        // Check for workers within MIMIC distance (5 tiles)
         boolean hasNearbyWorker = false;
         boolean hasWorkerWithConsumable = false;
 
@@ -45,7 +38,7 @@ public class WanderState implements State {
                 if (checkLoc.containsAnActor()) {
                     Actor target = checkLoc.getActor();
                     if (target.hasAbility(Ability.WORKER)) {
-                        int dist = Math.abs(checkLoc.x() - myLoc.x()) + Math.abs(checkLoc.y() - myLoc.y());
+                        int dist = Math.abs(checkLoc.x() - location.x()) + Math.abs(checkLoc.y() - location.y());
                         if (dist <= MIMIC_TRIGGER_DISTANCE) {
                             hasNearbyWorker = true;
                         }
@@ -57,7 +50,6 @@ public class WanderState implements State {
             }
         }
 
-        // Prioritize MIMICKING over HUNGRY (as per requirements)
         if (hasNearbyWorker) {
             return ChickenState.MIMICKING;
         }
@@ -71,9 +63,7 @@ public class WanderState implements State {
 
     private boolean hasConsumableInInventory(Actor actor) {
         for (Item item : actor.getInventory().getItems()) {
-            String name = item.toString().toLowerCase();
-            if (name.contains("apple") || name.contains("cookie") ||
-                    name.contains("flask") || name.contains("first aid")) {
+            if (item.asCapability(Consumable.class).isPresent()) {
                 return true;
             }
         }
@@ -82,7 +72,7 @@ public class WanderState implements State {
 
     @Override
     public void onEnter(Actor actor, Location location) {
-        // No immediate effect when entering wander state
+        // No immediate effect
     }
 
     @Override
@@ -92,6 +82,6 @@ public class WanderState implements State {
 
     @Override
     public String getStateName() {
-        return "WANDERING";
+        return "WANDER";
     }
 }
