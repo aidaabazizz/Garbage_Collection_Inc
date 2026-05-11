@@ -17,7 +17,7 @@ public class InfectAction extends Action {
     public String execute(Actor actor, GameMap map) {
         target.reactToInfection(map.locationOf(actor));
         map.removeActor(actor); // Parasite dies immediately
-        return actor + " has infected a host and perished.";
+        return actor + " has infected " + target + " and perished.";
     }
 
     @Override
