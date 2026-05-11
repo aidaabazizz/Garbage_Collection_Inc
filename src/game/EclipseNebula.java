@@ -125,11 +125,15 @@ public class EclipseNebula extends World {
         DefaultGroundCreator groundCreator = new DefaultGroundCreator();
         registerCommonGrounds(groundCreator);
 
+        // 1. Create ONE instance of the spawner for this map
+        Spawner deprecatedSpawner = new CreatureSpawner();
+
         // REQ4: Hole in 99-Deprecated spawns Undead and Slimes.
-        groundCreator.registerGround('o', StandardHole::new);
+        groundCreator.registerGround('o', () -> new StandardHole(deprecatedSpawner));
+
 
         // REQ4: Vents should be on both maps.
-        groundCreator.registerGround('V', Vent::new);
+        groundCreator.registerGround('V', () -> new Vent(deprecatedSpawner));
 
         List<String> moonStrings = Arrays.asList(
                 "....................########################################",
@@ -174,8 +178,8 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('w', WarperTree::new);
 
         // REQ 4: Spawner logic specific to 20-overflow
-        groundCreator.registerGround('o', ParasiticHole::new);
-        groundCreator.registerGround('V', Vent::new);
+        groundCreator.registerGround('o', () -> new ParasiticHole(overflowSpawner));
+        groundCreator.registerGround('V', () -> new Vent(overflowSpawner));
 
         List<String> overflowStrings = Arrays.asList(
                 "......y..............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
