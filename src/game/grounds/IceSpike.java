@@ -3,6 +3,7 @@ package game.grounds;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
+import game.capabilities.IceSpikeCapability;
 
 /**
  * A temporary ground type created by Elsa's Ice Spike state.
@@ -10,7 +11,7 @@ import edu.monash.fit2099.engine.positions.Location;
  *
  * @author Aida
  */
-public class IceSpike extends Ground {
+public class IceSpike extends Ground implements IceSpikeCapability {
     private int turnsRemaining = 3;
     private final Ground originalGround;
 
