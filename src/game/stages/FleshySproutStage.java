@@ -3,6 +3,7 @@ package game.stages;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Location;
 import game.managers.Spawner;
+import game.utils.SpatialSearch;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class FleshySproutStage extends FleshyTreeStage {
      */
     @Override
     public TreeStage execute(Location location) {
-        List<Actor> targets = getNearbyWorkers(location);
+        List<Actor> targets = SpatialSearch.getNearbyWorkers(location);
 
         if (!targets.isEmpty()) {
             display.println(String.format("Fleshy Sprout at %s current age: (%d/%d)",
