@@ -1,4 +1,4 @@
-// game/states/ElsaWanderingState.java
+// game/states/WanderingElsa.java
 package game.states;
 
 import edu.monash.fit2099.engine.actions.Action;
@@ -7,11 +7,8 @@ import edu.monash.fit2099.engine.actors.ActorStatistics;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.WanderBehaviour;
-import game.capabilities.Hypnotizable;
-import game.enums.Ability;
 import game.enums.ElsaState;
-
-import java.util.Optional;
+import game.utils.SpatialSearch;
 
 /**
  * WANDERING STATE for Elsa.
@@ -33,33 +30,10 @@ public class WanderingElsa implements State<ElsaState> {
     @Override
     public ElsaState getNextState(Actor actor, Location location, int turnsInCurrentState) {
         GameMap map = location.map();
-        int workerCount = 0;
-        boolean hasNearbyWorker = false;
-        boolean hasNearbySlime = false;
 
-        for (int y : map.getYRange()) {
-            for (int x : map.getXRange()) {
-                Location checkLoc = map.at(x, y);
-                if (checkLoc.containsAnActor()) {
-                    Actor target = checkLoc.getActor();
-                    int dist = Math.abs(x - location.x()) + Math.abs(y - location.y());
-
-                    if (target.hasAbility(Ability.WORKER)) {
-                        workerCount++;
-                        if (dist <= FREEZE_DISTANCE) {
-                            hasNearbyWorker = true;
-                        }
-                    }
-
-                    if (dist <= SLIME_DISTANCE) {
-                        Optional<Hypnotizable> hypnotizable = target.asCapability(Hypnotizable.class);
-                        if (hypnotizable.isPresent()) {
-                            hasNearbySlime = true;
-                        }
-                    }
-                }
-            }
-        }
+        int workerCount = SpatialSearch.countAllWorkers(map);
+        boolean hasNearbyWorker = SpatialSearch.hasWorkerWithinDistance(map, location, FREEZE_DISTANCE);
+        boolean hasNearbySlime = SpatialSearch.hasHypnotizableWithinDistance(map, location, SLIME_DISTANCE);
 
         int maxHealth = actor.getMaximumStatistic(ActorStatistics.HEALTH);
         int currentHealth = actor.getStatistic(ActorStatistics.HEALTH);
