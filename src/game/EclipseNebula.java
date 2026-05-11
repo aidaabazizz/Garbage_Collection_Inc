@@ -13,6 +13,8 @@ import game.doors.TitaniumDoor;
 import game.enums.AccessLevel;
 import game.finance.Wallet;
 import game.grounds.*;
+import game.holestrategies.ParasiticHoleStrategy;
+import game.holestrategies.StandardHoleStrategy;
 import game.inventory.WeightLimitedInventory;
 import game.items.*;
 import game.managers.CreatureSpawner;
@@ -133,7 +135,8 @@ public class EclipseNebula extends World {
         registerCommonGrounds(groundCreator);
 
         // REQ4: Hole in 99-Deprecated spawns Undead and Slimes.
-        groundCreator.registerGround('o', () -> new StandardHole(spawner));
+        groundCreator.registerGround('o', () -> new Hole(new StandardHoleStrategy(), spawner));
+        //groundCreator.registerGround('o', () -> new StandardHole(spawner));
 
         // REQ4: Vents should be on both maps.
         groundCreator.registerGround('V', () -> new Vent(spawner));
@@ -179,7 +182,8 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('w', WarperTree::new);
 
         // REQ 4: Spawner logic specific to 20-overflow
-        groundCreator.registerGround('o', () -> new ParasiticHole(spawner));
+        //groundCreator.registerGround('o', () -> new ParasiticHole(spawner));
+        groundCreator.registerGround('o', () -> new Hole(new ParasiticHoleStrategy(), spawner));
         groundCreator.registerGround('V', () -> new Vent(spawner));
 
         List<String> overflowStrings = Arrays.asList(

@@ -17,4 +17,7 @@ public class StandardHoleStrategy implements HoleSpawnStrategy {
             return spawner.spawnSlime(location);
         }
     }
+
+    @Override
+    public HoleSpawnStrategy cloneStrategy() { return new StandardHoleStrategy(); }
 }
