@@ -11,6 +11,7 @@ import edu.monash.fit2099.engine.statistics.StatisticOperations;
 import game.actors.*;
 import game.capabilities.DisorientedStatus;
 import game.enums.Ability;
+import game.utils.SpatialSearch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,27 +57,20 @@ public class CreatureSpawner implements Spawner {
         Location spot = getSpawnLocation(center);
         if (spot == null) return false;
         display.println("!!! A Slime has emerged at " + spot + " !!!");
-
         try {
             spot.addActor(new Slime());
-            // REACTION: Adjacent workers drop all items
-            for (Exit exit : spot.getExits()) {
-                Location adj = exit.getDestination();
-                if (adj.containsAnActor() && adj.getActor().hasAbility(Ability.WORKER)) {
-                    Actor worker = adj.getActor();
-                    display.println(">>> " + worker + " is terrified and dropped all items!");
-                    List<Item> items = new ArrayList<>(worker.getInventory().getItems());
-                    for (Item item : items) {
-                        worker.getInventory().remove(item);
-                        adj.addItem(item);
-                    }
-                }
+
+            // USE THE UTILITY: Get all nearby workers
+            List<Actor> targets = SpatialSearch.getNearbyWorkers(spot);
+
+            for (Actor worker : targets) {
+                display.println(">>> " + worker + " is terrified and dropped all items!");
+                dropItems(worker, spot.map().locationOf(worker));
             }
             return true;
-        } catch (GameEngineException e) {
-            return false;
-        }
+        } catch (Exception e) { return false; }
     }
+
 
     /**
      * This method creates an undead creature. It gives the undead a
@@ -90,15 +84,8 @@ public class CreatureSpawner implements Spawner {
 
         try {
             Undead undead = new Undead();
-            // REACTION: Max HP bonus (+1 for every adjacent creature)
-            // Replaced Lambda/Stream with a standard for-loop
-            int count = 0;
-            for (Exit exit : spot.getExits()) {
-                if (exit.getDestination().containsAnActor()) {
-                    count++;
-                }
-            }
-
+            List<Actor> nearbyCreatures = SpatialSearch.getNearbyActors(spot);
+            int count = nearbyCreatures.size();
             if (count > 0) {
                 undead.modifyStatisticMaximum(ActorStatistics.HEALTH, StatisticOperations.INCREASE, count);
                 undead.heal(count);
@@ -133,6 +120,14 @@ public class CreatureSpawner implements Spawner {
             return true;
         } catch (GameEngineException e) {
             return false;
+        }
+    }
+
+    private void dropItems(Actor actor, Location location) {
+        List<Item> inventoryCopy = new ArrayList<>(actor.getInventory().getItems());
+        for (Item item : inventoryCopy) {
+            actor.getInventory().remove(item);
+            location.addItem(item);
         }
     }
 
