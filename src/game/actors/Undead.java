@@ -44,7 +44,12 @@ public class Undead extends NonPlayerCharacter implements Infectable {
 
     @Override
     public void reactToInfection(Location location) {
-        this.hurt(INSTANT_DEATH_DAMAGE); // Instantly blows up
+
+        this.hurt(INSTANT_DEATH_DAMAGE);// Instantly blows up
+
+        // Remove from map immediately as it is dead
+        location.map().removeActor(this);
+
     }
 
 
