@@ -6,6 +6,7 @@ import game.enums.Ability;
 import game.capabilities.PoisonStatus;
 import game.managers.CreatureSpawner;
 import game.managers.Spawner;
+import game.utils.SpatialSearch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class Vent extends Ground {
     @Override
     public void tick(Location location) {
         // REQ4 Clarification: No cooldown. Triggers if Worker is adjacent.
-        if (isWorkerAdjacent(location) && !location.containsAnActor()) {
+        if (!SpatialSearch.getNearbyWorkers(location).isEmpty() && !location.containsAnActor()) {
             if (rand.nextBoolean()) spawner.spawnParasite(location);
             else spawner.spawnSlime(location);
 
