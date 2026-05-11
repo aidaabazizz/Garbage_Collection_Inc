@@ -24,22 +24,6 @@ public abstract class AbstractTreeStage implements TreeStage {
     private int age = 0;
 
     /**
-     * Identifies all nearby workers in the surrounding eight tiles.
-     * @param location The current location of the flora.
-     * @return The detected workers.
-     */
-    protected List<Actor> getNearbyWorkers(Location location) {
-        List<Actor> workers = new ArrayList<>();
-        for (Exit exit : location.getExits()) {
-            Location adj = exit.getDestination();
-            if (adj.containsAnActor() && adj.getActor().hasAbility(Ability.WORKER)) {
-                workers.add(adj.getActor());
-            }
-        }
-        return workers;
-    }
-
-    /**
      * Shared logic for aging and growth checks.
      * @return true if the tree successfully meets the criteria to grow.
      */
