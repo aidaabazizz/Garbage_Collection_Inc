@@ -5,6 +5,8 @@ import edu.monash.fit2099.engine.positions.*;
 import game.enums.Ability;
 import game.capabilities.PoisonStatus;
 import game.managers.CreatureSpawner;
+import game.managers.Spawner;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,14 +14,17 @@ import java.util.Random;
 public class Vent extends Ground {
     private final Random rand = new Random();
     private static final int POISON_DURATION = 5;
+    private final Spawner spawner;
 
-    public Vent() { super('V', "Vent"); }
+    public Vent(Spawner spawner) {
+        super('V', "Vent");
+        this.spawner = spawner;
+    }
 
     @Override
     public void tick(Location location) {
         // REQ4 Clarification: No cooldown. Triggers if Worker is adjacent.
         if (isWorkerAdjacent(location) && !location.containsAnActor()) {
-            CreatureSpawner spawner = new CreatureSpawner();
             if (rand.nextBoolean()) spawner.spawnParasite(location);
             else spawner.spawnSlime(location);
 

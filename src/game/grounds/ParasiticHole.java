@@ -1,9 +1,10 @@
 package game.grounds;
 
 import game.holestrategies.ParasiticHoleStrategy;
+import game.managers.Spawner;
 
 public class ParasiticHole extends Hole {
-    public ParasiticHole() {
-        super(new ParasiticHoleStrategy()); // Spawns Undead/Parasite
+    public ParasiticHole(Spawner spawner) {
+        super(new ParasiticHoleStrategy(),spawner); // Spawns Undead/Parasite
     }
 }

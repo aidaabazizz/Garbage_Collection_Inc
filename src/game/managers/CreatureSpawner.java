@@ -46,6 +46,11 @@ public class CreatureSpawner implements Spawner {
         return null;
     }
 
+    /**
+     * This method creates a slime. When a slime emerges it causes nearby
+     * workers to become terrified and drop every item in their inventory
+     * onto the ground.
+     */
     @Override
     public boolean spawnSlime(Location center) {
         Location spot = getSpawnLocation(center);
@@ -73,6 +78,11 @@ public class CreatureSpawner implements Spawner {
         }
     }
 
+    /**
+     * This method creates an undead creature. It gives the undead a
+     * health bonus based on the number of other creatures already
+     * standing in the surrounding tiles.
+     */
     @Override
     public boolean spawnUndead(Location center) {
         Location spot = getSpawnLocation(center);
@@ -92,7 +102,9 @@ public class CreatureSpawner implements Spawner {
             if (count > 0) {
                 undead.modifyStatisticMaximum(ActorStatistics.HEALTH, StatisticOperations.INCREASE, count);
                 undead.heal(count);
-                display.println("!!! An Undead spawned at " + spot + " with a +" + count + " HP bonus !!!");
+                int newMaxHealth = undead.getStatistic(ActorStatistics.HEALTH);
+                display.println(String.format("!!! %s at %s has evolved! Nearby lifeforms increased its Max HP by %d. New Max Health: %d !!!",
+                        undead, spot, count, newMaxHealth));
             }
 
             spot.addActor(undead);

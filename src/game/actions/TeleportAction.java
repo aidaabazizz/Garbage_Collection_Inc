@@ -41,9 +41,18 @@ public class TeleportAction extends Action {
         Location source = map.locationOf(actor);
         Location destination = strategy.getDestination(actor, map);
 
-        if (destination == null) {
-            return actor + " cancels teleportation.";
+        if (destination == source) {
+            return actor + " is already at that location!";
         }
+
+        if (destination == null) {
+            return "No valid teleport location found!";
+        }
+
+        if (destination.containsAnActor()) {
+            return "Destination is occupied by " + destination.getActor() + "! Cannot teleport.";
+        }
+
         map.moveActor(actor, destination);
         strategy.applySideEffects(actor, source, destination, map);
         return actor + " teleported from " + source + " to " + destination;
