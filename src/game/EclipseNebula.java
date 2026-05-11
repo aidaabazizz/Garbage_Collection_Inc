@@ -113,6 +113,9 @@ public class EclipseNebula extends World {
 
         // Placeholders to prevent registration errors during map string parsing
         groundCreator.registerGround('Φ', Dirt::new);
+
+        // REQ5: Galaxy Portal for CrazyChicken and Elsa
+        groundCreator.registerGround('P', GalaxyPortal::new);
     }
 
     /**
