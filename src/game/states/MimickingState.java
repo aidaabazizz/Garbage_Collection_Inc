@@ -16,7 +16,7 @@ import game.enums.ChickenState;
  *
  * @author Aida
  */
-public class MimickingState implements State {
+public class MimickingState implements State<ChickenState>  {
     private MirrorMovementBehaviour mirrorBehaviour;
     private Actor trackedWorker;
     private static final int FRENZY_TRIGGER_TURNS = 2;

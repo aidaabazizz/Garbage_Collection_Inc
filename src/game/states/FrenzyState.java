@@ -22,7 +22,9 @@ import game.weapons.CrazyChickenBeak;
  *
  * @author Aida
  */
-public class FrenzyState implements State {
+
+
+public class FrenzyState implements State<ChickenState> {
     private final HuntBehaviour huntBehaviour = new HuntBehaviour();
     private final AttackBehaviour attackBehaviour = new AttackBehaviour();
     private static final int FRENZY_DURATION = 3;
