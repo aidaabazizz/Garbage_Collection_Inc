@@ -6,6 +6,7 @@ package game.capabilities;
  * and contaminated water sources (REQ2).
  *
  * @author Jewell Gomes
+ * @author Chathya Attanayake (modified by)
  */
 public class PoisonStatus extends DamageOverTimeStatus {
     /**
@@ -13,6 +14,6 @@ public class PoisonStatus extends DamageOverTimeStatus {
      * @param turns The duration of the toxic effect.
      */
     public PoisonStatus(int turns) {
-        super("Poisoned", turns);
+        super("Poison", turns);
     }
 }
