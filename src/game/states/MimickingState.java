@@ -16,7 +16,7 @@ import game.enums.ChickenState;
  *
  * @author Aida
  */
-public class MimickingState implements State {
+public class MimickingState implements State<ChickenState>  {
     private MirrorMovementBehaviour mirrorBehaviour;
     private Actor trackedWorker;
     private static final int FRENZY_TRIGGER_TURNS = 2;
@@ -36,7 +36,7 @@ public class MimickingState implements State {
         }
 
         // Fallback to wander if no worker found
-        return new WanderState().getAction(actor, location);
+        return new WanderingChicken().getAction(actor, location);
     }
 
     private Actor findNearestWorker(Actor actor, Location location) {

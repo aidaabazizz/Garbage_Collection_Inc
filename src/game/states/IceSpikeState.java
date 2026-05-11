@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.WanderBehaviour;
+import game.capabilities.IceSpikeCapability;
 import game.enums.ElsaState;
 import game.grounds.IceSpike;
 
@@ -52,7 +53,7 @@ public class IceSpikeState implements State<ElsaState> {
                     int dist = Math.abs(x) + Math.abs(y);
 
                     if (dist <= SPIKE_RADIUS && dist > 0) {
-                        if (!(targetLoc.getGround() instanceof IceSpike)) {
+                        if (targetLoc.getGroundAs(IceSpikeCapability.class) == null) {
                             validLocations.add(targetLoc);
                         }
                     }

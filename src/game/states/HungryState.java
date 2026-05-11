@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author Aida
  */
-public class HungryState implements State {
+public class HungryState implements State<ChickenState> {
     private final StealFromInventoryBehaviour stealBehaviour = new StealFromInventoryBehaviour();
     private final WanderBehaviour wanderBehaviour = new WanderBehaviour();
     private static final int HUNGRY_DISTANCE = 10;

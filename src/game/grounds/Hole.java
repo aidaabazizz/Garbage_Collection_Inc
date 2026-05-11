@@ -3,8 +3,8 @@ package game.grounds;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
-import game.managers.CreatureSpawner;
 import game.holestrategies.HoleSpawnStrategy;
+import game.managers.Spawner;
 
 /**
  * A specialized ground type that acts as a creature spawner.
@@ -20,6 +20,7 @@ public class Hole extends Ground {
     private static final int SPAWN_INTERVAL = 20;
     private int turnCounter = 0;
     private final HoleSpawnStrategy strategy;
+    private final Spawner spawner;
     private static final double EXPANSION_CHANCE = 0.01; // 1% (req4)
 
     /**
@@ -28,9 +29,10 @@ public class Hole extends Ground {
      * The hole begins with a turn counter at zero, counting upward until the
      * spawning threshold is reached.
      */
-    public Hole(HoleSpawnStrategy strategy) {
+    public Hole(HoleSpawnStrategy strategy,Spawner spawner) {
         super('o', "Hole");
         this.strategy = strategy;
+        this.spawner = spawner;
     }
 
     /**
@@ -45,7 +47,7 @@ public class Hole extends Ground {
             turnCounter = 0;
             // The strategy decides WHAT to spawn
             // The spawner handles the REQ4 environmental reactions
-            boolean success = strategy.spawn(location, new CreatureSpawner());
+            boolean success = strategy.spawn(location, spawner);
 
             if (success && Math.random() < EXPANSION_CHANCE) {
                 // 1% chance to expand
@@ -61,7 +63,7 @@ public class Hole extends Ground {
             // We check if it's passable (Dirt/Floor) so we don't destroy Walls
             if (adj.getGround().canActorEnter(null)) {
                 // Transform it! If it's already a hole, it just overwrites itself.
-                adj.setGround(new Hole(this.strategy));
+                adj.setGround(new Hole(strategy,spawner));
                 return; // Stop after expanding once
             }
         }
