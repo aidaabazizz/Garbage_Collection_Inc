@@ -6,4 +6,5 @@ import game.managers.Spawner;
 //req4
 public interface HoleSpawnStrategy {
     boolean spawn(Location location, Spawner spawner);
+    HoleSpawnStrategy cloneStrategy();
 }
