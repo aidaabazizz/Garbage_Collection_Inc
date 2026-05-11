@@ -36,7 +36,7 @@ public class MimickingState implements State {
         }
 
         // Fallback to wander if no worker found
-        return new WanderState().getAction(actor, location);
+        return new WanderingChicken().getAction(actor, location);
     }
 
     private Actor findNearestWorker(Actor actor, Location location) {

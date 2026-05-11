@@ -1,17 +1,18 @@
+// game/states/State.java (updated - Generic version)
 package game.states;
 
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.positions.Location;
-import game.enums.ChickenState;
 
 /**
- * Interface for state behavior in the State pattern.
+ * Generic interface for state behavior in the State pattern.
  * Each state defines its own behavior and transition logic.
  *
+ * @param <T> The enum type representing the possible states
  * @author Aida
  */
-public interface State {
+public interface State<T extends Enum<T>> {
 
     /**
      * Returns the action to be performed by the actor in this state.
@@ -23,7 +24,7 @@ public interface State {
      * Must be deterministic (no randomness).
      * Must transition to at least 2 different states (or stay).
      */
-    ChickenState getNextState(Actor actor, Location location, int turnsInCurrentState);
+    T getNextState(Actor actor, Location location, int turnsInCurrentState);
 
     /**
      * Called immediately when entering this state.

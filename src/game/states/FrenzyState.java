@@ -20,7 +20,7 @@ import game.weapons.CrazyChickenBeak;
  * - WANDER: after 3 rounds (frenzy duration ends)
  * - stays FRENZY: otherwise
  *
- * @author AI Assistant
+ * @author Aida
  */
 public class FrenzyState implements State {
     private final HuntBehaviour huntBehaviour = new HuntBehaviour();
@@ -54,7 +54,7 @@ public class FrenzyState implements State {
             return huntAction;
         }
 
-        return new WanderState().getAction(actor, location);
+        return new WanderingChicken().getAction(actor, location);
     }
 
     @Override
