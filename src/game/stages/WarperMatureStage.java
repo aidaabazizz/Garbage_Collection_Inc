@@ -4,6 +4,7 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.TeleportAction;
 import game.capabilities.TeleportStrategy;
+import game.utils.SpatialSearch;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class WarperMatureStage extends AbstractTreeStage {
      */
     @Override
     public TreeStage execute(Location location) {
-        List<Actor> targets = getNearbyWorkers(location);
+        List<Actor> targets = SpatialSearch.getNearbyWorkers(location);
         for (Actor worker : targets) {
             TeleportAction warpAction = new TeleportAction(strategy);
             String result = warpAction.execute(worker, location.map());
