@@ -114,8 +114,8 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('≈', ToxicWaste::new);
         groundCreator.registerGround('◎', MagicCircle::new);
 
-        // Placeholders to prevent registration errors during map string parsing
-        groundCreator.registerGround('Φ', Dirt::new);
+        // Inside registerCommonGrounds
+        groundCreator.registerGround('Φ', () -> new TeleportationTube(new ArrayList<>()));
 
         // REQ5: Galaxy Portal for CrazyChicken and Elsa
         groundCreator.registerGround('P', GalaxyPortal::new);
@@ -212,21 +212,39 @@ public class EclipseNebula extends World {
      * Identifies Φ symbols and replaces placeholders with functional tubes.
      */
     private void linkTeleportationTubes(GameMap moonMap, GameMap overflowMap) {
-        Location moonTubeLoc = moonMap.at(28, 3);
-        Location overflowTubeLoc = overflowMap.at(6, 3);
+        Location moonTubeLoc = findLocationOfSymbol(moonMap, 'Φ');
+        Location overflowTubeLoc = findLocationOfSymbol(overflowMap, 'Φ');
 
-        // Configure Moon Tube: Dest 1 (Internal), Dest 2 (Overflow)
-        // Note: TeleportTubeStrategy must handle the 50% malfunction and fire side effects
+        if (moonTubeLoc == null || overflowTubeLoc == null) {
+            throw new IllegalStateException("Teleportation Tube placeholders (Φ) missing from maps!");
+        }
+
+        // Configure Moon Tube
         List<TeleportStrategy> moonStrategies = new ArrayList<>();
-        moonStrategies.add(new TeleportTubeStrategy(moonMap.at(5, 15))); // Within-map
-        moonStrategies.add(new TeleportTubeStrategy(overflowTubeLoc));  // Between-map
+        moonStrategies.add(new TeleportTubeStrategy(moonMap.at(5, 15)));
+        moonStrategies.add(new TeleportTubeStrategy(overflowTubeLoc));
         moonTubeLoc.setGround(new TeleportationTube(moonStrategies));
 
-        // Configure Overflow Tube: Dest 1 (Moon 99)
+        // Configure Overflow Tube
         List<TeleportStrategy> overflowStrategies = new ArrayList<>();
-        overflowStrategies.add(new TeleportTubeStrategy(moonTubeLoc)); // Between-map
-        overflowStrategies.add(new TeleportTubeStrategy(overflowMap.at(10, 10))); // Within-map
+        overflowStrategies.add(new TeleportTubeStrategy(moonTubeLoc));
+        overflowStrategies.add(new TeleportTubeStrategy(overflowMap.at(10, 10)));
         overflowTubeLoc.setGround(new TeleportationTube(overflowStrategies));
+    }
+
+    /**
+     * Helper to find a specific ground character on a map.
+     * Fulfills REQ2: "identifies Φ symbols".
+     */
+    private Location findLocationOfSymbol(GameMap map, char symbol) {
+        for (int x : map.getXRange()) {
+            for (int y : map.getYRange()) {
+                if (map.at(x, y).getGround().getDisplayChar() == symbol) {
+                    return map.at(x, y);
+                }
+            }
+        }
+        return null;
     }
 
     /**
