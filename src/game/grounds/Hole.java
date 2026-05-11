@@ -63,7 +63,7 @@ public class Hole extends Ground {
             // We check if it's passable (Dirt/Floor) so we don't destroy Walls
             if (adj.getGround().canActorEnter(null)) {
                 // Transform it! If it's already a hole, it just overwrites itself.
-                adj.setGround(new Hole(strategy,spawner));
+                adj.setGround(new Hole(strategy.cloneStrategy(),spawner));
                 return; // Stop after expanding once
             }
         }
