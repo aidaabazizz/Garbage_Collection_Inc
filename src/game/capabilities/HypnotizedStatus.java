@@ -9,7 +9,7 @@ import edu.monash.fit2099.engine.positions.Location;
  *
  * @author Aida
  */
-public class HypnotizedStatus implements Status {
+public class HypnotizedStatus implements Status, HypnotizedCapability  {
     private int remainingTurns;
 
     public HypnotizedStatus(int duration) {
@@ -34,4 +34,6 @@ public class HypnotizedStatus implements Status {
     public String toString() {
         return "Hypnotized by Elsa's song (" + remainingTurns + " turns left)";
     }
+
+
 }

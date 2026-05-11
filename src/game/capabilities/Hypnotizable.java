@@ -8,3 +8,4 @@ package game.capabilities;
 public interface Hypnotizable {
     void hypnotize(int duration);
 }
+
