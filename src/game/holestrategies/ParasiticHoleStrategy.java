@@ -17,4 +17,7 @@ public class ParasiticHoleStrategy implements HoleSpawnStrategy {
             return spawner.spawnParasite(location);
         }
     }
+
+    @Override
+    public HoleSpawnStrategy cloneStrategy() { return new ParasiticHoleStrategy(); }
 }
