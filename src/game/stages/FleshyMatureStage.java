@@ -24,6 +24,8 @@ public class FleshyMatureStage extends FleshyTreeStage {
      * the tree. It looks for any workers in the adjacent tiles and
      * attempts to spawn an undead creature for each one found. It
      * always returns itself to remain in the mature state.
+     *
+     * @param location  The current map location of the tree.
      */
     @Override
     public TreeStage execute(Location location) {
@@ -40,6 +42,8 @@ public class FleshyMatureStage extends FleshyTreeStage {
     /**
      * This method returns the uppercase letter Y which is the visual
      * icon used to show a mature fleshy tree on the game world map.
+     *
+     * @return The character 'Y'.
      */
     @Override
     public char getDisplayChar() { return 'Y'; }

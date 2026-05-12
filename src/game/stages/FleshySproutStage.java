@@ -28,8 +28,11 @@ public class FleshySproutStage extends FleshyTreeStage {
      * This method manages the behavior of the sprout during every turn.
      * It first identifies all workers in the surrounding tiles. If a
      * slime is successfully spawned the sprout will not try to grow
-     * during that same turn. Otherwise, it increments its age and has
-     * a chance to mature into a fleshy sapling stage.
+     * during that same turn. It will always increment the age as per ed discussion
+     * age incrementing is an internal state not an action. It will prioritize spawning over
+     * growing into a mature fleshy sapling.
+     *
+     * @param location  The current map location of the tree.
      */
     @Override
     public TreeStage execute(Location location) {
@@ -58,6 +61,8 @@ public class FleshySproutStage extends FleshyTreeStage {
     /**
      * This method returns the lowercase letter y which is the visual
      * representation of this stage on the game map.
+     *
+     * @return The character 'y'.
      */
     @Override
     public char getDisplayChar(){
