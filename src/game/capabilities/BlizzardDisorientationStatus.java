@@ -32,9 +32,10 @@ public class BlizzardDisorientationStatus implements Status, DisorientedCapabili
         return remainingTurns > 0;
     }
 
-    public int getRemainingTurns() {
-        return remainingTurns;
-    }
+    // REMOVE this unused method
+    // public int getRemainingTurns() {
+    //     return remainingTurns;
+    // }
 
     @Override
     public String toString() {

@@ -17,8 +17,7 @@ public class MovementActionWrapper {
      * Uses policy-based replacement - NO switch!
      */
     public static ActionList wrapMovementActions(ActionList originalActions, Actor actor,
-                                                 java.util.function.Function<String, String> hotKeyExtractor,
-                                                 java.util.function.Function<String, String> directionExtractor) {
+                                                 java.util.function.Function<String, String> hotKeyExtractor) {
         ActionList newActions = new ActionList();
 
         for (Action action : originalActions.getUnmodifiableActionList()) {

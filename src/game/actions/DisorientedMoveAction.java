@@ -74,8 +74,10 @@ public class DisorientedMoveAction extends Action {
         return null;
     }
 
+    // Keep hotKey and use it in menuDescription
     @Override
     public String menuDescription(Actor actor) {
-        return actor + " attempts to go " + intendedDirection + " (blizzard disorients!)";
+        String hotKeyDisplay = hotKey != null && !hotKey.isEmpty() ? " (" + hotKey + ")" : "";
+        return actor + " attempts to go " + intendedDirection + hotKeyDisplay + " (blizzard disorients!)";
     }
 }
