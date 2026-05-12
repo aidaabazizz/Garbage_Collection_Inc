@@ -150,27 +150,16 @@ public class SpatialSearch {
     }
 
     /**
-     * Checks if there is a worker with consumable items within a specified distance.
-     * Uses capability pattern - no instanceof.
+     * Checks if any adjacent worker has consumable items in their inventory.
+     * Uses getNearbyWorkers() for efficiency - only checks 8 adjacent tiles.
      *
-     * @param map The game map
-     * @param center The center location
-     * @param maxDistance The maximum Manhattan distance to check
-     * @return true if a worker with consumable items is within distance
+     * @param center The center location (chicken's location)
+     * @return true if an adjacent worker has a consumable item
      */
-    public static boolean hasWorkerWithConsumableWithinDistance(GameMap map, Location center, int maxDistance) {
-        for (int y : map.getYRange()) {
-            for (int x : map.getXRange()) {
-                Location loc = map.at(x, y);
-                if (loc.containsAnActor()) {
-                    Actor target = loc.getActor();
-                    if (target.hasAbility(Ability.WORKER)) {
-                        int dist = calculateDistance(loc, center);
-                        if (dist <= maxDistance && hasConsumableInInventory(target)) {
-                            return true;
-                        }
-                    }
-                }
+    public static boolean hasAdjacentWorkerWithConsumable(Location center) {
+        for (Actor worker : getNearbyWorkers(center)) {
+            if (hasConsumableInInventory(worker)) {
+                return true;
             }
         }
         return false;
