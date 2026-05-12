@@ -27,7 +27,8 @@ public class FleshySaplingStage extends FleshyTreeStage {
      */
     @Override
     public TreeStage execute(Location location) {
-        if (incrementAgeAndCheckGrowth(location, GROWTH_THRESHOLD, GROWTH_CHANCE, "Fleshy Sapling")) {
+        updateAge(location, GROWTH_THRESHOLD, "Fleshy Sapling");
+        if (checkGrowthThreshold(GROWTH_THRESHOLD, GROWTH_CHANCE, location, "Fleshy Sapling")) {
             display.println(String.format(
                     "Fleshy Tree Sapling ('%s') at %s matures into a Fleshy Mature Tree ('Y')!",
                     getDisplayChar(),

@@ -24,7 +24,9 @@ public class WarperSaplingStage extends AbstractTreeStage {
      */
     @Override
     public TreeStage execute(Location location) {
-        if (incrementAgeAndCheckGrowth(location, GROWTH_THRESHOLD, GROWTH_CHANCE, "Warper Sapling")) {
+        updateAge(location, GROWTH_THRESHOLD, "Warper Sapling");
+
+        if (checkGrowthThreshold(GROWTH_THRESHOLD, GROWTH_CHANCE, location, "Warper Sapling")) {
             display.println(String.format(
                     "Warper Tree Sapling ('%s') at %s matures into a Warper Mature Tree ('W')!",
                     getDisplayChar(), location));
