@@ -34,6 +34,9 @@ public class CreatureSpawner implements Spawner {
      * Finds a valid spot for spawning.
      * Checks the center tile first (for Holes/Vents).
      * If blocked, checks adjacent tiles (for Trees/Infected Workers).
+     *
+     * @param center the reference location where the spawn is triggered
+     * @return a traversable and unoccupied Location if found; null otherwise
      */
     private Location getSpawnLocation(Location center) {
         // canActorEnter(null) is the polymorphic check for Ground + Actors
@@ -53,6 +56,9 @@ public class CreatureSpawner implements Spawner {
      * This method creates a slime. When a slime emerges it causes nearby
      * workers to become terrified and drop every item in their inventory
      * onto the ground.
+     *
+     * @param center the location where the Slime emergence was initiated
+     * @return true if the Slime was successfully added to the map; false if spawning failed
      */
     @Override
     public boolean spawnSlime(Location center) {
@@ -71,6 +77,9 @@ public class CreatureSpawner implements Spawner {
      * This method creates an undead creature. It gives the undead a
      * health bonus based on the number of other creatures already
      * standing in the surrounding tiles.
+     *
+     * @param center the location where the Undead emergence was initiated
+     * @return true if the Undead was successfully added to the map; false if spawning failed
      */
     @Override
     public boolean spawnUndead(Location center) {

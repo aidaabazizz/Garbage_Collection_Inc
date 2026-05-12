@@ -24,10 +24,13 @@ public class FleshySaplingStage extends FleshyTreeStage {
      * the sapling. It adds one to the age and checks if the maturation
      * threshold has been reached. If it has there is a fifty percent
      * chance to mature into a fleshy mature tree.
+     *
+     * @param location  The current map location of the tree.
      */
     @Override
     public TreeStage execute(Location location) {
-        if (incrementAgeAndCheckGrowth(location, GROWTH_THRESHOLD, GROWTH_CHANCE, "Fleshy Sapling")) {
+        updateAge(location, GROWTH_THRESHOLD, "Fleshy Sapling");
+        if (checkGrowthThreshold(GROWTH_THRESHOLD, GROWTH_CHANCE, location, "Fleshy Sapling")) {
             display.println(String.format(
                     "Fleshy Tree Sapling ('%s') at %s matures into a Fleshy Mature Tree ('Y')!",
                     getDisplayChar(),
@@ -41,6 +44,8 @@ public class FleshySaplingStage extends FleshyTreeStage {
     /**
      * This method returns the character v which is used to represent the
      * fleshy sapling on the game world map.
+     *
+     * @return The character 'v'.
      */
     @Override
     public char getDisplayChar() { return 'v'; }

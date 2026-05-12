@@ -90,7 +90,7 @@ public class EclipseNebula extends World {
 
         // 7. Setup players
         // Start them on Moon 99 so they pick up the starting card and use the Tube
-        setupContractedWorkers(overflowMap,globalSpawner);
+        setupContractedWorkers(overflowMap);
 
     }
 
@@ -267,7 +267,7 @@ public class EclipseNebula extends World {
      *
      * @param map the GameMap where common scrap items will be deployed
      */
-    private void spawnCommonScrap(GameMap map, Spawner spawner) {
+    private void spawnCommonScrap(GameMap map,Spawner spawner) {
         // Items to SELL for credits. No high-value items here!
         map.at(16, 3).addItem(new Apple());
         map.at(17, 4).addItem(new Cookies(spawner));
@@ -294,7 +294,7 @@ public class EclipseNebula extends World {
      * @param map the GameMap where the players will be added
      * @throws Exception if a player cannot be added to the game world
      */
-    private void setupContractedWorkers(GameMap map, Spawner globalSpawner) throws Exception {
+    private void setupContractedWorkers(GameMap map,Spawner globalSpawner) throws Exception {
         String[] names = {"#1 Bob", "#2 Tom", "#3 Sarah", "#4 Julie", "#5 Rick"};
         int startX = 4;
 
