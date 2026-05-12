@@ -29,6 +29,7 @@ import game.capabilities.DisorientedCapability;
  *
  * @author Jewell Gomes
  * @author Chathya Attanayake (Modified by)
+ * @author Aida (Modified by)
  */
 public class ContractedWorker extends Actor implements Infectable, Freezable, Disorientable {
     private int spawnCounter = 0;
