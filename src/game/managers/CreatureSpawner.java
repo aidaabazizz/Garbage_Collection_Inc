@@ -110,7 +110,7 @@ public class CreatureSpawner implements Spawner {
             spot.addActor(new Parasite());
             display.println("!!! A Parasite has emerged at " + spot + " !!!");
 
-            List<Actor> targets = game.utils.SpatialSearch.getNearbyWorkers(spot);
+            List<Actor> targets = SpatialSearch.getNearbyWorkers(spot);
             // REACTION: Adjacent workers take 2 damage
             // Apply damage to every worker found
             for (Actor worker : targets) {
