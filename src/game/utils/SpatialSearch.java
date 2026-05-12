@@ -30,6 +30,10 @@ public class SpatialSearch {
     /**
      * Identifies all actors possessing the {@code Ability.WORKER} capability within
      * the eight adjacent tiles surrounding a specified center location.
+     *
+     * @param center the location around which to search for workers
+     * @return a list of all adjacent actors with the WORKER capability;
+     *         returns an empty list if no workers are found
      */
     public static List<Actor> getNearbyWorkers(Location center) {
         List<Actor> workers = new ArrayList<>();
@@ -44,6 +48,10 @@ public class SpatialSearch {
     /**
      * Collects all actors, regardless of capabilities, currently standing in the
      * eight tiles surrounding a center location.
+     *
+     * @param center the location around which to search for actors
+     * @return a list of all actors found in the immediate surrounding tiles;
+     *         returns an empty list if no actors are found
      */
     public static List<Actor> getNearbyActors(Location center) {
         List<Actor> actors = new ArrayList<>();
