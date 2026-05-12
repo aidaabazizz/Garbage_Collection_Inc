@@ -19,15 +19,38 @@ public abstract class AbstractTreeStage implements TreeStage {
     private int age = 0;
 
     /**
-     * Shared logic for aging and growth checks.
-     * @return true if the tree successfully meets the criteria to grow.
+     * Increments the age counter and prints the status.
+     * Need this because Fleshy Sprout has two options to Spawn or to Grow.
+     * My implementation is when it spawns it still increments the age.
+     * So, need to have a separate update age method, specifically for the
+     * Fleshy Sprout.
+     * Use this at the very start of execute method to satisfy the
+     * Internal State Update happens regardless rule.
+     *
+     * @param location  The current map location of the tree.
+     * @param threshold The number of turns required to attempt maturation.
+     * @param stageName The display name of the current growth stage for console output.
      */
-    protected boolean incrementAgeAndCheckGrowth(Location location, int threshold, double chance, String stageName) {
-        age++;
+    protected void updateAge(Location location, int threshold, String stageName) {
+        if (this.age < threshold) {
+            this.age++;
+        }
         display.println(String.format("%s at %s current age: (%d/%d)", stageName, location, age, threshold));
+    }
 
+    /**
+     * Checks if the tree has reached the threshold and rolls for growth.
+     * Use this only when no other action (like spawning) has occurred.
+     *
+     * @param threshold The age required to trigger a growth roll.
+     * @param chance    The probability (0.0 to 1.0) of a successful maturation.
+     * @param location  The current map location of the tree for failure notifications.
+     * @param stageName The display name of the stage for failure notifications.
+     * @return true if the growth roll succeeded; false otherwise.
+     */
+    protected boolean checkGrowthThreshold(int threshold, double chance, Location location, String stageName) {
         if (age >= threshold) {
-            age = 0; // Reset counter
+            age = 0; // Reset counter after reaching threshold
             if (random.nextDouble() <= chance) {
                 return true;
             } else {
@@ -36,12 +59,5 @@ public abstract class AbstractTreeStage implements TreeStage {
             }
         }
         return false;
-    }
-
-    /**
-     * Getter for the current age, used by subclasses for display purposes.
-     */
-    protected int getAge() {
-        return this.age;
     }
 }

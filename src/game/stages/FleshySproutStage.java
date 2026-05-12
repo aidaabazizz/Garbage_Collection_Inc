@@ -33,11 +33,11 @@ public class FleshySproutStage extends FleshyTreeStage {
      */
     @Override
     public TreeStage execute(Location location) {
+        // Ed discussion: Age increases every turn no matter what.
+        updateAge(location, GROWTH_THRESHOLD, "Fleshy Sprout");
         List<Actor> targets = SpatialSearch.getNearbyWorkers(location);
 
         if (!targets.isEmpty()) {
-            display.println(String.format("Fleshy Sprout at %s current age: (%d/%d)",
-                    location, getAge(), GROWTH_THRESHOLD));
             display.println("Fleshy Sprout Tree at " + location + " is producing Slime!");
             for (Actor worker : targets) {
                 spawner.spawnSlime(location);
@@ -46,7 +46,7 @@ public class FleshySproutStage extends FleshyTreeStage {
         }
 
         // aging/growing (only if not spawning)
-        if (incrementAgeAndCheckGrowth(location, GROWTH_THRESHOLD, GROWTH_CHANCE, "Fleshy Sprout")) {
+        if (checkGrowthThreshold(GROWTH_THRESHOLD, GROWTH_CHANCE, location,"Fleshy Sprout")) {
             display.println(String.format(
                     "Fleshy Tree Sprout ('%s') at %s grows into a Fleshy Sapling ('v')!",
                     getDisplayChar(), location));
