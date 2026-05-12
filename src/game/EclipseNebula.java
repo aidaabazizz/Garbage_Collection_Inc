@@ -90,7 +90,7 @@ public class EclipseNebula extends World {
 
         // 7. Setup players
         // Start them on Moon 99 so they pick up the starting card and use the Tube
-        setupContractedWorkers(overflowMap);
+        setupContractedWorkers(overflowMap, globalSpawner);
 
     }
 
