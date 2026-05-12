@@ -17,6 +17,7 @@ import game.capabilities.Sellable;
 import game.enums.Ability;
 import game.enums.ItemStatistics;
 import game.managers.CreatureSpawner;
+import game.managers.Spawner;
 
 /**
  * A multi-charge consumable item representing a pack of cookies.
@@ -37,12 +38,15 @@ public class Cookies extends Item implements Consumable, Sellable, Infectable {
 
     private int count = INITIAL_COUNT;
 
+    private final Spawner spawner;
+
     /**
      * Constructor for Cookies.
      * Sets the initial weight to two units and marks the item as portable.
      */
-    public Cookies() {
+    public Cookies(Spawner spawner) {
         super("Cookies", '◍');
+        this.spawner = spawner;
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(WEIGHT));
         this.makePortable();
     }
@@ -158,7 +162,8 @@ public class Cookies extends Item implements Consumable, Sellable, Infectable {
             count--;
         }
 
-        new CreatureSpawner().spawnParasite(location);
+        this.spawner.spawnParasite(location);
+
 
         if (count <= 0) {
             location.removeItem(this);
