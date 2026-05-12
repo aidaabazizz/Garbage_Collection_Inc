@@ -109,14 +109,15 @@ public class CreatureSpawner implements Spawner {
         try {
             spot.addActor(new Parasite());
             display.println("!!! A Parasite has emerged at " + spot + " !!!");
+
+            List<Actor> targets = game.utils.SpatialSearch.getNearbyWorkers(spot);
             // REACTION: Adjacent workers take 2 damage
-            for (Exit exit : spot.getExits()) {
-                Location adj = exit.getDestination();
-                if (adj.containsAnActor() && adj.getActor().hasAbility(Ability.WORKER)) {
-                    adj.getActor().hurt(PARASITE_SPAWN_DAMAGE);
-                    display.println(">>> " + adj.getActor() + " was bitten by the Parasite and took 2 damage!");
-                }
+            // Apply damage to every worker found
+            for (Actor worker : targets) {
+                worker.hurt(PARASITE_SPAWN_DAMAGE);
+                display.println(">>> " + worker + " was bitten by the Parasite and took " + PARASITE_SPAWN_DAMAGE + " damage!");
             }
+
             return true;
         } catch (GameEngineException e) {
             return false;
