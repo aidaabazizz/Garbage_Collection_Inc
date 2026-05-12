@@ -1,15 +1,13 @@
-// game/states/WanderState.java (updated)
+// game/states/WanderingChicken.java
 package game.states;
 
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.WanderBehaviour;
-import game.capabilities.Consumable;
-import game.enums.Ability;
 import game.enums.ChickenState;
+import game.utils.SpatialSearch;
 
 /**
  * WANDER STATE for CrazyChicken.
@@ -29,26 +27,9 @@ public class WanderingChicken implements State<ChickenState> {
     @Override
     public ChickenState getNextState(Actor actor, Location location, int turnsInCurrentState) {
         GameMap map = location.map();
-        boolean hasNearbyWorker = false;
-        boolean hasWorkerWithConsumable = false;
 
-        for (int y : map.getYRange()) {
-            for (int x : map.getXRange()) {
-                Location checkLoc = map.at(x, y);
-                if (checkLoc.containsAnActor()) {
-                    Actor target = checkLoc.getActor();
-                    if (target.hasAbility(Ability.WORKER)) {
-                        int dist = Math.abs(checkLoc.x() - location.x()) + Math.abs(checkLoc.y() - location.y());
-                        if (dist <= MIMIC_TRIGGER_DISTANCE) {
-                            hasNearbyWorker = true;
-                        }
-                        if (dist <= HUNGRY_TRIGGER_DISTANCE && hasConsumableInInventory(target)) {
-                            hasWorkerWithConsumable = true;
-                        }
-                    }
-                }
-            }
-        }
+        boolean hasNearbyWorker = SpatialSearch.hasWorkerWithinDistance(map, location, MIMIC_TRIGGER_DISTANCE);
+        boolean hasWorkerWithConsumable = SpatialSearch.hasWorkerWithConsumableWithinDistance(map, location, HUNGRY_TRIGGER_DISTANCE);
 
         if (hasNearbyWorker) {
             return ChickenState.MIMICKING;
@@ -59,15 +40,6 @@ public class WanderingChicken implements State<ChickenState> {
         }
 
         return ChickenState.WANDER;
-    }
-
-    private boolean hasConsumableInInventory(Actor actor) {
-        for (Item item : actor.getInventory().getItems()) {
-            if (item.asCapability(Consumable.class).isPresent()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
