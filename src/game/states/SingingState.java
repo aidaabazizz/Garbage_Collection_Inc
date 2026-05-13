@@ -3,6 +3,7 @@ package game.states;
 
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.WanderBehaviour;
@@ -20,6 +21,7 @@ import java.util.Optional;
 public class SingingState implements State<ElsaState> {
     private final WanderBehaviour wanderBehaviour = new WanderBehaviour();
     private static final int SINGING_DURATION = 5;
+    private final Display display = new Display();
 
     @Override
     public Action getAction(Actor actor, Location location) {
@@ -36,8 +38,7 @@ public class SingingState implements State<ElsaState> {
 
     @Override
     public void onEnter(Actor actor, Location location) {
-
-        System.out.println(actor + " starts singing Let It Go!");
+        display.println(actor + " starts singing Let It Go!");
 
         MusicPlayer.playMusic("src/game/music/let_it_go.wav");
         GameMap map = location.map();
@@ -50,16 +51,16 @@ public class SingingState implements State<ElsaState> {
                     Optional<Hypnotizable> hypnotizable = target.asCapability(Hypnotizable.class);
                     if (hypnotizable.isPresent()) {
                         hypnotizable.get().hypnotize(SINGING_DURATION);
+                        display.println(target + " is hypnotized by Elsa's song!");
                     }
                 }
             }
         }
     }
 
-
     @Override
     public void onExit(Actor actor, Location location) {
-        // Statuses expire naturally
+        display.println(actor + " stops singing.");
     }
 
     @Override
