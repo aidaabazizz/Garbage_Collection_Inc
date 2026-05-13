@@ -1,4 +1,4 @@
-package game.holestrategies;
+package game.galaxyportalstrategy;
 
 import edu.monash.fit2099.engine.positions.Location;
 import game.managers.Spawner;
