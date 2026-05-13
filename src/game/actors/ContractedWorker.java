@@ -111,7 +111,7 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             actions = MovementActionWrapper.wrapMovementActions(
                     actions,
                     this,
-                    this::getHotKeyForDirection,
+                    this::getHotKeyForDirection
             );
         }
 
