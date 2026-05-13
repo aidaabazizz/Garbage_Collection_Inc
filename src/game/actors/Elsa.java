@@ -105,7 +105,7 @@ public class Elsa extends NonPlayerCharacter implements StatefulActor {
 
             currentState.onEnter(this, currentLocation);
 
-            display.println("\u001B[36m" + this + " enters " + currentStateName + " state!\u001B[0m");
+            display.println("\u001B[36m" + this + " enters " + currentState.getStateName() + " state!\u001B[0m");
         }
 
         Action action = currentState.getAction(this, currentLocation);
