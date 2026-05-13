@@ -17,7 +17,7 @@ import game.managers.AlarmManager;
  * @author Suchir
  * @version 1.0
  */
-public class Door extends Ground implements Unlockable, AlarmListener {
+public abstract class Door extends Ground implements Unlockable, AlarmListener {
 
     private boolean isUnlocked = false;
     private boolean alarmLock = false;
