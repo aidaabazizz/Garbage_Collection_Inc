@@ -2,6 +2,7 @@ package game.states;
 
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.HuntBehaviour;
@@ -22,12 +23,11 @@ import game.weapons.CrazyChickenBeak;
  *
  * @author Aida
  */
-
-
 public class FrenzyState implements State<ChickenState> {
     private final HuntBehaviour huntBehaviour = new HuntBehaviour();
     private final AttackBehaviour attackBehaviour = new AttackBehaviour();
     private static final int FRENZY_DURATION = 3;
+    private final Display display = new Display();
 
     // Store original damage/hit rate for restoration
     private int originalDamage;
@@ -84,6 +84,8 @@ public class FrenzyState implements State<ChickenState> {
         statefulActor.setCurrentStateName("FRENZY");
 
         // IMMEDIATE EFFECT: The chicken screeches loudly
+        display.println("\u001B[33m" + actor + " lets out a FRENZIED SCREECH! The ground shakes!\u001B[0m");
+
         // All workers within 8 tiles take 2 damage and are pushed back 2 tiles
         GameMap map = location.map();
 
@@ -95,8 +97,15 @@ public class FrenzyState implements State<ChickenState> {
                     if (target.hasAbility(Ability.WORKER)) {
                         int dist = Math.abs(x - location.x()) + Math.abs(y - location.y());
                         if (dist <= 8) {
-                            // Damage: 2 HP
+                            // Damage: 2 HP with message
                             target.hurt(2);
+                            display.println("\u001B[31m" + target + " takes 2 damage from the shockwave!" +
+                                    " (" + target + " HP: " + getCurrentHealth(target) + "/" + getMaxHealth(target) + ")\u001B[0m");
+
+                            // Check if worker died
+                            if (!target.isConscious()) {
+                                display.println("\u001B[31m" + target + " has been killed by the shockwave!\u001B[0m");
+                            }
 
                             // Push back: find a tile away from chicken and move the worker
                             tryPushBack(target, targetLoc, location, map);
@@ -125,14 +134,25 @@ public class FrenzyState implements State<ChickenState> {
                 Location newLoc = map.at(newX, newY);
                 if (!newLoc.containsAnActor() && newLoc.canActorEnter(target)) {
                     current.map().moveActor(target, newLoc);
+                    display.println(target + " is pushed back to " + newLoc + "!");
                     current = newLoc;
                 } else {
+                    display.println(target + " is knocked back but hits an obstacle!");
                     break;
                 }
             } else {
+                display.println(target + " cannot be pushed further (map boundary)!");
                 break;
             }
         }
+    }
+
+    private int getCurrentHealth(Actor actor) {
+        return actor.getStatistic(edu.monash.fit2099.engine.actors.ActorStatistics.HEALTH);
+    }
+
+    private int getMaxHealth(Actor actor) {
+        return actor.getMaximumStatistic(edu.monash.fit2099.engine.actors.ActorStatistics.HEALTH);
     }
 
     @Override
@@ -141,6 +161,8 @@ public class FrenzyState implements State<ChickenState> {
         StatefulActor statefulActor = (StatefulActor) actor;
         statefulActor.setBeak(new CrazyChickenBeak(originalDamage, originalHitRate));
         statefulActor.setCurrentStateName("WANDER");
+
+        display.println("\u001B[33m" + actor + " calms down from its frenzy.\u001B[0m");
     }
 
     @Override
