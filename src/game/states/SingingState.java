@@ -8,6 +8,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.WanderBehaviour;
 import game.capabilities.Hypnotizable;
 import game.enums.ElsaState;
+import game.utils.MusicPlayer;
 
 import java.util.Optional;
 
@@ -35,6 +36,10 @@ public class SingingState implements State<ElsaState> {
 
     @Override
     public void onEnter(Actor actor, Location location) {
+
+        System.out.println(actor + " starts singing Let It Go!");
+
+        MusicPlayer.playMusic("src/game/music/let_it_go.wav");
         GameMap map = location.map();
 
         for (int y : map.getYRange()) {
@@ -50,6 +55,7 @@ public class SingingState implements State<ElsaState> {
             }
         }
     }
+
 
     @Override
     public void onExit(Actor actor, Location location) {
