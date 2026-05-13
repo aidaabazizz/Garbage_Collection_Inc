@@ -5,7 +5,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.capabilities.TeleportStrategy;
 import game.items.Flask;
-
+import game.grounds.MagicCircle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -34,19 +34,28 @@ public class MagicCircleStrategy implements TeleportStrategy {
     public Location getDestination(Actor actor, GameMap map) {
         List<Location> otherCircles = new ArrayList<>();
         Location currentLocation = map.locationOf(actor);
-        // This will scan the map for other magic circles
-        for (int x: map.getXRange()) {
-            for (int y: map.getYRange()) {
-                Location loc = map.at(x,y);
-                if (loc.getGround().getDisplayChar() == '◎' && !loc.equals(currentLocation)) {
+
+        for (int x : map.getXRange()) {
+            for (int y : map.getYRange()) {
+                Location loc = map.at(x, y);
+
+                boolean isMagicCircle = loc.getGround().getClass().equals(MagicCircle.class);
+
+                boolean isCurrentLocation =
+                        loc.x() == currentLocation.x() && loc.y() == currentLocation.y();
+
+                if (isMagicCircle && !isCurrentLocation) {
                     otherCircles.add(loc);
                 }
             }
         }
-        if (otherCircles.isEmpty()) return currentLocation;
+
+        if (otherCircles.isEmpty()) {
+            return currentLocation;
+        }
+
         return otherCircles.get(random.nextInt(otherCircles.size()));
     }
-
     /**
      * This will spawn a flask on an empty adjacent tile at the destination
      * @param actor the actor teleporting
@@ -56,11 +65,12 @@ public class MagicCircleStrategy implements TeleportStrategy {
      */
     @Override
     public void applySideEffects(Actor actor, Location source, Location destination, GameMap map) {
-        for (Location adjacent: destination.getNearbyLocations(ADJACENT_TILE)) {
-            if (!adjacent.containsAnActor() && adjacent.canActorEnter(actor)) {
+        for (Location adjacent : destination.getNearbyLocations(ADJACENT_TILE)) {
+            if (!adjacent.containsAnActor()
+                    && adjacent.canActorEnter(actor)
+                    && adjacent.getItems().isEmpty()) {
                 adjacent.addItem(new Flask());
-                // this ensures that only one Flask will be added
-                break;
+                return;
             }
         }
     }
