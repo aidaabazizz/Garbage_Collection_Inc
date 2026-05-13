@@ -4,8 +4,10 @@ import edu.monash.fit2099.engine.GameEngineException;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.actors.ActorStatistics;
 import edu.monash.fit2099.engine.displays.Display;
+import edu.monash.fit2099.engine.items.DropAction;
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Exit;
+import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.StatisticOperations;
 import game.actors.*;
@@ -32,6 +34,9 @@ public class CreatureSpawner implements Spawner {
      * Finds a valid spot for spawning.
      * Checks the center tile first (for Holes/Vents).
      * If blocked, checks adjacent tiles (for Trees/Infected Workers).
+     *
+     * @param center the reference location where the spawn is triggered
+     * @return a traversable and unoccupied Location if found; null otherwise
      */
     private Location getSpawnLocation(Location center) {
         // canActorEnter(null) is the polymorphic check for Ground + Actors
@@ -51,22 +56,18 @@ public class CreatureSpawner implements Spawner {
      * This method creates a slime. When a slime emerges it causes nearby
      * workers to become terrified and drop every item in their inventory
      * onto the ground.
+     *
+     * @param center the location where the Slime emergence was initiated
+     * @return true if the Slime was successfully added to the map; false if spawning failed
      */
     @Override
     public boolean spawnSlime(Location center) {
         Location spot = getSpawnLocation(center);
         if (spot == null) return false;
-        display.println("!!! A Slime has emerged at " + spot + " !!!");
         try {
             spot.addActor(new Slime());
-
-            // USE THE UTILITY: Get all nearby workers
-            List<Actor> targets = SpatialSearch.getNearbyWorkers(spot);
-
-            for (Actor worker : targets) {
-                display.println(">>> " + worker + " is terrified and dropped all items!");
-                dropItems(worker, spot.map().locationOf(worker));
-            }
+            display.println("!!! A Slime has emerged at " + spot + " !!!");
+            dropAllItems( spot);
             return true;
         } catch (Exception e) { return false; }
     }
@@ -76,6 +77,9 @@ public class CreatureSpawner implements Spawner {
      * This method creates an undead creature. It gives the undead a
      * health bonus based on the number of other creatures already
      * standing in the surrounding tiles.
+     *
+     * @param center the location where the Undead emergence was initiated
+     * @return true if the Undead was successfully added to the map; false if spawning failed
      */
     @Override
     public boolean spawnUndead(Location center) {
@@ -124,11 +128,30 @@ public class CreatureSpawner implements Spawner {
         }
     }
 
-    private void dropItems(Actor actor, Location location) {
-        List<Item> inventoryCopy = new ArrayList<>(actor.getInventory().getItems());
-        for (Item item : inventoryCopy) {
-            actor.getInventory().remove(item);
-            location.addItem(item);
+    private void dropAllItems(Location slimeSpot) {
+        // 1. Find all workers nearby using the shared utility
+        List<Actor> nearbyWorkers = SpatialSearch.getNearbyWorkers(slimeSpot);
+
+        for (Actor worker : nearbyWorkers) {
+            display.println(">>> " + worker + " is terrified and dropped all items!");
+
+            // 2. We need the map to execute the DropAction
+            GameMap map = slimeSpot.map();
+
+            // 3. Create a copy of the inventory to avoid ConcurrentModificationException
+            List<Item> inventoryCopy = new ArrayList<>(worker.getInventory().getItems());
+
+            for (Item item : inventoryCopy) {
+                // This ensures the item is removed from inventory and added to the map correctly
+               DropAction dropAction = new DropAction(item);
+
+                // 5. Execute the action manually
+                // This will return a string like "Bob drops the Flask"
+                String result = dropAction.execute(worker, map);
+
+                // Optional: Print the result to the console for feedback
+                display.println("    " + result);
+            }
         }
     }
 

@@ -16,6 +16,9 @@ import game.managers.AlarmManager;
 import edu.monash.fit2099.engine.items.Item;
 import game.finance.Wallet;
 import game.managers.CreatureSpawner;
+import game.actions.MovementActionWrapper;
+import game.actions.DisorientedMoveAction;
+import game.capabilities.DisorientedCapability;
 
 /**
  * The primary player-controlled actor representing a contracted worker.
@@ -26,6 +29,7 @@ import game.managers.CreatureSpawner;
  *
  * @author Jewell Gomes
  * @author Chathya Attanayake (Modified by)
+ * @author Aida (Modified by)
  */
 public class ContractedWorker extends Actor implements Infectable, Freezable, Disorientable {
     private int spawnCounter = 0;
@@ -35,10 +39,10 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     /**
      * Constructor to initialize the worker with their starting statistics.
      *
-     * @param name The display name of the worker.
+     * @param name        The display name of the worker.
      * @param displayChar The character representing the worker on the map.
-     * @param hitPoints The initial health points of the worker.
-     * @param inventory The inventory system assigned to the worker.
+     * @param hitPoints   The initial health points of the worker.
+     * @param inventory   The inventory system assigned to the worker.
      */
     public ContractedWorker(String name, char displayChar, int hitPoints, Inventory inventory) {
         super(name, displayChar, hitPoints, inventory);
@@ -53,10 +57,10 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
      * 3. Displays all active status effects and inventory notifications to the user interface.
      * 4. Resolves multi-turn actions or displays a selection menu for player interaction.
      *
-     * @param actions A collection of available actions provided by the engine.
+     * @param actions    A collection of available actions provided by the engine.
      * @param lastAction The action performed in the previous turn.
-     * @param map The current game map the worker is navigating.
-     * @param display The terminal interface for outputting messages and menus.
+     * @param map        The current game map the worker is navigating.
+     * @param display    The terminal interface for outputting messages and menus.
      * @return The Action selected by the player or the next part of a multi-turn action.
      */
     @Override
@@ -92,9 +96,47 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         if (lastAction != null && lastAction.getNextAction() != null)
             return lastAction.getNextAction();
 
+        //REQ5 blizzard state
+        boolean isDisoriented = this.asCapability(DisorientedCapability.class)
+                .map(DisorientedCapability::isDisoriented)
+                .orElse(false);
+
+        if (isDisoriented) {
+            actions = MovementActionWrapper.wrapMovementActions(
+                    actions,
+                    this,
+                    this::getHotKeyForDirection,
+                    this::extractDirectionFromDescription
+            );
+        }
+
         // return/print the console menu
         Menu menu = new Menu(actions);
         return menu.showMenu(this, display);
+    }
+
+
+    //REQ5 helper methods for BlizzardState
+    private String getHotKeyForDirection(String direction) {
+        // Using array mapping - NO switch!
+        String[] directions = {"North", "South", "East", "West"};
+        String[] hotKeys = {"8", "2", "6", "4"};
+        for (int i = 0; i < directions.length; i++) {
+            if (directions[i].equals(direction)) {
+                return hotKeys[i];
+            }
+        }
+        return "";
+    }
+
+    private String extractDirectionFromDescription(String description) {
+        String[] directions = {"North", "South", "East", "West"};
+        for (String dir : directions) {
+            if (description.contains(dir)) {
+                return dir;
+            }
+        }
+        return "";
     }
 
     //req 4
@@ -126,5 +168,6 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         this.addStatus(new BlizzardDisorientationStatus(duration));
     }
 
-
 }
+
+

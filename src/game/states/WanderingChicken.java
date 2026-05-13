@@ -17,7 +17,7 @@ import game.utils.SpatialSearch;
 public class WanderingChicken implements State<ChickenState> {
     private final WanderBehaviour wanderBehaviour = new WanderBehaviour();
     private static final int MIMIC_TRIGGER_DISTANCE = 5;
-    private static final int HUNGRY_TRIGGER_DISTANCE = 10;
+    // No more HUNGRY_TRIGGER_DISTANCE - now checks adjacent only!
 
     @Override
     public Action getAction(Actor actor, Location location) {
@@ -29,13 +29,14 @@ public class WanderingChicken implements State<ChickenState> {
         GameMap map = location.map();
 
         boolean hasNearbyWorker = SpatialSearch.hasWorkerWithinDistance(map, location, MIMIC_TRIGGER_DISTANCE);
-        boolean hasWorkerWithConsumable = SpatialSearch.hasWorkerWithConsumableWithinDistance(map, location, HUNGRY_TRIGGER_DISTANCE);
+        // CHANGED: Now checks ADJACENT workers only (not radius)
+        boolean hasAdjacentWorkerWithConsumable = SpatialSearch.hasAdjacentWorkerWithConsumable(location);
 
         if (hasNearbyWorker) {
             return ChickenState.MIMICKING;
         }
 
-        if (hasWorkerWithConsumable) {
+        if (hasAdjacentWorkerWithConsumable) {
             return ChickenState.HUNGRY;
         }
 

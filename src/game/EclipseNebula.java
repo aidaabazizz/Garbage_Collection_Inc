@@ -78,8 +78,8 @@ public class EclipseNebula extends World {
 
         // 5. REQ 1: Spawn Scrap (Items the player SELLS to earn credits)
         // Spawned on both maps to provide income.
-        spawnCommonScrap(moonMap);
-        spawnCommonScrap(overflowMap);
+        spawnCommonScrap(moonMap,globalSpawner);
+        spawnCommonScrap(overflowMap,globalSpawner);
 
         // 6. REQ 2: Spawn Starting Card and Unique Items
         // "Starting Access Card spawned at the beginning" = Map 99
@@ -90,7 +90,7 @@ public class EclipseNebula extends World {
 
         // 7. Setup players
         // Start them on Moon 99 so they pick up the starting card and use the Tube
-        setupContractedWorkers(overflowMap);
+        setupContractedWorkers(overflowMap, globalSpawner);
 
     }
 
@@ -267,10 +267,10 @@ public class EclipseNebula extends World {
      *
      * @param map the GameMap where common scrap items will be deployed
      */
-    private void spawnCommonScrap(GameMap map) {
+    private void spawnCommonScrap(GameMap map,Spawner spawner) {
         // Items to SELL for credits. No high-value items here!
         map.at(16, 3).addItem(new Apple());
-        map.at(17, 4).addItem(new Cookies());
+        map.at(17, 4).addItem(new Cookies(spawner));
         map.at(17, 5).addItem(new FloppyDisk());
         map.at(5, 8).addItem(new Lantern());
         map.at(16, 4).addItem(new CRTMonitor());
@@ -294,7 +294,7 @@ public class EclipseNebula extends World {
      * @param map the GameMap where the players will be added
      * @throws Exception if a player cannot be added to the game world
      */
-    private void setupContractedWorkers(GameMap map) throws Exception {
+    private void setupContractedWorkers(GameMap map,Spawner globalSpawner) throws Exception {
         String[] names = {"#1 Bob", "#2 Tom", "#3 Sarah", "#4 Julie", "#5 Rick"};
         int startX = 4;
 
@@ -303,7 +303,7 @@ public class EclipseNebula extends World {
             inventory.add(new Flask());
             inventory.add(new Wallet()); // REQ 1: Required for purchases
 
-            ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory);
+            ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory,globalSpawner);
             this.addPlayer(worker, map.at(startX++, 2));
         }
     }

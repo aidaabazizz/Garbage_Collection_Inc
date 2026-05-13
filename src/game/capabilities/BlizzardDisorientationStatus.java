@@ -6,10 +6,11 @@ import edu.monash.fit2099.engine.positions.Location;
 
 /**
  * A status that causes player movement to be randomized.
+ * Implements DisorientedCapability for capability pattern.
  *
  * @author Aida
  */
-public class BlizzardDisorientationStatus implements Status {
+public class BlizzardDisorientationStatus implements Status, DisorientedCapability {
     private int remainingTurns;
 
     public BlizzardDisorientationStatus(int duration) {
@@ -26,9 +27,15 @@ public class BlizzardDisorientationStatus implements Status {
         return remainingTurns > 0;
     }
 
-    public int getRemainingTurns() {
-        return remainingTurns;
+    @Override
+    public boolean isDisoriented() {
+        return remainingTurns > 0;
     }
+
+    // REMOVE this unused method
+    // public int getRemainingTurns() {
+    //     return remainingTurns;
+    // }
 
     @Override
     public String toString() {

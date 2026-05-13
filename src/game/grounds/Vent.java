@@ -4,7 +4,6 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.*;
 import game.enums.Ability;
 import game.capabilities.PoisonStatus;
-import game.managers.CreatureSpawner;
 import game.managers.Spawner;
 import game.utils.SpatialSearch;
 
@@ -33,21 +32,14 @@ public class Vent extends Ground {
         }
     }
 
-    private boolean isWorkerAdjacent(Location loc) {
-        for (Exit exit : loc.getExits()) {
-            if (exit.getDestination().containsAnActor() &&
-                    exit.getDestination().getActor().hasAbility(Ability.WORKER)) return true;
-        }
-        return false;
-    }
 
-    private void applyPoison(Location loc) {
+    private void applyPoison(Location location) {
         // Poison the new spawn
-        if (loc.containsAnActor()) loc.getActor().addStatus(new PoisonStatus(POISON_DURATION));
+        if (location.containsAnActor()) location.getActor().addStatus(new PoisonStatus(POISON_DURATION));
 
         // REQ4 Clarification: Poison any (one random) adjacent actor
         List<Actor> adjacentActors = new ArrayList<>();
-        for (Exit exit : loc.getExits()) {
+        for (Exit exit : location.getExits()) {
             if (exit.getDestination().containsAnActor()) {
                 adjacentActors.add(exit.getDestination().getActor());
             }
