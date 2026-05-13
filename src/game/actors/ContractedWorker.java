@@ -19,6 +19,7 @@ import game.managers.CreatureSpawner;
 import game.actions.MovementActionWrapper;
 import game.actions.DisorientedMoveAction;
 import game.capabilities.DisorientedCapability;
+import game.managers.Spawner;
 
 /**
  * The primary player-controlled actor representing a contracted worker.
@@ -34,6 +35,10 @@ import game.capabilities.DisorientedCapability;
 public class ContractedWorker extends Actor implements Infectable, Freezable, Disorientable {
     private int spawnCounter = 0;
     private static final int SPAWN_THRESHOLD = 5;
+    private final Spawner spawner;
+
+
+
 
 
     /**
@@ -44,8 +49,9 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
      * @param hitPoints   The initial health points of the worker.
      * @param inventory   The inventory system assigned to the worker.
      */
-    public ContractedWorker(String name, char displayChar, int hitPoints, Inventory inventory) {
+    public ContractedWorker(String name, char displayChar, int hitPoints, Inventory inventory,Spawner spawner) {
         super(name, displayChar, hitPoints, inventory);
+        this.spawner = spawner;
         this.enableAbility(Ability.WORKER);
     }
 
@@ -154,7 +160,7 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             // We don't need a manual loop here. The CreatureSpawner's getSpawnLocation
             // will see that the Worker is blocking 'location' and automatically
             // find the adjacent empty tile for the Parasite.
-            new CreatureSpawner().spawnParasite(location);
+            this.spawner.spawnParasite(location);
         }
     }
 
