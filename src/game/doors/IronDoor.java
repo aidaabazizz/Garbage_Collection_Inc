@@ -1,17 +1,17 @@
 package game.doors;
 
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
+import game.capabilities.FireStackable;
 import game.enums.AccessLevel;
 import game.grounds.Door;
 import game.grounds.Fire;
 
 /**
  * Iron door requires level 2 or higher clearance.
- * Unlocking iron door causes the mechanism to overheat, setting adjavent tiles on fire
+ * Unlocking iron door causes the mechanism to overheat, setting adjacent tiles on fire
  * for 2 turns.
  *
  * @author Victoria Tay Wen Xie
@@ -52,18 +52,24 @@ public class IronDoor extends Door {
      */
     @Override
     public String applyUnlockEffect(Actor actor, GameMap map) {
-        // gets the current position of the worker who unlocked the door
         Location actorLocation = map.locationOf(actor);
-        for (Exit exit : actorLocation.getExits()) {
+        for (edu.monash.fit2099.engine.positions.Exit exit : actorLocation.getExits()) {
             Location doorLocation = exit.getDestination();
+
             if (doorLocation.getGround() == this) {
+                this.unlock();
                 for (Location adjacent : doorLocation.getNearbyLocations(ADJACENT_TILES)) {
                     Ground ground = adjacent.getGround();
-                    if (ground.canActorEnter(actor)) {
+
+                    FireStackable existingFire = adjacent.getGroundAs(FireStackable.class);
+                    if (existingFire != null) {
+                        existingFire.addStack();
+                    } else if (ground.canActorEnter(actor)) {
+                        // Pass the current ground (unlocked) to be saved as previousGround
                         adjacent.setGround(new Fire(ground, FIRE_DURATION));
                     }
                 }
-                return "The door overheats, setting adjacent floor tiles on fire!";
+                return "The door overheats, setting adjacent tiles on fire for 2 turns!";
             }
         }
         return "The door overheats!";
