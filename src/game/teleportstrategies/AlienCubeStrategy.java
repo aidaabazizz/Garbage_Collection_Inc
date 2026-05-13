@@ -73,9 +73,6 @@ public class AlienCubeStrategy extends BaseTeleportStrategy {
         for (Location adj : source.getNearbyLocations(ADJACENT_TILE)) {
             adj.setGround(new ToxicWaste());
         }
-        if (cube != null) {
-            actor.getInventory().remove(cube);
-        }
     }
 
     /**
