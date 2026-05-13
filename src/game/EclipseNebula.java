@@ -90,7 +90,7 @@ public class EclipseNebula extends World {
 
         // 7. Setup players
         // Start them on Moon 99 so they pick up the starting card and use the Tube
-        setupContractedWorkers(overflowMap, globalSpawner);
+        setupContractedWorkers(moonMap, globalSpawner);
 
     }
 
@@ -304,7 +304,7 @@ public class EclipseNebula extends World {
             inventory.add(new Wallet()); // REQ 1: Required for purchases
 
             ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory,globalSpawner);
-            this.addPlayer(worker, map.at(startX++, 2));
+            this.addPlayer(worker, map.at(startX++, 4));
         }
     }
 
