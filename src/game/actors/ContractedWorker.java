@@ -17,7 +17,6 @@ import edu.monash.fit2099.engine.items.Item;
 import game.finance.Wallet;
 import game.managers.CreatureSpawner;
 import game.actions.MovementActionWrapper;
-import game.actions.DisorientedMoveAction;
 import game.capabilities.DisorientedCapability;
 import game.managers.Spawner;
 
@@ -199,6 +198,14 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     }
 
 
+    // ==================== REQ5 FREEZE/BLIZZARD METHODS ====================
+
+    /**
+     * Freezes the worker by adding FrozenStatus for the specified duration.
+     * Called when Elsa enters FREEZE state.
+     *
+     * @param duration The number of turns the worker remains frozen.
+     */
     @Override
     public void freeze(int duration) {
         this.addStatus(new FrozenStatus(duration));
