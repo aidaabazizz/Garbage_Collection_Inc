@@ -148,7 +148,9 @@ public class Lantern extends Item implements UpdateNotifier, Sellable, Infectabl
      */
     @Override
     public void updateInfection(Location location) {
-        this.oil = Math.max(0, this.oil - 1);
+        if (oil > 0) {
+            oil--;
+        }
     }
 
     /**
