@@ -90,6 +90,12 @@ public class CreatureSpawner implements Spawner {
             Undead undead = new Undead();
             List<Actor> nearbyCreatures = SpatialSearch.getNearbyActors(spot);
             int count = nearbyCreatures.size();
+            for (Actor actor : nearbyCreatures) {
+                // If the actor DOES NOT have the WORKER ability, it is a creature
+                if (!actor.hasAbility(Ability.WORKER)) {
+                    count++;
+                }
+            }
             if (count > 0) {
                 undead.modifyStatisticMaximum(ActorStatistics.HEALTH, StatisticOperations.INCREASE, count);
                 undead.heal(count);
