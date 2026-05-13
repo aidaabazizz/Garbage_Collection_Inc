@@ -4,8 +4,8 @@ package game.grounds;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.managers.CreatureSpawner;
-import game.holestrategies.GalaxyPortalSpawnStrategy;
-import game.holestrategies.GalaxyPortalStrategy;
+import game.galaxyportalstrategy.GalaxyPortalSpawnStrategy;
+import game.galaxyportalstrategy.GalaxyPortalStrategy;
 
 /**
  * REQ5: A mystical portal that spawns CrazyChicken and Elsa.
