@@ -134,15 +134,6 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         return "";
     }
 
-    private String extractDirectionFromDescription(String description) {
-        String[] directions = {"North", "South", "East", "West"};
-        for (String dir : directions) {
-            if (description.contains(dir)) {
-                return dir;
-            }
-        }
-        return "";
-    }
 
     //req 4
     @Override

@@ -28,7 +28,7 @@ public class Elsa extends NonPlayerCharacter implements StatefulActor {
     private State<ElsaState> currentState;
     private ElsaState currentStateEnum;
     private int turnsInCurrentState = 0;
-    private String currentStateName = "WANDERING";
+    private String currentStateName;
 
     private IceBlast currentWeapon;
 
@@ -59,7 +59,7 @@ public class Elsa extends NonPlayerCharacter implements StatefulActor {
 
     @Override
     public String getCurrentStateName() {
-        return currentStateName;
+        return getCurrentStateName();
     }
 
     @Override
