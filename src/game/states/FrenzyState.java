@@ -16,7 +16,6 @@ import game.weapons.CrazyChickenBeak;
  * FRENZY STATE for CrazyChicken.
  * The chicken furiously chases and attacks the nearest worker.
  * Deals half damage but attacks with increased frequency.
- *
  * Transitions to:
  * - WANDER: after 3 rounds (frenzy duration ends)
  * - stays FRENZY: otherwise

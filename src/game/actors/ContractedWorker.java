@@ -19,6 +19,7 @@ import game.managers.CreatureSpawner;
 import game.actions.MovementActionWrapper;
 import game.actions.DisorientedMoveAction;
 import game.capabilities.DisorientedCapability;
+import game.capabilities.FreezableCapability;
 import game.managers.Spawner;
 
 /**
@@ -90,6 +91,22 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             display.println(this.name + " is affected by: " + status.toString());
         }
 
+        // ========== REQ5 FROZEN CHECK - DIRECT STATUS CHECK ==========
+        boolean isFrozen = false;
+        for (Status status : this.statuses()) {
+            if (status instanceof FrozenStatus && status.isStatusActive()) {
+                isFrozen = true;
+                break;
+            }
+        }
+
+        if (isFrozen) {
+            display.println("\u001B[36m" + this + " is frozen solid! Cannot take any actions until the ice melts!\u001B[0m");
+            return new DoNothingAction();  // Skip turn completely - no menu shown
+        }
+// ========================================================
+
+
         // Process background notifications from inventory items
         for (UpdateNotifier notifier : this.getInventory().getItemsAs(UpdateNotifier.class)) {
             String msg = notifier.updateMessage();
@@ -158,6 +175,8 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     public void freeze(int duration) {
         this.addStatus(new FrozenStatus(duration));
     }
+
+
 
     @Override
     public void disorient(int duration) {

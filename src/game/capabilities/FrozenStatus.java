@@ -6,10 +6,11 @@ import edu.monash.fit2099.engine.positions.Location;
 
 /**
  * A status that prevents an actor from moving or taking actions.
+ * Implements FreezableCapability for capability pattern.
  *
  * @author Aida
  */
-public class FrozenStatus implements Status {
+public class FrozenStatus implements Status, FreezableCapability {
     private int remainingTurns;
 
     public FrozenStatus(int duration) {
@@ -23,6 +24,11 @@ public class FrozenStatus implements Status {
 
     @Override
     public boolean isStatusActive() {
+        return remainingTurns > 0;
+    }
+
+    @Override
+    public boolean isFrozen() {
         return remainingTurns > 0;
     }
 
