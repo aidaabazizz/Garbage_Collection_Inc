@@ -16,6 +16,7 @@ public abstract class AbstractTreeStage implements TreeStage {
     protected static final Random random = new Random();
     /** By making this protected, all "Stage" subclasses inherit it automatically. */
     protected final Display display = new Display();
+    /** The age of the current tree stage **/
     private int age = 0;
 
     /**
