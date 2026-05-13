@@ -18,7 +18,7 @@ public class MagicCircle extends Ground {
 
     /**
      * This constructor constructs a new Magic Circle ground tile
-      */
+     */
     public MagicCircle() {
         super('◎', "Magic Circle");
     }
@@ -33,7 +33,11 @@ public class MagicCircle extends Ground {
     @Override
     public ActionList allowableActions(Actor actor, Location location, String direction) {
         ActionList actions = new ActionList();
-        actions.add(new TeleportAction(new MagicCircleStrategy()));
+
+        if (direction.isEmpty()) {
+            actions.add(new TeleportAction(new MagicCircleStrategy()));
+        }
+
         return actions;
     }
 }
