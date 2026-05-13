@@ -165,9 +165,8 @@ public class Cookies extends Item implements Consumable, Sellable, Infectable {
         this.spawner.spawnParasite(location);
 
 
-        if (count <= 0) {
-            location.removeItem(this);
-        }
+//        if (count <= 0) {
+//            location.removeItem(this);
     }
 
     /**
