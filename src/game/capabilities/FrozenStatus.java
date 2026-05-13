@@ -28,7 +28,7 @@ public class FrozenStatus implements Status, FreezableCapability {
     }
 
     @Override
-    public boolean isFrozen() {
+    public boolean isActive() {
         return remainingTurns > 0;
     }
 

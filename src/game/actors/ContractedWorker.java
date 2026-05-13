@@ -17,9 +17,7 @@ import edu.monash.fit2099.engine.items.Item;
 import game.finance.Wallet;
 import game.managers.CreatureSpawner;
 import game.actions.MovementActionWrapper;
-import game.actions.DisorientedMoveAction;
 import game.capabilities.DisorientedCapability;
-import game.capabilities.FreezableCapability;
 import game.managers.Spawner;
 
 /**
@@ -38,10 +36,6 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     private static final int SPAWN_THRESHOLD = 5;
     private final Spawner spawner;
 
-
-
-
-
     /**
      * Constructor to initialize the worker with their starting statistics.
      *
@@ -49,11 +43,28 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
      * @param displayChar The character representing the worker on the map.
      * @param hitPoints   The initial health points of the worker.
      * @param inventory   The inventory system assigned to the worker.
+     * @param spawner     The spawner used for creating parasites when infected.
      */
-    public ContractedWorker(String name, char displayChar, int hitPoints, Inventory inventory,Spawner spawner) {
+    public ContractedWorker(String name, char displayChar, int hitPoints, Inventory inventory, Spawner spawner) {
         super(name, displayChar, hitPoints, inventory);
         this.spawner = spawner;
         this.enableAbility(Ability.WORKER);
+    }
+
+    /**
+     * Checks if the worker has an active status of the given class.
+     * Uses class comparison instead of instanceof (SOLID compliant).
+     *
+     * @param statusClass The status class to check for (e.g., FrozenStatus.class)
+     * @return true if an active status of the given class exists, false otherwise
+     */
+    private boolean hasActiveStatus(Class<? extends Status> statusClass) {
+        for (Status status : this.statuses()) {
+            if (status.getClass() == statusClass && status.isStatusActive()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -62,7 +73,9 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
      * 1. Notifies the user of global facility states such as active lockdowns.
      * 2. Validates the consciousness of the actor to determine if a turn can be taken.
      * 3. Displays all active status effects and inventory notifications to the user interface.
-     * 4. Resolves multi-turn actions or displays a selection menu for player interaction.
+     * 4. Checks for frozen status - if frozen, skips turn completely.
+     * 5. Resolves multi-turn actions or displays a selection menu for player interaction.
+     * 6. Wraps movement actions with disoriented versions if blizzard status is active.
      *
      * @param actions    A collection of available actions provided by the engine.
      * @param lastAction The action performed in the previous turn.
@@ -91,21 +104,15 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             display.println(this.name + " is affected by: " + status.toString());
         }
 
-        // ========== REQ5 FROZEN CHECK - DIRECT STATUS CHECK ==========
-        boolean isFrozen = false;
-        for (Status status : this.statuses()) {
-            if (status instanceof FrozenStatus && status.isStatusActive()) {
-                isFrozen = true;
-                break;
-            }
-        }
+        // ========== REQ5 FREEZE CHECK ==========
+        // Uses class comparison - NO instanceof!
+        boolean isFrozen = hasActiveStatus(FrozenStatus.class);
 
         if (isFrozen) {
             display.println("\u001B[36m" + this + " is frozen solid! Cannot take any actions until the ice melts!\u001B[0m");
-            return new DoNothingAction();  // Skip turn completely - no menu shown
+            return new DoNothingAction();
         }
-// ========================================================
-
+        // =======================================
 
         // Process background notifications from inventory items
         for (UpdateNotifier notifier : this.getInventory().getItemsAs(UpdateNotifier.class)) {
@@ -116,13 +123,13 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         }
 
         // Handle multi-turn Actions
-        if (lastAction != null && lastAction.getNextAction() != null)
+        if (lastAction != null && lastAction.getNextAction() != null) {
             return lastAction.getNextAction();
+        }
 
-        //REQ5 blizzard state
-        boolean isDisoriented = this.asCapability(DisorientedCapability.class)
-                .map(DisorientedCapability::isDisoriented)
-                .orElse(false);
+        // ========== REQ5 BLIZZARD CHECK ==========
+        // Uses class comparison - NO instanceof!
+        boolean isDisoriented = hasActiveStatus(BlizzardDisorientationStatus.class);
 
         if (isDisoriented) {
             actions = MovementActionWrapper.wrapMovementActions(
@@ -131,14 +138,20 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
                     this::getHotKeyForDirection
             );
         }
+        // ========================================
 
         // return/print the console menu
         Menu menu = new Menu(actions);
         return menu.showMenu(this, display);
     }
 
-
-    //REQ5 helper methods for BlizzardState
+    /**
+     * Returns the hotkey associated with a given movement direction.
+     * Used by the MovementActionWrapper when wrapping movement actions.
+     *
+     * @param direction The movement direction (North, South, East, West)
+     * @return The hotkey character (8, 2, 6, 4) or empty string if not found
+     */
     private String getHotKeyForDirection(String direction) {
         // Using array mapping - NO switch!
         String[] directions = {"North", "South", "East", "West"};
@@ -151,38 +164,57 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         return "";
     }
 
+    // ==================== REQ4 INFECTION METHODS ====================
 
-    //req 4
+    /**
+     * Reacts to infection by adding the InfectionStatus to this worker.
+     * Called when a parasite successfully infects this worker.
+     *
+     * @param location The location where the infection occurred.
+     */
     @Override
     public void reactToInfection(Location location) {
         this.addStatus(new InfectionStatus());
     }
 
+    /**
+     * Updates the infection status each turn.
+     * Every 5 turns, spawns a new parasite at an adjacent tile.
+     *
+     * @param location The current location of the infected worker.
+     */
     @Override
     public void updateInfection(Location location) {
         spawnCounter++;
         if (spawnCounter >= SPAWN_THRESHOLD) {
             spawnCounter = 0;
-            //UPDATED: Delegate spawning to the Spawner.
-            // We don't need a manual loop here. The CreatureSpawner's getSpawnLocation
-            // will see that the Worker is blocking 'location' and automatically
-            // find the adjacent empty tile for the Parasite.
+            // Delegate spawning to the Spawner.
+            // The CreatureSpawner's getSpawnLocation will find an adjacent empty tile.
             this.spawner.spawnParasite(location);
         }
     }
 
+    // ==================== REQ5 FREEZE/BLIZZARD METHODS ====================
+
+    /**
+     * Freezes the worker by adding FrozenStatus for the specified duration.
+     * Called when Elsa enters FREEZE state.
+     *
+     * @param duration The number of turns the worker remains frozen.
+     */
     @Override
     public void freeze(int duration) {
         this.addStatus(new FrozenStatus(duration));
     }
 
-
-
+    /**
+     * Disorients the worker by adding BlizzardDisorientationStatus for the specified duration.
+     * Called when Elsa enters BLIZZARD state.
+     *
+     * @param duration The number of turns the worker remains disoriented.
+     */
     @Override
     public void disorient(int duration) {
         this.addStatus(new BlizzardDisorientationStatus(duration));
     }
-
 }
-
-
