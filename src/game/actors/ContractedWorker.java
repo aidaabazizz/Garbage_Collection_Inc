@@ -112,7 +112,6 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
                     actions,
                     this,
                     this::getHotKeyForDirection,
-                    this::extractDirectionFromDescription
             );
         }
 
