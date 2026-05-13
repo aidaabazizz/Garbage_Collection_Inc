@@ -1,8 +1,8 @@
-// game/states/ElsaIceSpikeState.java
 package game.states;
 
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.WanderBehaviour;
@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * ICE SPIKE STATE for Elsa.
+ * Triggered when any worker's health drops to 50% or below.
  *
  * @author Aida
  */
@@ -24,6 +25,7 @@ public class IceSpikeState implements State<ElsaState> {
     private static final int ICE_SPIKE_DURATION = 3;
     private static final int SPIKE_RADIUS = 5;
     private static final int MAX_SPIKES = 8;
+    private final Display display = new Display();
 
     @Override
     public Action getAction(Actor actor, Location location) {
@@ -40,6 +42,8 @@ public class IceSpikeState implements State<ElsaState> {
 
     @Override
     public void onEnter(Actor actor, Location location) {
+        display.println("\u001B[36m" + actor + " senses a wounded worker! Ice spikes erupt from the ground!\u001B[0m");
+
         GameMap map = location.map();
         List<Location> validLocations = new ArrayList<>();
 
@@ -53,6 +57,7 @@ public class IceSpikeState implements State<ElsaState> {
                     int dist = Math.abs(x) + Math.abs(y);
 
                     if (dist <= SPIKE_RADIUS && dist > 0) {
+                        // NO instanceof - using capability pattern!
                         if (targetLoc.getGroundAs(IceSpikeCapability.class) == null) {
                             validLocations.add(targetLoc);
                         }
@@ -67,12 +72,15 @@ public class IceSpikeState implements State<ElsaState> {
         for (int i = 0; i < spikesToCreate; i++) {
             Location spikeLoc = validLocations.get(i);
             spikeLoc.setGround(new IceSpike(spikeLoc.getGround()));
+            display.println("\u001B[36mAn ice spike erupts at " + spikeLoc + "!\u001B[0m");
         }
+
+        display.println("\u001B[36m" + spikesToCreate + " ice spikes will remain for " + ICE_SPIKE_DURATION + " turns.\u001B[0m");
     }
 
     @Override
     public void onExit(Actor actor, Location location) {
-        // Ice spikes will naturally melt via their own tick() method
+        display.println("\u001B[36m" + actor + " calms down. The ice spikes begin to melt...\u001B[0m");
     }
 
     @Override
