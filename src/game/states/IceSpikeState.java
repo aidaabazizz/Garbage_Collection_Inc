@@ -40,6 +40,34 @@ public class IceSpikeState implements State<ElsaState> {
         return ElsaState.ICE_SPIKE;
     }
 
+    /**
+     * Checks if a location is valid for placing an ice spike.
+     * Uses capability pattern and engine methods - NO instanceof!
+     *
+     * @param loc The location to check
+     * @param center The center location (Elsa's position)
+     * @return true if valid for ice spike placement
+     */
+    private boolean isValidSpikeLocation(Location loc, Location center) {
+        // Don't place spike on Elsa's own tile
+        if (loc == center) {
+            return false;
+        }
+
+        // Don't place spike on existing ice spike (capability pattern)
+        if (loc.getGroundAs(IceSpikeCapability.class) != null) {
+            return false;
+        }
+
+        // Don't place spike on non-traversable ground (walls, etc.)
+        // canActorEnter(null) returns false for impassable terrain
+        if (!loc.canActorEnter(null)) {
+            return false;
+        }
+
+        return true;
+    }
+
     @Override
     public void onEnter(Actor actor, Location location) {
         display.println("\u001B[36m" + actor + " senses a wounded worker! Ice spikes erupt from the ground!\u001B[0m");
@@ -57,8 +85,7 @@ public class IceSpikeState implements State<ElsaState> {
                     int dist = Math.abs(x) + Math.abs(y);
 
                     if (dist <= SPIKE_RADIUS && dist > 0) {
-                        // NO instanceof - using capability pattern!
-                        if (targetLoc.getGroundAs(IceSpikeCapability.class) == null) {
+                        if (isValidSpikeLocation(targetLoc, location)) {
                             validLocations.add(targetLoc);
                         }
                     }
@@ -72,7 +99,7 @@ public class IceSpikeState implements State<ElsaState> {
         for (int i = 0; i < spikesToCreate; i++) {
             Location spikeLoc = validLocations.get(i);
             spikeLoc.setGround(new IceSpike(spikeLoc.getGround()));
-            display.println("\u001B[36mAn ice spike erupts at " + spikeLoc + "!\u001B[0m");
+            display.println("\u001B[36mAn ice spike erupts at (" + spikeLoc.x() + ", " + spikeLoc.y() + ")!\u001B[0m");
         }
 
         display.println("\u001B[36m" + spikesToCreate + " ice spikes will remain for " + ICE_SPIKE_DURATION + " turns.\u001B[0m");

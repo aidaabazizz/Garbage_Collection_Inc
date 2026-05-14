@@ -28,7 +28,7 @@ public class WanderingChicken implements State<ChickenState> {
         GameMap map = location.map();
 
         boolean hasNearbyWorker = SpatialSearch.hasWorkerWithinDistance(map, location, MIMIC_TRIGGER_DISTANCE);
-        // CHANGED: Now checks ADJACENT workers only (not radius)
+
         boolean hasAdjacentWorkerWithConsumable = SpatialSearch.hasAdjacentWorkerWithConsumable(location);
 
         if (hasAdjacentWorkerWithConsumable) {
