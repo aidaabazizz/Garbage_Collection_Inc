@@ -259,5 +259,3 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         this.addStatus(new BlizzardDisorientationStatus(duration));
     }
 }
-
-
