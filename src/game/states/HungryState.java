@@ -1,8 +1,8 @@
-// game/states/HungryState.java
 package game.states;
 
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
@@ -17,18 +17,19 @@ import java.util.List;
 
 /**
  * HUNGRY STATE for CrazyChicken.
- * Now checks for workers with consumables in ADJACENT tiles only.
+ * Checks for workers with consumables in ADJACENT tiles only.
  *
  * @author Aida
  */
 public class HungryState implements State<ChickenState> {
     private final StealFromInventoryBehaviour stealBehaviour = new StealFromInventoryBehaviour();
     private final WanderBehaviour wanderBehaviour = new WanderBehaviour();
+    private final Display display = new Display();
     private static final int MIMIC_PRIORITY_DISTANCE = 5;
+    private static final int PULL_RADIUS = 5;
 
     @Override
     public Action getAction(Actor actor, Location location) {
-        // Try to steal from adjacent workers
         Action stealAction = stealBehaviour.operate(actor, location);
         if (stealAction != null) {
             return stealAction;
@@ -41,7 +42,6 @@ public class HungryState implements State<ChickenState> {
         GameMap map = location.map();
 
         boolean hasNearbyWorker = SpatialSearch.hasWorkerWithinDistance(map, location, MIMIC_PRIORITY_DISTANCE);
-        // CHANGED: Now checks ADJACENT workers only for consumables
         boolean hasAdjacentWorkerWithConsumable = SpatialSearch.hasAdjacentWorkerWithConsumable(location);
 
         if (hasNearbyWorker) {
@@ -57,18 +57,22 @@ public class HungryState implements State<ChickenState> {
 
     @Override
     public void onEnter(Actor actor, Location location) {
-        // IMMEDIATE EFFECT: Pull consumable items within 5 tiles (this stays the same)
+        display.println("\u001B[33m" + actor + " is hungry! The ground trembles as items are pulled toward it!\u001B[0m");
+
         GameMap map = location.map();
+        int pulledCount = 0;
 
         for (int y : map.getYRange()) {
             for (int x : map.getXRange()) {
                 Location targetLoc = map.at(x, y);
                 int dist = Math.abs(x - location.x()) + Math.abs(y - location.y());
-                if (dist <= 5) {
+
+                if (dist <= PULL_RADIUS) {
                     List<Item> itemsToMove = new ArrayList<>();
                     for (Item item : targetLoc.getItems()) {
                         if (item.asCapability(Consumable.class).isPresent()) {
                             itemsToMove.add(item);
+                            pulledCount++;
                         }
                     }
                     for (Item item : itemsToMove) {
@@ -77,6 +81,10 @@ public class HungryState implements State<ChickenState> {
                     }
                 }
             }
+        }
+
+        if (pulledCount > 0) {
+            display.println("\u001B[33m" + pulledCount + " consumable items were pulled toward " + actor + "!\u001B[0m");
         }
     }
 
