@@ -1,3 +1,4 @@
+// game/capabilities/FrozenStatus.java
 package game.capabilities;
 
 import edu.monash.fit2099.engine.GameEntity;
@@ -5,11 +6,13 @@ import edu.monash.fit2099.engine.capabilities.Status;
 import edu.monash.fit2099.engine.positions.Location;
 
 /**
- * A status that prevents an actor from moving or taking actions.
+ * A status that prevents an actor from taking actions.
+ * Implements FrozenCapability marker interface.
  *
  * @author Aida
+ * @version 1.0
  */
-public class FrozenStatus implements Status {
+public class FrozenStatus implements Status, FrozenCapability {
     private int remainingTurns;
 
     public FrozenStatus(int duration) {

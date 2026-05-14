@@ -1,49 +1,53 @@
-// game/states/MimickingState.java
 package game.states;
 
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
+import edu.monash.fit2099.engine.positions.Location;
 import game.behaviours.MirrorMovementBehaviour;
-import game.capabilities.StatefulActor;
-import game.capabilities.DisorientedStatus;
 import game.enums.ChickenState;
 import game.utils.SpatialSearch;
 
 /**
- * MIMICKING STATE for CrazyChicken.
+ * MIMICKING state for CrazyChicken.
+ * In this state, CrazyChicken tracks a nearby worker and moves in the opposite direction.
  *
  * @author Aida
+ * @version 1.0
  */
 public class MimickingState implements State<ChickenState> {
-    private MirrorMovementBehaviour mirrorBehaviour;
-    private Actor trackedWorker;
     private static final int FRENZY_TRIGGER_TURNS = 2;
     private static final int MIMIC_DISTANCE = 5;
+
+    private MirrorMovementBehaviour mirrorBehaviour;
+    private Actor trackedWorker;
 
     @Override
     public Action getAction(Actor actor, Location location) {
         GameMap map = location.map();
-        Actor nearestWorker = SpatialSearch.findNearestWorker(map, location);
+        Actor nearestWorker = SpatialSearch.findNearestWorkerWithinDistance(map, location, MIMIC_DISTANCE);
 
-        if (nearestWorker != null) {
-            if (trackedWorker == null || trackedWorker != nearestWorker) {
-                trackedWorker = nearestWorker;
-                mirrorBehaviour = new MirrorMovementBehaviour(trackedWorker);
-            }
-            return mirrorBehaviour.operate(actor, location);
+        if (nearestWorker == null) {
+            return null;
         }
 
-        return new WanderingChicken().getAction(actor, location);
+        if (trackedWorker == null || trackedWorker != nearestWorker) {
+            trackedWorker = nearestWorker;
+            mirrorBehaviour = new MirrorMovementBehaviour(trackedWorker);
+        }
+
+        return mirrorBehaviour.operate(actor, location);
     }
 
     @Override
     public ChickenState getNextState(Actor actor, Location location, int turnsInCurrentState) {
         GameMap map = location.map();
-        boolean hasNearbyWorker = SpatialSearch.hasWorkerWithinDistance(map, location, MIMIC_DISTANCE);
 
-        if (!hasNearbyWorker) {
+        if (SpatialSearch.hasAdjacentWorkerWithConsumable(location)) {
+            return ChickenState.HUNGRY;
+        }
+
+        if (!SpatialSearch.hasWorkerWithinDistance(map, location, MIMIC_DISTANCE)) {
             return ChickenState.WANDER;
         }
 
@@ -56,18 +60,13 @@ public class MimickingState implements State<ChickenState> {
 
     @Override
     public void onEnter(Actor actor, Location location) {
-        StatefulActor statefulActor = (StatefulActor) actor;
-        statefulActor.setCurrentStateName("MIMICKING");
-
-        // Use SpatialSearch.getNearbyWorkers() for adjacent workers!
-        for (Actor worker : SpatialSearch.getNearbyWorkers(location)) {
-            worker.addStatus(new DisorientedStatus(3));
-        }
+        // No immediate effect - just start mimicking
     }
 
     @Override
     public void onExit(Actor actor, Location location) {
-        // No cleanup needed
+        trackedWorker = null;
+        mirrorBehaviour = null;
     }
 
     @Override

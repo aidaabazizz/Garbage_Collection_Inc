@@ -1,25 +1,31 @@
-// game/states/ElsaFreezeState.java
+
 package game.states;
 
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.positions.Location;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.GameMap;
+import edu.monash.fit2099.engine.positions.Location;
 import game.behaviours.WanderBehaviour;
 import game.capabilities.Freezable;
 import game.enums.Ability;
 import game.enums.ElsaState;
-
-import java.util.Optional;
+import game.utils.ConsumableUseTracker;
+import game.utils.SpatialSearch;
 
 /**
- * FREEZE STATE for Elsa.
+ * FREEZE state for Elsa.
  *
  * @author Aida
+ * @version 1.0
  */
 public class FreezeState implements State<ElsaState> {
-    private final WanderBehaviour wanderBehaviour = new WanderBehaviour();
+    private static final int FREEZE_DISTANCE = 3;
     private static final int FREEZE_DURATION = 2;
+    private static final int BLIZZARD_DISTANCE = 8;
+
+    private final WanderBehaviour wanderBehaviour = new WanderBehaviour();
+    private final Display display = new Display();
 
     @Override
     public Action getAction(Actor actor, Location location) {
@@ -28,9 +34,24 @@ public class FreezeState implements State<ElsaState> {
 
     @Override
     public ElsaState getNextState(Actor actor, Location location, int turnsInCurrentState) {
-        if (turnsInCurrentState >= FREEZE_DURATION) {
+        GameMap map = location.map();
+
+        if (ConsumableUseTracker.consumeFlag()) {
+            return ElsaState.ICE_SPIKE;
+        }
+
+        if (SpatialSearch.hasAdjacentSlime(location)) {
+            return ElsaState.SINGING;
+        }
+
+        if (SpatialSearch.countWorkersWithinDistance(map, location, BLIZZARD_DISTANCE) >= 2) {
+            return ElsaState.BLIZZARD;
+        }
+
+        if (!SpatialSearch.hasWorkerWithinDistance(map, location, FREEZE_DISTANCE)) {
             return ElsaState.WANDERING;
         }
+
         return ElsaState.FREEZE;
     }
 
@@ -38,25 +59,33 @@ public class FreezeState implements State<ElsaState> {
     public void onEnter(Actor actor, Location location) {
         GameMap map = location.map();
 
+        display.println(actor + " releases a freezing wave across the whole map!");
+
         for (int y : map.getYRange()) {
             for (int x : map.getXRange()) {
-                Location targetLoc = map.at(x, y);
-                if (targetLoc.containsAnActor()) {
-                    Actor target = targetLoc.getActor();
-                    if (target.hasAbility(Ability.WORKER)) {
-                        Optional<Freezable> freezable = target.asCapability(Freezable.class);
-                        if (freezable.isPresent()) {
-                            freezable.get().freeze(FREEZE_DURATION);
-                        }
-                    }
+                Location targetLocation = map.at(x, y);
+
+                if (!targetLocation.containsAnActor()) {
+                    continue;
                 }
+
+                Actor target = targetLocation.getActor();
+
+                if (!target.hasAbility(Ability.WORKER)) {
+                    continue;
+                }
+
+                target.asCapability(Freezable.class)
+                        .ifPresent(freezable -> freezable.freeze(FREEZE_DURATION));
+
+                display.println(target + " is frozen for " + FREEZE_DURATION + " turns.");
             }
         }
     }
 
     @Override
     public void onExit(Actor actor, Location location) {
-        // No cleanup needed
+        // Frozen status expires naturally.
     }
 
     @Override
