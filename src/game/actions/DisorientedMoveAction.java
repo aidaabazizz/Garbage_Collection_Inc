@@ -5,6 +5,8 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 
+import java.util.Map;
+
 /**
  * Movement action that sends the player in the opposite direction when disoriented.
  * Menu shows normal movement options - player doesn't know they will be disoriented.
@@ -31,12 +33,15 @@ public class DisorientedMoveAction extends Action {
     /**
      * Returns the opposite direction.
      */
+    private static final Map<String, String> OPPOSITES = Map.of(
+            "North", "South",
+            "South", "North",
+            "East", "West",
+            "West", "East"
+    );
+
     private String getOppositeDirection(String direction) {
-        if (direction.equals("North")) return "South";
-        if (direction.equals("South")) return "North";
-        if (direction.equals("East")) return "West";
-        if (direction.equals("West")) return "East";
-        return direction;
+        return OPPOSITES.getOrDefault(direction, direction);
     }
 
     private String executeMove(Actor actor, GameMap map, String direction) {
