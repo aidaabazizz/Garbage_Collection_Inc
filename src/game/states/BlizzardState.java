@@ -13,7 +13,14 @@ import game.utils.ConsumableUseTracker;
 import game.utils.SpatialSearch;
 
 /**
- * BLIZZARD state for Elsa.
+ * Elsa summons a map-wide blizzard that disorients all workers, randomizing their movement.
+ * Action: Moves randomly using WanderBehaviour
+ * Transitions to:
+ * ICE_SPIKE: if a consumable was used this round
+ * SINGING: if a slime is adjacent
+ * FREEZE: if a worker is within 3 tiles
+ * WANDERING: after 3 turns AND less than 2 workers within 8 tiles
+ * stays BLIZZARD: otherwise
  *
  * @author Aida
  * @version 1.0
@@ -86,7 +93,6 @@ public class BlizzardState implements State<ElsaState> {
 
     @Override
     public void onExit(Actor actor, Location location) {
-        // Disorientation expires naturally.
     }
 
     @Override

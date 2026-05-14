@@ -7,7 +7,6 @@ import edu.monash.fit2099.engine.behaviours.Behaviour;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.enums.Ability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +74,7 @@ public class MirrorMovementBehaviour implements Behaviour<Actor, Action> {
             }
         }
         if (!validMoves.isEmpty()) {
-            return validMoves.get(0); // deterministic: take first available
+            return validMoves.get(0);
         }
         return null;
     }

@@ -10,7 +10,7 @@ import edu.monash.fit2099.engine.positions.Location;
  *
  * @author Aida
  */
-public class BlizzardDisorientationStatus implements Status, DisorientedCapability {
+public class BlizzardDisorientationStatus implements Status{
     private int remainingTurns;
 
     public BlizzardDisorientationStatus(int duration) {
@@ -26,16 +26,6 @@ public class BlizzardDisorientationStatus implements Status, DisorientedCapabili
     public boolean isStatusActive() {
         return remainingTurns > 0;
     }
-
-    @Override
-    public boolean isDisoriented() {
-        return remainingTurns > 0;
-    }
-
-    // REMOVE this unused method
-    // public int getRemainingTurns() {
-    //     return remainingTurns;
-    // }
 
     @Override
     public String toString() {

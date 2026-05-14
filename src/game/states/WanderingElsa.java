@@ -13,6 +13,15 @@ import game.utils.SpatialSearch;
 
 /**
  * WANDERING STATE for Elsa.
+ * Elsa wanders aimlessly around the map, observing her surroundings.
+ * Action: Moves randomly using WanderBehaviour
+ * Transitions to:
+ * FREEZE: when a worker is within 3 tiles
+ * ICE_SPIKE: when any worker has health ≤ 50% of max HP
+ * BLIZZARD: when total workers on map ≥ 5
+ * SINGING: when a slime is within 5 tiles
+ * stays WANDERING: otherwise
+ * On Enter: No immediate effect
  *
  * @author Aida
  */
@@ -36,9 +45,8 @@ public class WanderingElsa implements State<ElsaState> {
         boolean hasNearbyWorker = SpatialSearch.hasWorkerWithinDistance(map, location, FREEZE_DISTANCE);
         boolean hasNearbySlime = SpatialSearch.hasHypnotizableWithinDistance(map, location, SLIME_DISTANCE);
 
-        // ========== NEW: Check if any worker has health ≤ 50% ==========
+        //Check if any worker has health ≤ 50%
         boolean hasLowHealthWorker = hasWorkerWithLowHealth(map);
-        // ==============================================================
 
         if (hasLowHealthWorker) {
             return ElsaState.ICE_SPIKE;
@@ -87,12 +95,10 @@ public class WanderingElsa implements State<ElsaState> {
 
     @Override
     public void onEnter(Actor actor, Location location) {
-        // No immediate effect
     }
 
     @Override
     public void onExit(Actor actor, Location location) {
-        // No cleanup needed
     }
 
     @Override

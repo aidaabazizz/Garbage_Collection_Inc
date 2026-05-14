@@ -126,15 +126,12 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             display.println(this.name + " is affected by: " + status.toString());
         }
 
-        // ========== REQ5 FREEZE CHECK ==========
-        // Uses class comparison - NO instanceof, NO switch!
+        // REQ5 Freeze check using class comparison
         if (isFrozen()) {
             display.println("\u001B[36m" + this + " is frozen solid! Cannot take any actions until the ice melts!\u001B[0m");
             return new DoNothingAction();
         }
-        // =======================================
 
-        // Process background notifications from inventory items
         for (UpdateNotifier notifier : this.getInventory().getItemsAs(UpdateNotifier.class)) {
             String msg = notifier.updateMessage();
             if (msg != null) {
@@ -147,8 +144,6 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             return lastAction.getNextAction();
         }
 
-        // ========== REQ5 BLIZZARD STATE - WRAP MOVEMENT ACTIONS ==========
-        // Uses class comparison - NO instanceof, NO switch!
         if (isDisoriented()) {
             ActionList wrappedActions = new ActionList();
             Set<String> addedDirections = new HashSet<>();
@@ -158,26 +153,21 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
                 String description = action.menuDescription(this);
                 String moveDirection = null;
 
-                // Check if this is a movement action - matches any direction
                 for (String dir : allDirections) {
                     if (description.contains(dir)) {
                         moveDirection = dir;
                         break;
                     }
                 }
-
-                // Only add ONE action per direction (no duplicates)
                 if (moveDirection != null && !addedDirections.contains(moveDirection)) {
                     addedDirections.add(moveDirection);
                     String hotKey = getHotKeyForDirection(moveDirection);
                     wrappedActions.add(new DisorientedMoveAction(moveDirection, hotKey));
                 } else if (moveDirection == null) {
-                    // Add non-movement actions as-is (consumption, dropping, etc.)
                     wrappedActions.add(action);
                 }
             }
 
-            // Use the wrapped actions for the menu
             Menu menu = new Menu(wrappedActions);
             return menu.showMenu(this, display);
         }
@@ -233,9 +223,6 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             this.spawner.spawnParasite(location);
         }
     }
-
-
-    // ==================== REQ5 FREEZE/BLIZZARD METHODS ====================
 
     /**
      * Freezes the worker by adding FrozenStatus for the specified duration.

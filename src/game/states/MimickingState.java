@@ -9,8 +9,14 @@ import game.enums.ChickenState;
 import game.utils.SpatialSearch;
 
 /**
- * MIMICKING state for CrazyChicken.
- * In this state, CrazyChicken tracks a nearby worker and moves in the opposite direction.
+ * The chicken tracks a nearby worker and moves in the opposite direction.
+ * Action: Mirrors worker movement (moves opposite direction)
+ * Transitions to:
+ * HUNGRY: if an adjacent worker has a consumable item
+ * WANDER: if no worker within 5 tiles
+ * FRENZY: after 2 turns (frenzy trigger duration ends)
+ * stays MIMICKING: otherwise
+ * On Enter: No immediate effect; starts tracking the nearest worker
  *
  * @author Aida
  * @version 1.0

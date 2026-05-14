@@ -178,7 +178,6 @@ public class CreatureSpawner implements Spawner {
      * REQ5: Spawns a CrazyChicken at the specified location.
      * The CrazyChicken is a stateful creature with four distinct states:
      * WANDER, MIMICKING, FRENZY, and HUNGRY.
-     *
      * Environmental Reaction: When a CrazyChicken spawns, all adjacent workers
      * become disoriented by its sudden appearance for 3 turns.
      *
@@ -208,7 +207,7 @@ public class CreatureSpawner implements Spawner {
             return false;
         }
     }
-    // Add to CreatureSpawner.java
+
     @Override
     public boolean spawnElsa(Location center) {
         Location spot = getSpawnLocation(center);

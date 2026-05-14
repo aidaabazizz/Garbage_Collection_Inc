@@ -13,12 +13,20 @@ import game.enums.ChickenState;
 import game.weapons.CrazyChickenBeak;
 
 /**
- * FRENZY STATE for CrazyChicken.
  * The chicken furiously chases and attacks the nearest worker.
  * Deals half damage but attacks with increased frequency.
+ * Emits a shockwave that damages and pushes back nearby workers.
+ * Action: Chases nearest worker (HuntBehaviour) and attacks adjacent workers (AttackBehaviour)
  * Transitions to:
- * - WANDER: after 3 rounds (frenzy duration ends)
- * - stays FRENZY: otherwise
+ * WANDER: after 3 rounds (frenzy duration ends)
+ * stays FRENZY: otherwise
+ * On Enter:
+ * Replaces beak with FrenzyBeak (half damage, double hit rate)
+ * Lets out a frenzied screech creating a shockwave
+ * All workers within 8 tiles take 2 damage
+ * All workers within 8 tiles are pushed back 2 tiles away from chicken
+ * Displays "lets out a FRENZIED SCREECH! The ground shakes!"
+ * On Exit: Restores original beak; displays "calms down from its frenzy."
  *
  * @author Aida
  */

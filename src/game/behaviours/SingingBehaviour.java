@@ -22,14 +22,12 @@ public class SingingBehaviour implements Behaviour<Actor, Action> {
 
     /**
      * Checks if the actor has an active HypnotizedStatus.
-     * Uses class comparison - NOT instanceof (SOLID compliant).
      *
      * @param actor The actor to check
      * @return true if hypnotized and status is active, false otherwise
      */
     private boolean isHypnotized(Actor actor) {
         for (Status status : actor.statuses()) {
-            // Class comparison - NOT instanceof!
             if (status.getClass() == HypnotizedStatus.class && status.isStatusActive()) {
                 return true;
             }

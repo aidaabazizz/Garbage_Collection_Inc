@@ -14,7 +14,15 @@ import game.utils.ConsumableUseTracker;
 import game.utils.SpatialSearch;
 
 /**
- * FREEZE state for Elsa.
+ * Elsa releases a freezing wave across the entire map, immobilizing all workers.
+ * Action: Moves randomly using WanderBehaviour
+ * Transitions to:
+ * ICE_SPIKE: if a consumable was used this round
+ * SINGING: if a slime is adjacent
+ * BLIZZARD: if 2+ workers within 8 tiles
+ * WANDERING: if no workers within 3 tiles
+ * stays FREEZE: otherwise
+ * On Enter: Freezes ALL workers on the entire map for 2 turns; displays "releases a freezing wave across the whole map!"
  *
  * @author Aida
  * @version 1.0

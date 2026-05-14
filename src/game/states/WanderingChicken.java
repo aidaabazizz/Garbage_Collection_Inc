@@ -10,13 +10,19 @@ import game.utils.SpatialSearch;
 
 /**
  * WANDER STATE for CrazyChicken.
+ * The chicken wanders aimlessly, searching for workers or consumables.
+ * Action: Moves randomly using WanderBehaviour
+ * Transitions to:
+ * HUNGRY: if an adjacent worker has a consumable item
+ * MIMICKING: if a worker is within 5 tiles
+ * stays WANDER: otherwise
+ * On Enter: No immediate effect
  *
  * @author Aida
  */
 public class WanderingChicken implements State<ChickenState> {
     private final WanderBehaviour wanderBehaviour = new WanderBehaviour();
     private static final int MIMIC_TRIGGER_DISTANCE = 5;
-    // No more HUNGRY_TRIGGER_DISTANCE - now checks adjacent only!
 
     @Override
     public Action getAction(Actor actor, Location location) {
@@ -44,12 +50,10 @@ public class WanderingChicken implements State<ChickenState> {
 
     @Override
     public void onEnter(Actor actor, Location location) {
-        // No immediate effect
     }
 
     @Override
     public void onExit(Actor actor, Location location) {
-        // No cleanup needed
     }
 
     @Override

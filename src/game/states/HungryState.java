@@ -16,8 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * HUNGRY STATE for CrazyChicken.
- * Checks for workers with consumables in ADJACENT tiles only.
+ * The chicken is hungry and pulls consumable items toward it from a 5-tile radius.
+ * Action: Steals and consumes consumables from adjacent workers (StealFromInventoryBehaviour) OR wanders
+ * Transitions to:
+ * MIMICKING: if a worker is within 5 tiles
+ * WANDER: if no adjacent worker has a consumable item
+ * stays HUNGRY: otherwise
+ * On Enter: Pulls ALL consumable items within 5 tiles to chicken's location; displays "The ground trembles as items are pulled toward it!"
  *
  * @author Aida
  */
@@ -90,7 +95,6 @@ public class HungryState implements State<ChickenState> {
 
     @Override
     public void onExit(Actor actor, Location location) {
-        // No cleanup needed
     }
 
     @Override

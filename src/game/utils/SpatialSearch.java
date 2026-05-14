@@ -25,8 +25,6 @@ import java.util.List;
  */
 public class SpatialSearch {
 
-    // ==================== EXISTING METHODS ====================
-
     /**
      * Identifies all actors possessing the {@code Ability.WORKER} capability within
      * the eight adjacent tiles surrounding a specified center location.
@@ -64,8 +62,7 @@ public class SpatialSearch {
         return actors;
     }
 
-    // ==================== NEW HELPER METHODS FOR REQ5 ====================
-
+    //REQ 5
     /**
      * Checks if there is any worker within a specified Manhattan distance.
      * Uses capability pattern - no instanceof.
@@ -112,7 +109,6 @@ public class SpatialSearch {
 
     /**
      * Finds the nearest conscious worker within a specified Manhattan distance.
-     * Uses capability pattern - no instanceof.
      *
      * @param map The game map
      * @param center The reference location
@@ -143,7 +139,6 @@ public class SpatialSearch {
 
     /**
      * Counts all workers on the entire map.
-     * Uses capability pattern - no instanceof.
      *
      * @param map The game map
      * @return Total number of workers on the map
@@ -166,7 +161,6 @@ public class SpatialSearch {
 
     /**
      * Counts the number of workers within a specified Manhattan distance from a center location.
-     * Uses capability pattern - no instanceof.
      *
      * @param map The game map
      * @param center The center location
@@ -196,7 +190,6 @@ public class SpatialSearch {
 
     /**
      * Checks if an actor has any consumable items in their inventory.
-     * Uses asCapability() pattern - no instanceof.
      *
      * @param actor The actor to check
      * @return true if the actor has at least one consumable item, false otherwise
@@ -228,7 +221,6 @@ public class SpatialSearch {
 
     /**
      * Checks if there is any hypnotizable actor (slime) within a specified Manhattan distance.
-     * Uses asCapability() pattern - no instanceof.
      *
      * @param map The game map
      * @param center The center location

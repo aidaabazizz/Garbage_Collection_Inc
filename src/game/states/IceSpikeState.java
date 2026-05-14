@@ -15,7 +15,16 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * ICE_SPIKE state for Elsa.
+ * Elsa summons temporary ice spikes at random locations across the map.
+ * Action: Moves randomly using WanderBehaviour
+ * Transitions to:
+ * SINGING: if a slime is adjacent
+ * FREEZE: if a worker is within 3 tiles
+ * BLIZZARD: if 2+ workers within 8 tiles
+ * WANDERING: after 3 turns (ice spike duration ends)
+ * stays ICE_SPIKE: otherwise
+ * On Enter: Creates 8 ice spikes at random traversable locations that last 3 turns;
+ * displays "summons random ice spikes across the map!"
  *
  * @author Aida
  * @version 1.0

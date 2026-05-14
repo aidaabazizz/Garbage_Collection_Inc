@@ -15,7 +15,19 @@ import game.utils.SpatialSearch;
 import java.util.Optional;
 
 /**
- * SINGING state for Elsa.
+ * Elsa sings "Let It Go", hypnotizing all slimes on the map to attack workers.
+ * Action: Moves randomly using WanderBehaviour
+ * Transitions to:
+ * ICE_SPIKE: if a consumable was used this round
+ * FREEZE: if a worker is within 3 tiles
+ * BLIZZARD: if 2+ workers within 8 tiles
+ * WANDERING: after 5 turns OR no adjacent slime
+ * stays SINGING: otherwise
+ * On Enter: Hypnotizes ALL slimes on the entire map for 5 turns;
+ * plays "Let It Go" music;
+ * displays "The haunting melody echoes across the facility..."
+ * On Exit: Slimes return to normal behavior;
+ * displays "stops singing. The slimes shake their heads and return to normal."
  *
  * @author Aida
  * @version 1.0

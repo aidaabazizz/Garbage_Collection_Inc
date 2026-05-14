@@ -9,7 +9,7 @@ import edu.monash.fit2099.engine.positions.Location;
  *
  * @author Aida
  */
-public class HypnotizedStatus implements Status, HypnotizedCapability  {
+public class HypnotizedStatus implements Status  {
     private int remainingTurns;
 
     public HypnotizedStatus(int duration) {
@@ -23,10 +23,6 @@ public class HypnotizedStatus implements Status, HypnotizedCapability  {
 
     @Override
     public boolean isStatusActive() {
-        return remainingTurns > 0;
-    }
-
-    public boolean isHypnotized() {
         return remainingTurns > 0;
     }
 
