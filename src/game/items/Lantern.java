@@ -31,17 +31,26 @@ import java.util.Random;
  * @version 1.0
  */
 public class Lantern extends Item implements UpdateNotifier, Sellable, Infectable {
+    /** The starting amount of oil in a new lantern. */
     private static final int INITIAL_OIL = 10;
+    /** The base probability (5%) of an oil leak occurring during a turn. */
     private static final double LEAK_CHANCE = 0.05;
-
+    /** The credit value per unit of remaining oil when sold. */
     private static final int PRICE_PER_OIL = 5;
+    /** The probability (50%) of the lantern burning the seller during a transaction. */
     private static final int BURN_CHANCE = 50;
+    /** The probability (25%) of the lantern spawning fire on surrounding tiles upon sale. */
     private static final int FIRE_CHANCE = 25;
+    /** The duration of the burning status effect (3 turns). */
     private static final int BURN_DURATION = 3;
-
+    /** The current amount of oil remaining in the lantern. */
     private int oil = INITIAL_OIL;
+    /** Random number generator for leak and sale outcome calculations. */
     private final Random random = new Random();
+    /** Storage for the most recent leak notification message. */
     private String latestNote = null;
+    /** The weight of the lantern in inventory units. */
+    private static final int WEIGHT = 7;
 
     /**
      * Constructor for the Lantern.
@@ -49,7 +58,7 @@ public class Lantern extends Item implements UpdateNotifier, Sellable, Infectabl
      */
     public Lantern() {
         super("Lantern", '&');
-        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(7));
+        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(WEIGHT));
         this.makePortable();
     }
 
@@ -131,9 +140,10 @@ public class Lantern extends Item implements UpdateNotifier, Sellable, Infectabl
     }
 
     /**
-     * Reacts to infection by adding an infection status to this item.
+     * Defines the reaction when a Parasite infects the lantern.
+     * Requirement 4: Adds the Infection status to the item.
      *
-     * @param location the location of the infected lantern
+     * @param location The location where the infection occurred.
      */
     @Override
     public void reactToInfection(Location location) {
@@ -141,14 +151,16 @@ public class Lantern extends Item implements UpdateNotifier, Sellable, Infectabl
     }
 
     /**
-     * Updates the infected lantern each turn.
-     * Infection reduces the lantern oil by one without going below zero.
+     * Updates the infection logic for the lantern every turn.
+     * Requirement 4: The infection  will drain the lantern's oil content by 1 unit each turn.
      *
-     * @param location the location of the infected lantern
+     * @param location The location of the infected lantern.
      */
     @Override
     public void updateInfection(Location location) {
-        this.oil = Math.max(0, this.oil - 1);
+        if (oil > 0) {
+            oil--;
+        }
     }
 
     /**

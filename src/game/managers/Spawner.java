@@ -21,8 +21,14 @@ public interface Spawner {
      */
     boolean spawnUndead(Location location);
 
-
-    //req4
+    /**
+     * Creates a Parasite at the specified location and handles its unique side effects.
+     * Requirement 4: All workers within its adjacent tiles immediately take 2 points
+     * of damage upon the Parasite's emergence.
+     *
+     * @param location The map location where the Parasite emergence is initiated.
+     * @return true if the Parasite was successfully added to the map; false otherwise.
+     */
     boolean spawnParasite(Location location);
 
     /**

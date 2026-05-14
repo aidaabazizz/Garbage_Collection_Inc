@@ -73,7 +73,7 @@ public class SpatialSearch {
      * @param map The game map
      * @param center The center location
      * @param maxDistance The maximum Manhattan distance to check
-     * @return true if at least one worker is within distance
+     * @return true if at least one worker is within distance, false otherwise
      */
     public static boolean hasWorkerWithinDistance(GameMap map, Location center, int maxDistance) {
         return findNearestWorker(map, center) != null &&
@@ -111,11 +111,42 @@ public class SpatialSearch {
     }
 
     /**
+     * Finds the nearest conscious worker within a specified Manhattan distance.
+     * Uses capability pattern - no instanceof.
+     *
+     * @param map The game map
+     * @param center The reference location
+     * @param maxDistance The maximum Manhattan distance to search within
+     * @return The nearest worker within the specified distance, or null if none found
+     */
+    public static Actor findNearestWorkerWithinDistance(GameMap map, Location center, int maxDistance) {
+        Actor closest = null;
+        int minDistance = Integer.MAX_VALUE;
+
+        for (int y : map.getYRange()) {
+            for (int x : map.getXRange()) {
+                Location loc = map.at(x, y);
+                if (loc.containsAnActor()) {
+                    Actor target = loc.getActor();
+                    if (target.hasAbility(Ability.WORKER) && target.isConscious()) {
+                        int dist = calculateDistance(loc, center);
+                        if (dist <= maxDistance && dist < minDistance) {
+                            minDistance = dist;
+                            closest = target;
+                        }
+                    }
+                }
+            }
+        }
+        return closest;
+    }
+
+    /**
      * Counts all workers on the entire map.
      * Uses capability pattern - no instanceof.
      *
      * @param map The game map
-     * @return Total number of workers
+     * @return Total number of workers on the map
      */
     public static int countAllWorkers(GameMap map) {
         int count = 0;
@@ -134,11 +165,41 @@ public class SpatialSearch {
     }
 
     /**
+     * Counts the number of workers within a specified Manhattan distance from a center location.
+     * Uses capability pattern - no instanceof.
+     *
+     * @param map The game map
+     * @param center The center location
+     * @param maxDistance The maximum Manhattan distance to search within
+     * @return The number of workers within the specified distance
+     */
+    public static int countWorkersWithinDistance(GameMap map, Location center, int maxDistance) {
+        int count = 0;
+
+        for (int y : map.getYRange()) {
+            for (int x : map.getXRange()) {
+                Location loc = map.at(x, y);
+                if (loc.containsAnActor()) {
+                    Actor target = loc.getActor();
+                    if (target.hasAbility(Ability.WORKER) && target.isConscious()) {
+                        int dist = calculateDistance(loc, center);
+                        if (dist <= maxDistance) {
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return count;
+    }
+
+    /**
      * Checks if an actor has any consumable items in their inventory.
      * Uses asCapability() pattern - no instanceof.
      *
      * @param actor The actor to check
-     * @return true if the actor has at least one consumable item
+     * @return true if the actor has at least one consumable item, false otherwise
      */
     public static boolean hasConsumableInInventory(Actor actor) {
         for (Item item : actor.getInventory().getItems()) {
@@ -154,7 +215,7 @@ public class SpatialSearch {
      * Uses getNearbyWorkers() for efficiency - only checks 8 adjacent tiles.
      *
      * @param center The center location (chicken's location)
-     * @return true if an adjacent worker has a consumable item
+     * @return true if an adjacent worker has a consumable item, false otherwise
      */
     public static boolean hasAdjacentWorkerWithConsumable(Location center) {
         for (Actor worker : getNearbyWorkers(center)) {
@@ -165,14 +226,14 @@ public class SpatialSearch {
         return false;
     }
 
-
     /**
-     * Checks if there is any hypnotizable actor (slime) within a specified distance.
+     * Checks if there is any hypnotizable actor (slime) within a specified Manhattan distance.
+     * Uses asCapability() pattern - no instanceof.
      *
      * @param map The game map
      * @param center The center location
      * @param maxDistance The maximum Manhattan distance to check
-     * @return true if a hypnotizable actor is within distance
+     * @return true if a hypnotizable actor is within distance, false otherwise
      */
     public static boolean hasHypnotizableWithinDistance(GameMap map, Location center, int maxDistance) {
         for (int y : map.getYRange()) {
@@ -193,11 +254,36 @@ public class SpatialSearch {
     }
 
     /**
+     * Checks if there is any slime adjacent to the center location.
+     * Uses asCapability() pattern - only checks the 8 surrounding tiles.
+     *
+     * @param center The center location
+     * @return true if an adjacent slime is found, false otherwise
+     */
+    public static boolean hasAdjacentSlime(Location center) {
+        for (Exit exit : center.getExits()) {
+            Location destination = exit.getDestination();
+
+            if (!destination.containsAnActor()) {
+                continue;
+            }
+
+            Actor actor = destination.getActor();
+
+            if (actor.asCapability(Hypnotizable.class).isPresent()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Calculates Manhattan distance between two locations.
      *
      * @param a First location
      * @param b Second location
-     * @return Manhattan distance
+     * @return Manhattan distance between location a and location b
      */
     private static int calculateDistance(Location a, Location b) {
         return Math.abs(a.x() - b.x()) + Math.abs(a.y() - b.y());
@@ -209,7 +295,7 @@ public class SpatialSearch {
      * @param map The game map
      * @param center The center location
      * @param worker The worker to measure distance to
-     * @return Manhattan distance, or Integer.MAX_VALUE if worker not on map
+     * @return Manhattan distance, or Integer.MAX_VALUE if worker is null or not on map
      */
     private static int getDistanceToWorker(GameMap map, Location center, Actor worker) {
         if (worker == null) return Integer.MAX_VALUE;

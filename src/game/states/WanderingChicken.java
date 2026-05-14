@@ -1,4 +1,3 @@
-// game/states/WanderingChicken.java
 package game.states;
 
 import edu.monash.fit2099.engine.actions.Action;
@@ -29,15 +28,15 @@ public class WanderingChicken implements State<ChickenState> {
         GameMap map = location.map();
 
         boolean hasNearbyWorker = SpatialSearch.hasWorkerWithinDistance(map, location, MIMIC_TRIGGER_DISTANCE);
-        // CHANGED: Now checks ADJACENT workers only (not radius)
-        boolean hasAdjacentWorkerWithConsumable = SpatialSearch.hasAdjacentWorkerWithConsumable(location);
 
-        if (hasNearbyWorker) {
-            return ChickenState.MIMICKING;
-        }
+        boolean hasAdjacentWorkerWithConsumable = SpatialSearch.hasAdjacentWorkerWithConsumable(location);
 
         if (hasAdjacentWorkerWithConsumable) {
             return ChickenState.HUNGRY;
+        }
+
+        if (hasNearbyWorker) {
+            return ChickenState.MIMICKING;
         }
 
         return ChickenState.WANDER;

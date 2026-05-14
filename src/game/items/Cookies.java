@@ -31,13 +31,17 @@ import game.managers.Spawner;
  * @version 1.0
  */
 public class Cookies extends Item implements Consumable, Sellable, Infectable {
+    /** The initial number of cookies in a full pack. */
     private static final int INITIAL_COUNT = 5;
+    /** The amount of health points restored by a sterilized cookie. */
     private static final int HEAL_POINTS = 1;
+    /** The penalty applied to the actor's maximum health by an expired cookie. */
     private static final int MAX_HP_PENALTY = 1;
+    /** The inventory weight of the cookie pack. */
     private static final int WEIGHT = 2;
-
+    /** The current number of cookies remaining in the pack. */
     private int count = INITIAL_COUNT;
-
+    /** The spawning service used to handle parasite creation during infection. */
     private final Spawner spawner;
 
     /**
@@ -141,9 +145,10 @@ public class Cookies extends Item implements Consumable, Sellable, Infectable {
     }
 
     /**
-     * Reacts to infection by adding an infection status to this item.
+     * Defines the reaction when a Parasite infects the cookie pack.
+     * Requirement 4: The infection rapidly consumes organic matter.
      *
-     * @param location the location of the infected item
+     * @param location The map location where the infection occurred.
      */
     @Override
     public void reactToInfection(Location location) {
@@ -151,10 +156,11 @@ public class Cookies extends Item implements Consumable, Sellable, Infectable {
     }
 
     /**
-     * Updates the infected cookie pack each turn.
-     * The cookie count decreases and a parasite may be spawned nearby.
+     * Updates the infection logic every game turn.
+     * Requirement 4: The infection reduces the cookie count and spawns
+     * Parasites on adjacent tiles.
      *
-     * @param location the location of the infected item
+     * @param location The current location of the infected cookie pack.
      */
     @Override
     public void updateInfection(Location location) {
@@ -163,17 +169,13 @@ public class Cookies extends Item implements Consumable, Sellable, Infectable {
         }
 
         this.spawner.spawnParasite(location);
-
-
-        if (count <= 0) {
-            location.removeItem(this);
-        }
+         location.removeItem(this);
     }
 
     /**
-     * Returns the cookie display text.
+     * Provides the display string for the cookie pack, including the remaining count.
      *
-     * @return cookie description
+     * @return a string representation of the item.
      */
     @Override
     public String toString() {
