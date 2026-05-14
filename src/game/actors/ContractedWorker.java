@@ -17,6 +17,7 @@ import edu.monash.fit2099.engine.items.Item;
 import game.finance.Wallet;
 import game.managers.CreatureSpawner;
 import game.actions.MovementActionWrapper;
+import game.actions.DisorientedMoveAction;
 import game.capabilities.DisorientedCapability;
 import game.managers.Spawner;
 
@@ -32,8 +33,11 @@ import game.managers.Spawner;
  * @author Aida (Modified by)
  */
 public class ContractedWorker extends Actor implements Infectable, Freezable, Disorientable {
+    /** The number of turns elapsed since the last parasite spawn. */
     private int spawnCounter = 0;
+    /** The fixed interval at which a new parasite is spawned while infected. */
     private static final int SPAWN_THRESHOLD = 5;
+    /** The spawning service used to handle creature creation and side effects. */
     private final Spawner spawner;
 
     /**
@@ -194,14 +198,7 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         }
     }
 
-    // ==================== REQ5 FREEZE/BLIZZARD METHODS ====================
 
-    /**
-     * Freezes the worker by adding FrozenStatus for the specified duration.
-     * Called when Elsa enters FREEZE state.
-     *
-     * @param duration The number of turns the worker remains frozen.
-     */
     @Override
     public void freeze(int duration) {
         this.addStatus(new FrozenStatus(duration));
@@ -217,4 +214,7 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     public void disorient(int duration) {
         this.addStatus(new BlizzardDisorientationStatus(duration));
     }
+
 }
+
+

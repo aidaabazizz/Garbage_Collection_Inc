@@ -27,7 +27,9 @@ import java.util.List;
  * @author Aida
  */
 public class CreatureSpawner implements Spawner {
+    /** The amount of damage dealt to adjacent workers when a Parasite spawns. */
     private static final int PARASITE_SPAWN_DAMAGE = 2;
+    /** Terminal interface for displaying spawning events and side effects. */
     private final Display display = new Display();
 
     /**
@@ -39,10 +41,11 @@ public class CreatureSpawner implements Spawner {
      * @return a traversable and unoccupied Location if found; null otherwise
      */
     private Location getSpawnLocation(Location center) {
-        // canActorEnter(null) is the polymorphic check for Ground + Actors
+        // Check the trigger tile itself
         if (center.canActorEnter(null)) {
             return center;
         }
+        // Check adjacent tiles if the trigger tile is blocked
         for (Exit exit : center.getExits()) {
             Location adj = exit.getDestination();
             if (adj.canActorEnter(null)) {
@@ -67,6 +70,7 @@ public class CreatureSpawner implements Spawner {
         try {
             spot.addActor(new Slime());
             display.println("!!! A Slime has emerged at " + spot + " !!!");
+            // Trigger inventory drop for adjacent workers
             dropAllItems( spot);
             return true;
         } catch (Exception e) { return false; }
@@ -90,12 +94,14 @@ public class CreatureSpawner implements Spawner {
             Undead undead = new Undead();
             List<Actor> nearbyCreatures = SpatialSearch.getNearbyActors(spot);
             int count = nearbyCreatures.size();
+            // Calculate evolution bonus based on non-worker actors
             for (Actor actor : nearbyCreatures) {
-                // If the actor DOES NOT have the WORKER ability, it is a creature
+                // If the actor does not have the WORKER ability, it is a creature
                 if (!actor.hasAbility(Ability.WORKER)) {
                     count++;
                 }
             }
+            // Apply permanent Max HP increase and heal the new amount
             if (count > 0) {
                 undead.modifyStatisticMaximum(ActorStatistics.HEALTH, StatisticOperations.INCREASE, count);
                 undead.heal(count);
@@ -111,6 +117,13 @@ public class CreatureSpawner implements Spawner {
         }
     }
 
+    /**
+     * Spawns a Parasite and deals immediate damage to adjacent workers.
+     * Requirement 4: Adjacent workers take 2 points of damage upon emergence.
+     *
+     * @param center The location where the Parasite emergence is initiated.
+     * @return true if the Parasite was successfully added to the map; false otherwise.
+     */
     @Override
     public boolean spawnParasite(Location center) {
         Location spot = getSpawnLocation(center);
@@ -120,8 +133,8 @@ public class CreatureSpawner implements Spawner {
             spot.addActor(new Parasite());
             display.println("!!! A Parasite has emerged at " + spot + " !!!");
 
+            // Identify adjacent workers and apply damage
             List<Actor> targets = SpatialSearch.getNearbyWorkers(spot);
-            // REACTION: Adjacent workers take 2 damage
             // Apply damage to every worker found
             for (Actor worker : targets) {
                 worker.hurt(PARASITE_SPAWN_DAMAGE);
@@ -134,6 +147,12 @@ public class CreatureSpawner implements Spawner {
         }
     }
 
+    /**
+     * Forces all workers adjacent to a Slime's spawn location to drop their inventory.
+     * This utility supports the Requirement 4 "terrified" reaction.
+     *
+     * @param slimeSpot The location where the Slime spawned.
+     */
     private void dropAllItems(Location slimeSpot) {
         // 1. Find all workers nearby using the shared utility
         List<Actor> nearbyWorkers = SpatialSearch.getNearbyWorkers(slimeSpot);
@@ -141,21 +160,15 @@ public class CreatureSpawner implements Spawner {
         for (Actor worker : nearbyWorkers) {
             display.println(">>> " + worker + " is terrified and dropped all items!");
 
-            // 2. We need the map to execute the DropAction
             GameMap map = slimeSpot.map();
 
-            // 3. Create a copy of the inventory to avoid ConcurrentModificationException
+            // 3. Create a copy of the inventory
             List<Item> inventoryCopy = new ArrayList<>(worker.getInventory().getItems());
 
             for (Item item : inventoryCopy) {
-                // This ensures the item is removed from inventory and added to the map correctly
+                // Execute a DropAction for each item in the worker's inventory
                DropAction dropAction = new DropAction(item);
-
-                // 5. Execute the action manually
-                // This will return a string like "Bob drops the Flask"
                 String result = dropAction.execute(worker, map);
-
-                // Optional: Print the result to the console for feedback
                 display.println("    " + result);
             }
         }
