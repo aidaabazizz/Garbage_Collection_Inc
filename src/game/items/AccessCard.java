@@ -8,89 +8,92 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import game.actions.UnlockDoorAction;
+import game.capabilities.CreditHolder;
 import game.capabilities.Purchasable;
 import game.capabilities.Unlockable;
 import game.enums.AccessLevel;
 import game.enums.ItemStatistics;
-import game.capabilities.CreditHolder;
 import game.managers.AlarmManager;
 
 import java.util.Random;
 
 /**
- * A security item used to authorize entry through locked doors.
- * The access card has a clearance level and can also be purchased
- * from the Supercomputer.
+ * A security access card used by workers to unlock doors with matching or lower
+ * clearance requirements.
+ * <p>
+ * The card stores an {@link AccessLevel}, which defines its clearance rank,
+ * display character, purchase price, and weight. This avoids creating separate
+ * card classes for each level while still allowing different cards to have
+ * different values and purchase effects.
+ * </p>
  *
  * @author Suchir
  * @version 1.0
  */
 public class AccessCard extends Item implements Purchasable {
 
-    private static final int LEVEL_ONE_PRICE = 50;
-    private static final int LEVEL_TWO_PRICE = 100;
-    private static final int LEVEL_THREE_PRICE = 200;
-
-    private static final int LEVEL_ONE_WEIGHT = 1;
-    private static final int LEVEL_TWO_WEIGHT = 2;
-    private static final int LEVEL_THREE_WEIGHT = 3;
-
     private static final int LEVEL_TWO_DAMAGE = 5;
     private static final int HIDDEN_FEE = 50;
     private static final int HIDDEN_FEE_CHANCE = 50;
+    private static final int PERCENTAGE_BOUND = 100;
 
     private final AccessLevel accessLevel;
     private final Random random = new Random();
 
     /**
      * Constructor for a Level 1 Access Card.
+     * <p>
+     * This is used for the starting access card because the initial card in the
+     * game is a Level 1 card.
+     * </p>
      */
     public AccessCard() {
         this(AccessLevel.LEVEL_ONE);
     }
 
     /**
-     * Constructor for AccessCard.
+     * Constructor for an Access Card with a specified clearance level.
      *
-     * @param accessLevel the clearance level of the card
+     * @param accessLevel the clearance level of this access card
      */
     public AccessCard(AccessLevel accessLevel) {
-        super(getNameFor(accessLevel), getDisplayCharFor(accessLevel));
+        super(accessLevel.getCardName(), accessLevel.getDisplayChar());
         this.accessLevel = accessLevel;
-        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(getWeightFor(accessLevel)));
+        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(accessLevel.getWeight()));
         this.makePortable();
     }
 
     /**
-     * Gets the access level of this card.
+     * Gets the clearance level of this access card.
      *
-     * @return access level
+     * @return the access level of this card
      */
     public AccessLevel getAccessLevel() {
         return accessLevel;
     }
 
     /**
-     * Gets the purchase price of the card.
+     * Gets the purchase price of this access card.
      *
-     * @return purchase price
+     * @return the purchase price in credits
      */
     @Override
     public int getPurchasePrice() {
-        return switch (accessLevel) {
-            case LEVEL_ONE -> LEVEL_ONE_PRICE;
-            case LEVEL_TWO -> LEVEL_TWO_PRICE;
-            case LEVEL_THREE -> LEVEL_THREE_PRICE;
-        };
+        return accessLevel.getPurchasePrice();
     }
 
     /**
-     * Applies the purchase effect of the card.
+     * Applies the immediate effect that occurs after this access card is purchased.
+     * <p>
+     * Level 1 has no harmful purchase effect. Level 2 deals 5 damage to the buyer
+     * due to blood calibration. Level 3 has a 50% chance to deduct an additional
+     * 50 credits as a hidden fee.
+     * </p>
      *
-     * @param buyer the actor buying the item
+     * @param buyer the actor buying this access card
      * @param map the current game map
-     * @param wallet the buyer's wallet
-     * @return description of the purchase effect
+     * @param wallet the buyer's credit holder
+     * @return a description of the purchase effect
      */
     @Override
     public String purchasedBy(Actor buyer, GameMap map, CreditHolder wallet) {
@@ -100,25 +103,30 @@ public class AccessCard extends Item implements Purchasable {
         }
 
         if (accessLevel == AccessLevel.LEVEL_THREE) {
-            if (random.nextInt(100) < HIDDEN_FEE_CHANCE) {
+            if (random.nextInt(PERCENTAGE_BOUND) < HIDDEN_FEE_CHANCE) {
                 int deducted = wallet.forceDeductCredits(HIDDEN_FEE);
                 return "The Supercomputer applies a hidden fee and deducts "
                         + deducted + " extra credits.";
             }
 
-            return buyer + " purchases an Access Card (Level 3). No hidden fee is applied.";
+            return buyer + " avoids the hidden fee.";
         }
 
-        return buyer + " purchases an Access Card (Level 1).";
+        return buyer + " purchases a basic Level 1 access card.";
     }
 
     /**
-     * Generates unlock actions for adjacent locked doors if this card has
-     * enough access clearance.
+     * Generates unlock actions for adjacent locked doors when this card has enough
+     * clearance to open them.
+     * <p>
+     * This method checks adjacent locations for grounds that implement
+     * {@link Unlockable}. If the door is locked and this card's access level can
+     * open the door's required level, an {@link UnlockDoorAction} is added.
+     * </p>
      *
-     * @param owner the actor carrying the access card
+     * @param owner the actor carrying this access card
      * @param map the game map containing the actor
-     * @return available unlock actions
+     * @return a list of available unlock actions
      */
     @Override
     public ActionList allowableActions(Actor owner, GameMap map) {
@@ -142,47 +150,5 @@ public class AccessCard extends Item implements Purchasable {
         }
 
         return actions;
-    }
-
-    /**
-     * Gets the display name for an access card.
-     *
-     * @param accessLevel the access level
-     * @return display name
-     */
-    private static String getNameFor(AccessLevel accessLevel) {
-        return switch (accessLevel) {
-            case LEVEL_ONE -> "Access Card (Level 1)";
-            case LEVEL_TWO -> "Access Card (Level 2)";
-            case LEVEL_THREE -> "Access Card (Level 3)";
-        };
-    }
-
-    /**
-     * Gets the display character for an access card.
-     *
-     * @param accessLevel the access level
-     * @return display character
-     */
-    private static char getDisplayCharFor(AccessLevel accessLevel) {
-        return switch (accessLevel) {
-            case LEVEL_ONE -> '▤';
-            case LEVEL_TWO -> 'α';
-            case LEVEL_THREE -> '◐';
-        };
-    }
-
-    /**
-     * Gets the weight for an access card.
-     *
-     * @param accessLevel the access level
-     * @return card weight
-     */
-    private static int getWeightFor(AccessLevel accessLevel) {
-        return switch (accessLevel) {
-            case LEVEL_ONE -> LEVEL_ONE_WEIGHT;
-            case LEVEL_TWO -> LEVEL_TWO_WEIGHT;
-            case LEVEL_THREE -> LEVEL_THREE_WEIGHT;
-        };
     }
 }
