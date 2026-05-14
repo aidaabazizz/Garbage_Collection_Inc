@@ -14,4 +14,6 @@ public enum Ability {
     WORKER,
     /** Ability for items that should not be removed by random effects. */
     ESSENTIAL,
+    /** For the teleportation tube ability. **/
+    IS_TELEPORTATION_TUBE
 }

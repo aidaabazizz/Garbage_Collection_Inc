@@ -9,6 +9,7 @@ import game.actors.*;
 import game.doors.AluminiumDoor;
 import game.doors.IronDoor;
 import game.doors.TitaniumDoor;
+import game.enums.Ability;
 import game.enums.AccessLevel;
 import game.finance.Wallet;
 import game.grounds.*;
@@ -214,8 +215,8 @@ public class EclipseNebula extends World {
      * Identifies Φ symbols and replaces placeholders with functional tubes.
      */
     private void linkTeleportationTubes(GameMap moonMap, GameMap overflowMap) {
-        Location moonTubeLoc = findLocationOfSymbol(moonMap, 'Φ');
-        Location overflowTubeLoc = findLocationOfSymbol(overflowMap, 'Φ');
+        Location moonTubeLoc = findLocationOfSymbol(moonMap);
+        Location overflowTubeLoc = findLocationOfSymbol(overflowMap);
 
         if (moonTubeLoc == null || overflowTubeLoc == null) {
             throw new IllegalStateException("Teleportation Tube placeholders (Φ) missing from maps!");
@@ -238,10 +239,10 @@ public class EclipseNebula extends World {
      * Helper to find a specific ground character on a map.
      * Fulfills REQ2: "identifies Φ symbols".
      */
-    private Location findLocationOfSymbol(GameMap map, char symbol) {
+    private Location findLocationOfSymbol(GameMap map) {
         for (int x : map.getXRange()) {
             for (int y : map.getYRange()) {
-                if (map.at(x, y).getGround().getDisplayChar() == symbol) {
+                if (map.at(x, y).getGround().hasAbility(Ability.IS_TELEPORTATION_TUBE)) {
                     return map.at(x, y);
                 }
             }

@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.TeleportAction;
 import game.capabilities.TeleportStrategy;
+import game.enums.Ability;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class TeleportationTube extends Ground {
     public TeleportationTube(List<TeleportStrategy> strategies) {
         super('Φ', "Teleportation Tube");
         this.strategies = strategies;
+        this.enableAbility(Ability.IS_TELEPORTATION_TUBE);
     }
 
     /**
