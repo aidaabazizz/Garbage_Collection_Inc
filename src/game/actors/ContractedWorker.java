@@ -33,13 +33,12 @@ import game.managers.Spawner;
  * @author Aida (Modified by)
  */
 public class ContractedWorker extends Actor implements Infectable, Freezable, Disorientable {
+    /** The number of turns elapsed since the last parasite spawn. */
     private int spawnCounter = 0;
+    /** The fixed interval at which a new parasite is spawned while infected. */
     private static final int SPAWN_THRESHOLD = 5;
+    /** The spawning service used to handle creature creation and side effects. */
     private final Spawner spawner;
-
-
-
-
 
     /**
      * Constructor to initialize the worker with their starting statistics.
@@ -134,25 +133,33 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         return "";
     }
 
-
-    //req 4
+    /**
+     * Responds to the initial contact with a Parasite.
+     * Requirement 4: The worker becomes a living hive and gains the Infection status.
+     *
+     * @param location The location where the infection occurred.
+     */
     @Override
     public void reactToInfection(Location location) {
         this.addStatus(new InfectionStatus());
     }
 
+    /**
+     * Handles the ongoing effects of the infection every turn.
+     * Per Requirement 4, a new Parasite is spawned on an adjacent tile every 5 turns.
+     *
+     * @param location The worker's current location.
+     */
     @Override
     public void updateInfection(Location location) {
         spawnCounter++;
         if (spawnCounter >= SPAWN_THRESHOLD) {
             spawnCounter = 0;
-            //UPDATED: Delegate spawning to the Spawner.
-            // We don't need a manual loop here. The CreatureSpawner's getSpawnLocation
-            // will see that the Worker is blocking 'location' and automatically
-            // find the adjacent empty tile for the Parasite.
+            //REQ4: Force the worker to spawn a new Parasite on an adjacent tile
             this.spawner.spawnParasite(location);
         }
     }
+
 
     @Override
     public void freeze(int duration) {

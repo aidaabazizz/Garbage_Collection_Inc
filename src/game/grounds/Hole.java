@@ -18,9 +18,13 @@ import game.managers.Spawner;
 public class Hole extends Ground {
     /** The number of turns that must pass before a creature is spawned. */
     private static final int SPAWN_INTERVAL = 20;
+    /** Counter to track elapsed turns since the last spawn attempt. */
     private int turnCounter = 0;
+    /** The strategy defining which creatures the hole is capable of spawning. */
     private final HoleSpawnStrategy strategy;
+    /** The spawning manager used to handle environmental triggers and reactions. */
     private final Spawner spawner;
+    /** The probability (1%) that the hole will expand to an adjacent tile after a successful spawn. */
     private static final double EXPANSION_CHANCE = 0.01; // 1% (req4)
 
     /**
@@ -45,10 +49,8 @@ public class Hole extends Ground {
         turnCounter++;
         if (turnCounter >= SPAWN_INTERVAL) {
             turnCounter = 0;
-            // The strategy decides WHAT to spawn
-            // The spawner handles the REQ4 environmental reactions
+            //Delegate spawn logic to the strategy (REQ4: dynamic spawning based on map)
             boolean success = strategy.spawn(location, spawner);
-
             if (success && Math.random() < EXPANSION_CHANCE) {
                 // 1% chance to expand
                 rollForExpansion(location);
@@ -56,15 +58,22 @@ public class Hole extends Ground {
         }
     }
 
+    /**
+     * Attempts to expand the hole to one random adjacent tile.
+     * Requirement 4: Converts an adjacent passable tile into another Hole that
+     * inherits the same spawning capabilities.
+     *
+     * @param location The current location of the parent hole.
+     */
     private void rollForExpansion(Location location) {
         for (Exit exit : location.getExits()) {
             Location adj = exit.getDestination();
 
-            // We check if it's passable (Dirt/Floor) so we don't destroy Walls
+            // Check if it's passable (Dirt/Floor)
             if (adj.getGround().canActorEnter(null)) {
-                // Transform it! If it's already a hole, it just overwrites itself.
+                // Set the ground at the adjacent location to a new Hole with a clone of the strategy
                 adj.setGround(new Hole(strategy.cloneStrategy(),spawner));
-                return; // Stop after expanding once
+                return; // Expand only once per successful trigger
             }
         }
     }
