@@ -7,7 +7,7 @@ import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.GameMap;
 import game.behaviours.HuntBehaviour;
 import game.behaviours.AttackBehaviour;
-import game.capabilities.StatefulActor;
+import game.capabilities.BeakMutable;
 import game.enums.Ability;
 import game.enums.ChickenState;
 import game.weapons.CrazyChickenBeak;
@@ -69,18 +69,16 @@ public class FrenzyState implements State<ChickenState> {
 
     @Override
     public void onEnter(Actor actor, Location location) {
-        // Cast to the interface - no instanceof needed!
-        // The state machine guarantees this actor implements StatefulActor
-        StatefulActor statefulActor = (StatefulActor) actor;
+        // Cast to BeakMutable instead of StatefulActor
+        BeakMutable beakMutable = (BeakMutable) actor;
 
         // Store original weapon stats using the interface methods
-        CrazyChickenBeak originalBeak = statefulActor.getBeak();
+        CrazyChickenBeak originalBeak = beakMutable.getBeak();
         this.originalDamage = originalBeak.getDamageValue();
         this.originalHitRate = originalBeak.getHitRateValue();
 
         // Replace with frenzy beak using the interface
-        statefulActor.setBeak(new FrenzyBeak(originalDamage, originalHitRate));
-        statefulActor.setCurrentStateName("FRENZY");
+        beakMutable.setBeak(new FrenzyBeak(originalDamage, originalHitRate));
 
         // IMMEDIATE EFFECT: The chicken screeches loudly
         display.println("\u001B[33m" + actor + " lets out a FRENZIED SCREECH! The ground shakes!\u001B[0m");
@@ -157,9 +155,8 @@ public class FrenzyState implements State<ChickenState> {
     @Override
     public void onExit(Actor actor, Location location) {
         // Restore original beak using the interface
-        StatefulActor statefulActor = (StatefulActor) actor;
-        statefulActor.setBeak(new CrazyChickenBeak(originalDamage, originalHitRate));
-        statefulActor.setCurrentStateName("WANDER");
+        BeakMutable beakMutable = (BeakMutable) actor;
+        beakMutable.setBeak(new CrazyChickenBeak(originalDamage, originalHitRate));
 
         display.println("\u001B[33m" + actor + " calms down from its frenzy.\u001B[0m");
     }
