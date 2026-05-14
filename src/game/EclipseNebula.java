@@ -90,7 +90,7 @@ public class EclipseNebula extends World {
 
         // 7. Setup players
         // Start them on Moon 99 so they pick up the starting card and use the Tube
-        setupContractedWorkers(overflowMap, globalSpawner);
+        setupContractedWorkers(moonMap, globalSpawner);
 
     }
 
@@ -136,7 +136,6 @@ public class EclipseNebula extends World {
 
         // REQ4: Hole in 99-Deprecated spawns Undead and Slimes.
         groundCreator.registerGround('o', () -> new Hole(new StandardHoleStrategy(), spawner));
-        //groundCreator.registerGround('o', () -> new StandardHole(spawner));
 
         // REQ4: Vents should be on both maps.
         groundCreator.registerGround('V', () -> new Vent(spawner));
@@ -182,7 +181,6 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('w', WarperTree::new);
 
         // REQ 4: Spawner logic specific to 20-overflow
-        //groundCreator.registerGround('o', () -> new ParasiticHole(spawner));
         groundCreator.registerGround('o', () -> new Hole(new ParasiticHoleStrategy(), spawner));
         groundCreator.registerGround('V', () -> new Vent(spawner));
 
@@ -304,7 +302,7 @@ public class EclipseNebula extends World {
             inventory.add(new Wallet()); // REQ 1: Required for purchases
 
             ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory,globalSpawner);
-            this.addPlayer(worker, map.at(startX++, 2));
+            this.addPlayer(worker, map.at(startX++, 4));
         }
     }
 
