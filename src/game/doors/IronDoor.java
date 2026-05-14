@@ -65,7 +65,7 @@ public class IronDoor extends Door {
                     if (existingFire != null) {
                         existingFire.addStack();
                     } else if (ground.canActorEnter(actor)) {
-                        // Pass the current ground (unlocked) to be saved as previousGround
+                        // Pass the current ground to be saved as previousGround
                         adjacent.setGround(new Fire(ground, FIRE_DURATION));
                     }
                 }
