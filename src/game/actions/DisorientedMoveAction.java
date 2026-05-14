@@ -4,21 +4,17 @@ import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.capabilities.DisorientedCapability;
-
-import java.util.Random;
 
 /**
- * Movement action that randomizes direction when actor is disoriented.
- * Uses capability pattern - NO instanceof, NO switch!
+ * Movement action that sends the player in the opposite direction when disoriented.
+ * Menu shows normal movement options - player doesn't know they will be disoriented.
  *
  * @author Aida
+ * @version 1.0
  */
 public class DisorientedMoveAction extends Action {
     private final String intendedDirection;
     private final String hotKey;
-    private final Random random = new Random();
-    private static final String[] DIRECTIONS = {"North", "South", "East", "West"};
 
     public DisorientedMoveAction(String direction, String hotKey) {
         this.intendedDirection = direction;
@@ -27,18 +23,20 @@ public class DisorientedMoveAction extends Action {
 
     @Override
     public String execute(Actor actor, GameMap map) {
-        boolean isDisoriented = actor.asCapability(DisorientedCapability.class)
-                .map(DisorientedCapability::isDisoriented)
-                .orElse(false);
-
-        String actualDirection = intendedDirection;
-
-        if (isDisoriented) {
-            // Random direction using array
-            actualDirection = DIRECTIONS[random.nextInt(DIRECTIONS.length)];
-        }
-
+        // Always go opposite direction
+        String actualDirection = getOppositeDirection(intendedDirection);
         return executeMove(actor, map, actualDirection);
+    }
+
+    /**
+     * Returns the opposite direction.
+     */
+    private String getOppositeDirection(String direction) {
+        if (direction.equals("North")) return "South";
+        if (direction.equals("South")) return "North";
+        if (direction.equals("East")) return "West";
+        if (direction.equals("West")) return "East";
+        return direction;
     }
 
     private String executeMove(Actor actor, GameMap map, String direction) {
@@ -47,18 +45,15 @@ public class DisorientedMoveAction extends Action {
 
         if (destination != null && destination.canActorEnter(actor)) {
             map.moveActor(actor, destination);
-            if (!direction.equals(intendedDirection)) {
-                return String.format("%s tried to go %s but stumbled %s due to blizzard!",
-                        actor, intendedDirection, direction);
-            }
-            return String.format("%s moves %s", actor, direction);
+            // Show the truth AFTER moving
+            return String.format("\u001B[36m%s tried to go %s but was disoriented and went %s instead!\u001B[0m",
+                    actor, intendedDirection, direction);
         }
 
         return String.format("%s cannot move %s", actor, direction);
     }
 
     private Location getDestination(Location current, String direction, GameMap map) {
-        // Calculate destination using arithmetic
         int newX = current.x();
         int newY = current.y();
 
@@ -74,10 +69,10 @@ public class DisorientedMoveAction extends Action {
         return null;
     }
 
-    // Keep hotKey and use it in menuDescription
     @Override
     public String menuDescription(Actor actor) {
+        // Normal menu display - player doesn't know they will be disoriented!
         String hotKeyDisplay = hotKey != null && !hotKey.isEmpty() ? " (" + hotKey + ")" : "";
-        return actor + " attempts to go " + intendedDirection + hotKeyDisplay + " (blizzard disorients!)";
+        return actor + " moves " + intendedDirection + hotKeyDisplay;
     }
 }

@@ -16,9 +16,12 @@ import game.managers.AlarmManager;
 import edu.monash.fit2099.engine.items.Item;
 import game.finance.Wallet;
 import game.managers.CreatureSpawner;
-import game.actions.MovementActionWrapper;
-import game.capabilities.DisorientedCapability;
+import game.actions.DisorientedMoveAction;
 import game.managers.Spawner;
+
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
  * The primary player-controlled actor representing a contracted worker.
@@ -55,15 +58,31 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     }
 
     /**
-     * Checks if the worker has an active status of the given class.
-     * Uses class comparison instead of instanceof (SOLID compliant).
+     * Checks if this worker is currently frozen.
+     * Uses class comparison - NOT instanceof, NOT switch.
+     * Reliably detects FrozenStatus attached to this actor.
      *
-     * @param statusClass The status class to check for (e.g., FrozenStatus.class)
-     * @return true if an active status of the given class exists, false otherwise
+     * @return true if frozen and status is active, false otherwise
      */
-    private boolean hasActiveStatus(Class<? extends Status> statusClass) {
+    private boolean isFrozen() {
         for (Status status : this.statuses()) {
-            if (status.getClass() == statusClass && status.isStatusActive()) {
+            if (status.getClass() == FrozenStatus.class && status.isStatusActive()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if this worker is currently disoriented by a blizzard.
+     * Uses class comparison - NOT instanceof, NOT switch.
+     * Reliably detects BlizzardDisorientationStatus attached to this actor.
+     *
+     * @return true if disoriented and status is active, false otherwise
+     */
+    private boolean isDisoriented() {
+        for (Status status : this.statuses()) {
+            if (status.getClass() == BlizzardDisorientationStatus.class && status.isStatusActive()) {
                 return true;
             }
         }
@@ -108,10 +127,8 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         }
 
         // ========== REQ5 FREEZE CHECK ==========
-        // Uses class comparison - NO instanceof!
-        boolean isFrozen = hasActiveStatus(FrozenStatus.class);
-
-        if (isFrozen) {
+        // Uses class comparison - NO instanceof, NO switch!
+        if (isFrozen()) {
             display.println("\u001B[36m" + this + " is frozen solid! Cannot take any actions until the ice melts!\u001B[0m");
             return new DoNothingAction();
         }
@@ -130,35 +147,58 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             return lastAction.getNextAction();
         }
 
-        // ========== REQ5 BLIZZARD CHECK ==========
-        // Uses class comparison - NO instanceof!
-        boolean isDisoriented = hasActiveStatus(BlizzardDisorientationStatus.class);
+        // ========== REQ5 BLIZZARD STATE - WRAP MOVEMENT ACTIONS ==========
+        // Uses class comparison - NO instanceof, NO switch!
+        if (isDisoriented()) {
+            ActionList wrappedActions = new ActionList();
+            Set<String> addedDirections = new HashSet<>();
+            String[] allDirections = {"North", "South", "East", "West", "North-East", "South-East", "South-West", "North-West"};
 
-        if (isDisoriented) {
-            actions = MovementActionWrapper.wrapMovementActions(
-                    actions,
-                    this,
-                    this::getHotKeyForDirection
-            );
+            for (Action action : actions.getUnmodifiableActionList()) {
+                String description = action.menuDescription(this);
+                String moveDirection = null;
+
+                // Check if this is a movement action - matches any direction
+                for (String dir : allDirections) {
+                    if (description.contains(dir)) {
+                        moveDirection = dir;
+                        break;
+                    }
+                }
+
+                // Only add ONE action per direction (no duplicates)
+                if (moveDirection != null && !addedDirections.contains(moveDirection)) {
+                    addedDirections.add(moveDirection);
+                    String hotKey = getHotKeyForDirection(moveDirection);
+                    wrappedActions.add(new DisorientedMoveAction(moveDirection, hotKey));
+                } else if (moveDirection == null) {
+                    // Add non-movement actions as-is (consumption, dropping, etc.)
+                    wrappedActions.add(action);
+                }
+            }
+
+            // Use the wrapped actions for the menu
+            Menu menu = new Menu(wrappedActions);
+            return menu.showMenu(this, display);
         }
-        // ========================================
 
-        // return/print the console menu
+        // return/print the console menu with original actions
         Menu menu = new Menu(actions);
         return menu.showMenu(this, display);
     }
 
     /**
      * Returns the hotkey associated with a given movement direction.
-     * Used by the MovementActionWrapper when wrapping movement actions.
+     * Used by the blizzard state to preserve hotkey functionality when
+     * replacing movement actions with disoriented versions.
+     * Uses array mapping - NO switch!
      *
-     * @param direction The movement direction (North, South, East, West)
-     * @return The hotkey character (8, 2, 6, 4) or empty string if not found
+     * @param direction The movement direction (North, South, East, West, etc.)
+     * @return The hotkey character or empty string if not found
      */
     private String getHotKeyForDirection(String direction) {
-        // Using array mapping - NO switch!
-        String[] directions = {"North", "South", "East", "West"};
-        String[] hotKeys = {"8", "2", "6", "4"};
+        String[] directions = {"North", "South", "East", "West", "North-East", "South-East", "South-West", "North-West"};
+        String[] hotKeys = {"8", "2", "6", "4", "9", "3", "1", "7"};
         for (int i = 0; i < directions.length; i++) {
             if (directions[i].equals(direction)) {
                 return hotKeys[i];
@@ -221,7 +261,6 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     public void disorient(int duration) {
         this.addStatus(new BlizzardDisorientationStatus(duration));
     }
-
 }
 
 
