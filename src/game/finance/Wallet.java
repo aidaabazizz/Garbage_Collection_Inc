@@ -100,16 +100,6 @@ public class Wallet extends Item implements CreditHolder {
     }
 
     /**
-     * Gets the maximum wallet capacity.
-     *
-     * @return maximum credits
-     */
-    @Override
-    public int getMaxCredits() {
-        return MAX_CREDITS;
-    }
-
-    /**
      * Returns the wallet's display text.
      *
      * @return wallet display text
