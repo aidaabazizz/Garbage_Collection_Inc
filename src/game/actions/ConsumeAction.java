@@ -42,7 +42,7 @@ public class ConsumeAction extends Action {
     public String execute(Actor actor, GameMap map) {
         String result = target.consumedBy(actor);
 
-        ConsumableUseTracker.markConsumed();
+        ConsumableUseTracker.markConsumed(actor);
 
         if (target.isFinished()) {
             target.cleanUp(actor, map.locationOf(actor));

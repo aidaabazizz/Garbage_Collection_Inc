@@ -74,7 +74,7 @@ public class SingingState implements State<ElsaState> {
         display.println("\u001B[ The haunting melody echoes across the facility... \u001B");
         display.println("\u001B[ ALL the slimes seem to be in a trance! Their eyes glow with hunger! \u001B");
 
-        MusicPlayer.playMusic("src/game/music/let_it_go.wav");
+        MusicPlayer.playMusic("src/game/music/let_it_go.wav", display);
 
         GameMap map = location.map();
         int hypnotizedCount = 0;

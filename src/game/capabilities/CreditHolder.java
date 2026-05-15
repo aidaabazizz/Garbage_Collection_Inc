@@ -47,10 +47,4 @@ public interface CreditHolder {
      */
     int getCredits();
 
-    /**
-     * Gets the maximum credit capacity.
-     *
-     * @return maximum credit capacity
-     */
-    int getMaxCredits();
 }

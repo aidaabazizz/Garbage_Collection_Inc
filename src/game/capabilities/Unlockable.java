@@ -15,13 +15,13 @@ import game.enums.AccessLevel;
  */
 public interface Unlockable {
     /** Transitions the object from a locked state to an unlocked state. */
-    public void unlock();
+    void unlock();
 
     /**
      * Queries the current access state of the object.
      * @return True if the object is passable, false if it is locked.
      */
-    public boolean isUnlocked();
+    boolean isUnlocked();
 
     /**
      * Gets the access level required to unlock this object.
