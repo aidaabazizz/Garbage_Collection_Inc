@@ -3,40 +3,43 @@ package game.states;
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.displays.Display;
-import edu.monash.fit2099.engine.positions.Location;
+import edu.monash.fit2099.engine.items.Item;
+import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
+import edu.monash.fit2099.engine.positions.Location;
 import game.behaviours.HuntBehaviour;
 import game.behaviours.AttackBehaviour;
 import game.capabilities.BeakMutable;
+import game.capabilities.Consumable;
 import game.enums.Ability;
 import game.enums.ChickenState;
 import game.weapons.CrazyChickenBeak;
 
 /**
+ * FRENZY STATE for CrazyChicken.
+ *
  * The chicken furiously chases and attacks the nearest worker.
  * Deals half damage but attacks with increased frequency.
- * Emits a shockwave that damages and pushes back nearby workers.
- * Action: Chases nearest worker (HuntBehaviour) and attacks adjacent workers (AttackBehaviour)
- * Transitions to:
- * WANDER: after 3 rounds (frenzy duration ends)
- * stays FRENZY: otherwise
- * On Enter:
- * Replaces beak with FrenzyBeak (half damage, double hit rate)
- * Lets out a frenzied screech creating a shockwave
- * All workers within 8 tiles take 2 damage
- * All workers within 8 tiles are pushed back 2 tiles away from chicken
- * Displays "lets out a FRENZIED SCREECH! The ground shakes!"
- * On Exit: Restores original beak; displays "calms down from its frenzy."
+ *
+ * Transitions (deterministic, no randomness):
+ * - After 3 turns: if adjacent worker has consumable → HUNGRY
+ * - After 3 turns: if no adjacent consumable → WANDER
+ * - Otherwise: stay in FRENZY
  *
  * @author Aida
+ * @version 1.0
  */
 public class FrenzyState implements State<ChickenState> {
-    private final HuntBehaviour huntBehaviour = new HuntBehaviour();
-    private final AttackBehaviour attackBehaviour = new AttackBehaviour();
-    private static final int FRENZY_DURATION = 3;
-    private final Display display = new Display();
 
-    // Store original damage/hit rate for restoration
+    private static final int FRENZY_DURATION = 3;
+    private static final int SHOCKWAVE_RADIUS = 8;
+    private static final int PUSH_BACK_DISTANCE = 2;
+    private static final int SHOCKWAVE_DAMAGE = 2;
+
+    private final HuntBehaviour huntBehaviour;
+    private final AttackBehaviour attackBehaviour;
+    private final Display display;
+
     private int originalDamage;
     private int originalHitRate;
 
@@ -49,120 +52,197 @@ public class FrenzyState implements State<ChickenState> {
         }
     }
 
+    /**
+     * Constructor with dependency injection for testability (DIP).
+     */
+    public FrenzyState() {
+        this(new HuntBehaviour(), new AttackBehaviour(), new Display());
+    }
+
+    /**
+     * Constructor for dependency injection.
+     */
+    public FrenzyState(HuntBehaviour huntBehaviour, AttackBehaviour attackBehaviour, Display display) {
+        this.huntBehaviour = huntBehaviour;
+        this.attackBehaviour = attackBehaviour;
+        this.display = display;
+    }
+
     @Override
     public Action getAction(Actor actor, Location location) {
-        // First try to attack adjacent workers
+        // Priority 1: Attack adjacent workers
         Action attackAction = attackBehaviour.operate(actor, location);
         if (attackAction != null) {
             return attackAction;
         }
 
-        // Otherwise hunt towards nearest worker
+        // Priority 2: Hunt towards nearest worker
         Action huntAction = huntBehaviour.operate(actor, location);
         if (huntAction != null) {
             return huntAction;
         }
 
+        // Fallback: Wander
         return new WanderingChicken().getAction(actor, location);
     }
 
     @Override
     public ChickenState getNextState(Actor actor, Location location, int turnsInCurrentState) {
-        // Frenzy lasts exactly 3 rounds, then return to wander
+
+        // FIRST: Check if frenzy duration has expired (after 3 turns)
         if (turnsInCurrentState >= FRENZY_DURATION) {
+
+            // SECOND: If expired, check for adjacent worker with consumable
+            if (hasAdjacentWorkerWithConsumable(location)) {
+                return ChickenState.HUNGRY;
+            }
+
+            // THIRD: No consumable available - return to wandering
             return ChickenState.WANDER;
         }
+
+        // STAY in current state
         return ChickenState.FRENZY;
+    }
+
+    /**
+     * Checks if any adjacent worker has a consumable item in inventory.
+     *
+     *
+     * @param location The chicken's current location
+     * @return true if adjacent worker has consumable, false otherwise
+     */
+    private boolean hasAdjacentWorkerWithConsumable(Location location) {
+        for (Exit exit : location.getExits()) {
+            Location destination = exit.getDestination();
+
+            if (!destination.containsAnActor()) {
+                continue;
+            }
+
+            Actor target = destination.getActor();
+
+            if (!target.hasAbility(Ability.WORKER)) {
+                continue;
+            }
+
+            for (Item item : target.getInventory().getItems()) {
+                if (item.asCapability(Consumable.class).isPresent()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
     public void onEnter(Actor actor, Location location) {
-        // Cast to BeakMutable instead of StatefulActor
         BeakMutable beakMutable = (BeakMutable) actor;
 
-        // Store original weapon stats using the interface methods
         CrazyChickenBeak originalBeak = beakMutable.getBeak();
         this.originalDamage = originalBeak.getDamageValue();
         this.originalHitRate = originalBeak.getHitRateValue();
 
-        // Replace with frenzy beak using the interface
         beakMutable.setBeak(new FrenzyBeak(originalDamage, originalHitRate));
 
-        // IMMEDIATE EFFECT: The chicken screeches loudly
+        // Frenzied screech shockwave
         display.println("\u001B[33m" + actor + " lets out a FRENZIED SCREECH! The ground shakes!\u001B[0m");
 
-        // All workers within 8 tiles take 2 damage and are pushed back 2 tiles
         GameMap map = location.map();
 
+        // Iterate through all map tiles
         for (int y : map.getYRange()) {
             for (int x : map.getXRange()) {
                 Location targetLoc = map.at(x, y);
-                if (targetLoc.containsAnActor()) {
-                    Actor target = targetLoc.getActor();
-                    if (target.hasAbility(Ability.WORKER)) {
-                        int dist = Math.abs(x - location.x()) + Math.abs(y - location.y());
-                        if (dist <= 8) {
-                            // Damage: 2 HP with message
-                            target.hurt(2);
-                            display.println("\u001B[31m" + target + " takes 2 damage from the shockwave!" +
-                                    " (" + target + " HP: " + getCurrentHealth(target) + "/" + getMaxHealth(target) + ")\u001B[0m");
 
-                            // Check if worker died
-                            if (!target.isConscious()) {
-                                display.println("\u001B[31m" + target + " has been killed by the shockwave!\u001B[0m");
-                            }
+                if (!targetLoc.containsAnActor()) {
+                    continue;
+                }
 
-                            // Push back: find a tile away from chicken and move the worker
-                            tryPushBack(target, targetLoc, location, map);
-                        }
+                Actor target = targetLoc.getActor();
+
+                // Check if target is a worker
+                if (!target.hasAbility(Ability.WORKER)) {
+                    continue;
+                }
+
+                int distance = Math.abs(x - location.x()) + Math.abs(y - location.y());
+
+                if (distance <= SHOCKWAVE_RADIUS) {
+                    // Apply damage
+                    target.hurt(SHOCKWAVE_DAMAGE);
+                    display.println("\u001B[31m" + target + " takes " + SHOCKWAVE_DAMAGE +
+                            " damage from the shockwave! (HP: " + getCurrentHealth(target) +
+                            "/" + getMaxHealth(target) + ")\u001B[0m");
+
+                    // Check if worker died using isConscious()
+                    if (!target.isConscious()) {
+                        display.println("\u001B[31m" + target + " has been killed by the shockwave!\u001B[0m");
                     }
+
+                    // Push worker away from chicken
+                    pushBack(target, targetLoc, location, map);
                 }
             }
         }
     }
 
-    private void tryPushBack(Actor target, Location targetLoc, Location chickenLoc, GameMap map) {
-        // Calculate direction away from chicken
-        int dx = targetLoc.x() - chickenLoc.x();
-        int dy = targetLoc.y() - chickenLoc.y();
+    /**
+     * Pushes a target actor away from the source location.
+     * Uses Manhattan direction calculation.
+     *
+     * @param target The actor being pushed
+     * @param targetLoc Current location of target
+     * @param sourceLoc Source location (chicken)
+     * @param map The game map
+     */
+    private void pushBack(Actor target, Location targetLoc, Location sourceLoc, GameMap map) {
+        int dx = targetLoc.x() - sourceLoc.x();
+        int dy = targetLoc.y() - sourceLoc.y();
 
-        // Normalize direction (move away)
         if (dx != 0) dx = dx > 0 ? 1 : -1;
         if (dy != 0) dy = dy > 0 ? 1 : -1;
 
-        // Try to move 2 tiles away
         Location current = targetLoc;
-        for (int i = 0; i < 2; i++) {
+
+        for (int step = 0; step < PUSH_BACK_DISTANCE; step++) {
             int newX = current.x() + dx;
             int newY = current.y() + dy;
-            if (map.getXRange().contains(newX) && map.getYRange().contains(newY)) {
-                Location newLoc = map.at(newX, newY);
-                if (!newLoc.containsAnActor() && newLoc.canActorEnter(target)) {
-                    current.map().moveActor(target, newLoc);
-                    display.println(target + " is pushed back to " + newLoc + "!");
-                    current = newLoc;
-                } else {
-                    display.println(target + " is knocked back but hits an obstacle!");
-                    break;
-                }
-            } else {
+
+            if (!map.getXRange().contains(newX) || !map.getYRange().contains(newY)) {
                 display.println(target + " cannot be pushed further (map boundary)!");
-                break;
+                return;
             }
+
+            Location next = map.at(newX, newY);
+
+            if (next.containsAnActor() || !next.canActorEnter(target)) {
+                display.println(target + " is knocked back but hits an obstacle!");
+                return;
+            }
+
+            map.moveActor(target, next);
+            display.println(target + " is pushed back to " + next + "!");
+            current = next;
         }
     }
 
+    /**
+     * Gets current health using engine's statistics system.
+     */
     private int getCurrentHealth(Actor actor) {
         return actor.getStatistic(edu.monash.fit2099.engine.actors.ActorStatistics.HEALTH);
     }
 
+    /**
+     * Gets maximum health using engine's statistics system.
+     */
     private int getMaxHealth(Actor actor) {
         return actor.getMaximumStatistic(edu.monash.fit2099.engine.actors.ActorStatistics.HEALTH);
     }
 
     @Override
     public void onExit(Actor actor, Location location) {
-        // Restore original beak using the interface
         BeakMutable beakMutable = (BeakMutable) actor;
         beakMutable.setBeak(new CrazyChickenBeak(originalDamage, originalHitRate));
 
