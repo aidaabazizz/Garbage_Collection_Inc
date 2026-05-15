@@ -3,6 +3,7 @@ package game.capabilities;
 import edu.monash.fit2099.engine.GameEntity;
 import edu.monash.fit2099.engine.actors.ActorStatistics;
 import edu.monash.fit2099.engine.capabilities.Status;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.StatisticOperations;
 
@@ -17,6 +18,7 @@ public abstract class DamageOverTimeStatus implements Status {
     /** The number of remaining turns before the status expires. */
     protected int remainingTurns;
     private final String statusName;
+
 
     /**
      * Constructor to initialize the status parameters.
@@ -35,9 +37,13 @@ public abstract class DamageOverTimeStatus implements Status {
      */
     @Override
     public void tickStatus(GameEntity entity, Location location) {
+        Display display = new Display();
         if (entity.hasStatistic(ActorStatistics.HEALTH)) {
             entity.modifyStatistic(ActorStatistics.HEALTH, StatisticOperations.DECREASE, 1);
+
+            display.println(entity + " takes 1 damage from " + statusName);
         }
+
         remainingTurns--;
     }
 
