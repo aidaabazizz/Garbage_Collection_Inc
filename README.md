@@ -23,6 +23,15 @@
 |   | | | |   ||     |_ |   |                                                            
 |___| |_|  |__||_______||___|                                                                                                                                                                                                                         
 ```
+---
+**CONTRIBUTION LOG:**
+https://docs.google.com/spreadsheets/d/1jF6rAykPxPmQ_06LkXPTXP32cgSiaoel0PHISt5tX1c/edit?usp=sharing
+
+---
+
+**REQUIREMENT 5 DETAILS**
+
+
 In requirement 5, we have implemented two new creatures: **Elsa** and **Crazy Chicken**. 
 These two creatures are spawned on the map through the Galaxy Portal and transition through different states, which are triggered by various factors such as worker action and proximity.
 
