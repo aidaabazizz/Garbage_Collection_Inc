@@ -13,17 +13,22 @@ import edu.monash.fit2099.engine.statistics.StatisticOperations;
  * over a fixed number of game turns using the engine's status ticking system.
  *
  * @author Jewell Gomes
+ * @author Chathya Attanayake (modified by)
+ *
  */
 public abstract class DamageOverTimeStatus implements Status {
-    /** The number of remaining turns before the status expires. */
+    /**
+     * The number of remaining turns before the status expires.
+     */
     protected int remainingTurns;
     private final String statusName;
 
 
     /**
      * Constructor to initialize the status parameters.
+     *
      * @param statusName The identifier for the effect.
-     * @param turns The duration of the effect.
+     * @param turns      The duration of the effect.
      */
     public DamageOverTimeStatus(String statusName, int turns) {
         this.statusName = statusName;
@@ -32,7 +37,8 @@ public abstract class DamageOverTimeStatus implements Status {
 
     /**
      * Decreases the entity's health statistic during each status tick.
-     * @param entity The entity affected by the status.
+     *
+     * @param entity   The entity affected by the status.
      * @param location The current location of the entity.
      */
     @Override
@@ -49,6 +55,7 @@ public abstract class DamageOverTimeStatus implements Status {
 
     /**
      * Checks if the effect is still operational based on remaining turns.
+     *
      * @return True if turns remain; false if the effect has expired.
      */
     @Override
@@ -56,7 +63,9 @@ public abstract class DamageOverTimeStatus implements Status {
         return remainingTurns > 0;
     }
 
-    /** @return A string representation including the remaining duration. */
+    /**
+     * @return A string representation including the remaining duration.
+     */
     @Override
     public String toString() {
         return statusName + " (" + remainingTurns + " turns left)";
