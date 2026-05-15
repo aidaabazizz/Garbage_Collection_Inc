@@ -48,7 +48,7 @@ public class FleshySproutStage extends FleshyTreeStage {
             return this;
         }
 
-        // aging/growing (only if not spawning)
+        // growing (only if not spawning)
         if (checkGrowthThreshold(GROWTH_THRESHOLD, GROWTH_CHANCE, location,"Fleshy Sprout")) {
             display.println(String.format(
                     "Fleshy Tree Sprout ('%s') at %s grows into a Fleshy Sapling ('v')!",
