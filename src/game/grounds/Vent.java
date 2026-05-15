@@ -66,16 +66,13 @@ public class Vent extends Ground {
         // 1. Poison the newly spawned creature occupying the vent tile
         if (location.containsAnActor()) location.getActor().addStatus(new PoisonStatus(POISON_DURATION));
 
-        // 2. REQ4 Clarification: Poison exactly one random adjacent actor
-        List<Actor> adjacentActors = new ArrayList<>();
-        for (Exit exit : location.getExits()) {
-            if (exit.getDestination().containsAnActor()) {
-                adjacentActors.add(exit.getDestination().getActor());
-            }
-        }
+        // Poison exactly one random adjacent actor
+        List<Actor> nearby = SpatialSearch.getNearbyActors(location);
+
         // Select and poison one random target from the collected adjacent actors
-        if (!adjacentActors.isEmpty()) {
-            adjacentActors.get(rand.nextInt(adjacentActors.size())).addStatus(new PoisonStatus(POISON_DURATION));
+        if (!nearby.isEmpty()) {
+            Actor target = nearby.get(rand.nextInt(nearby.size()));
+            target.addStatus(new PoisonStatus(POISON_DURATION));
         }
     }
 }
