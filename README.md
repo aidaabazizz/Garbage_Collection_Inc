@@ -126,8 +126,8 @@ MIMICKING -> FRENZY (after 2 turns)
 
 ---
 
-FRENZY -> WANDER (after 3 turns)
-
+FRENZY -> WANDER (after 3 turns, if actor nearby does not have consumable)
+FRENZY -> HUNGRY (after 3 turns, if actor nearby has consumable)
 ---
 
 HUNGRY -> MIMICKING (worker within 5 tiles)
