@@ -15,7 +15,7 @@ public abstract class AbstractTreeStage implements TreeStage {
     /** Random number generator for growth probabilities. */
     protected static final Random random = new Random();
     /** By making this protected, all "Stage" subclasses inherit it automatically. */
-    protected static final Display display = new Display();
+    protected final Display display = new Display();
     /** The age of the current tree stage **/
     private int age = 0;
     /**
