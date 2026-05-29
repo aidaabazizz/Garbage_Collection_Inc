@@ -21,12 +21,26 @@ public abstract class FleshyTreeStage extends AbstractTreeStage{
      */
     protected final Spawner spawner;
     /**
-     * Constructor for FleshyTreeStage.
+     * Constructor for FleshyTreeStage instances that require growth thresholds.
      *
-     * @param spawner The spawning service to be used by this stage or
-     *                passed to the subsequent growth stage.
+     * @param spawner   The spawning service used to manage entity generation for this stage.
+     * @param name      The descriptive name of the growth stage.
+     * @param threshold The number of game turns required before maturation is attempted.
+     * @param chance    The probability of successful maturation upon reaching the threshold.
      */
-    public FleshyTreeStage(Spawner spawner) {
+    public FleshyTreeStage(Spawner spawner, String name, char displayChar, int threshold, double chance) {
+        super(name, displayChar, threshold, chance); // Pass to AbstractTreeStage
+        this.spawner = spawner;
+    }
+
+    /**
+     * Constructor for FleshyTreeStage instances that do not evolve further (terminal stages).
+     *
+     * @param spawner The spawning service used to manage entity generation for this stage.
+     * @param name    The descriptive name of the growth stage.
+     */
+    public FleshyTreeStage(Spawner spawner, String name, char displayChar) {
+        super(name, displayChar);
         this.spawner = spawner;
     }
 }

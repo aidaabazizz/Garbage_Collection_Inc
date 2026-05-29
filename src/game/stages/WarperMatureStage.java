@@ -22,7 +22,8 @@ public class WarperMatureStage extends AbstractTreeStage {
      * Constructor Injection.
      * @param strategy The strategy defining how the tree warps workers.
      */
-    public WarperMatureStage(TeleportStrategy strategy) {
+    public WarperMatureStage(TeleportStrategy strategy, char displayChar) {
+        super("Warper Mature", displayChar);
         this.strategy = strategy;
     }
 
@@ -47,12 +48,5 @@ public class WarperMatureStage extends AbstractTreeStage {
         }
         return this;
     }
-
-    /**
-     * Returns the display character for the Mature Warper Tree.
-     *
-     * @return The character 'W'.
-     */
-    @Override
-    public char getDisplayChar() { return 'W'; }
 }
+
