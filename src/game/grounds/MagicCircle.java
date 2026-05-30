@@ -34,6 +34,7 @@ public class MagicCircle extends Ground {
     public ActionList allowableActions(Actor actor, Location location, String direction) {
         ActionList actions = new ActionList();
 
+        // If direction is empty, it means the actor is standing directly on top of the '◎' symbol
         if (direction.isEmpty()) {
             actions.add(new TeleportAction(new MagicCircleStrategy()));
         }

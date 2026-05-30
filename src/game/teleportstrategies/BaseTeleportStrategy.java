@@ -3,11 +3,9 @@ package game.teleportstrategies;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.capabilities.TeleportStrategy;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
+
 
 /**
  * An abstract base class that serves as a foundation for all teleportation behaviors
@@ -17,49 +15,74 @@ import java.util.Random;
  *
  * @author Jewell Gomes
  */
-public abstract class BaseTeleportStrategy implements TeleportStrategy {
-    /**
-     * Random number generator used for coordinate selection and malfunction checks.
-     */
+public abstract class BaseTeleportStrategy {
+    protected Location targetLocation;
+    private final String destinationName;
     protected final Random random = new Random();
 
-    /**
-     * Identifies a random location on the specified map that is both passable and
-     * currently unoccupied.
-     * To ensure game stability and fulfill the robustness requirements of LO4,
-     * this method scans the map to collect all valid positions rather than using
-     * a random-guess loop. This prevents the application from hanging or entering
-     * an infinite loop if the map is entirely occupied by creatures or objects.
-     *
-     * @param map   The game map to search for a destination.
-     * @param actor The actor intended to be moved.
-     * @return A randomly selected valid Location, or null if no valid spots exist.
-     */
-    protected Location getRandomValidLocation(GameMap map, Actor actor) {
-        List<Location> validSpots = new ArrayList<>();
-        for (int x : map.getXRange()) {
-            for (int y : map.getYRange()) {
-                Location loc = map.at(x, y);
-                if (loc.canActorEnter(actor) && !loc.containsAnActor()) {
-                    validSpots.add(loc);
-                }
+    public BaseTeleportStrategy(Location targetLocation, String destinationName) {
+        this.targetLocation = targetLocation;
+        this.destinationName = destinationName;
+    }
+
+    public BaseTeleportStrategy(String destinationName) {
+        this.targetLocation = null;
+        this.destinationName = destinationName;
+    }
+
+    public static Location findRandomValidLocation(GameMap map, Actor actor) {
+        Random rand = new Random();
+        int xMin = map.getXRange().min();
+        int xMax = map.getXRange().max();
+        int yMin = map.getYRange().min();
+        int yMax = map.getYRange().max();
+
+        for (int i = 0; i < 100; i++) {
+            int x = xMin + rand.nextInt((xMax - xMin) + 1);
+            int y = yMin + rand.nextInt((yMax - yMin) + 1);
+            Location candidate = map.at(x, y);
+            if (candidate.getGround().canActorEnter(actor) && !candidate.containsAnActor()) {
+                return candidate;
             }
         }
-
-        if (validSpots.isEmpty()) {
-            return null;
-        }
-        return validSpots.get(random.nextInt(validSpots.size()));
+        return null;
     }
 
     /**
-     * Executes any secondary environmental triggers that occur as a result of teleportation.
-     *
-     * @param actor       The actor being moved.
-     * @param source      The location where the teleportation started.
-     * @param destination The location where the actor arrived.
-     * @param map         The map where the side effects should be applied.
+     * Template method that handles the core execution loop.
      */
-    @Override
-    public void applySideEffects(Actor actor, Location source, Location destination, GameMap map) {}
+    public final void teleport(Actor actor, Location source) {
+        if (actor == null || source == null) {
+            return;
+        }
+
+        // 1. Trigger source-side effects (e.g., Alien Cube turning ground to Toxic Waste)
+        applySourceEffects(source);
+
+        // 2. Determine actual destination map and location
+        Location destination = determineActualDestination(this.targetLocation != null ? this.targetLocation : source);
+        if (destination == null) return;
+
+        // 3. Move the actor safely
+        GameMap targetMap = destination.map();
+        targetMap.moveActor(actor, destination);
+
+        // 4. Trigger destination side-effects
+        applyDestinationEffects(destination);
+    }
+
+    public String getDestinationName() {
+        return this.destinationName;
+    }
+
+    protected Location determineActualDestination(Location target) {
+        return target;
+    }
+
+    public String getActionDescription(Actor actor) {
+        return actor + " teleports to " + getDestinationName();
+    }
+
+    protected abstract void applySourceEffects(Location source);
+    protected abstract void applyDestinationEffects(Location destination);
 }

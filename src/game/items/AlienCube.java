@@ -12,7 +12,9 @@ import game.capabilities.CreditHolder;
 import game.capabilities.Sellable;
 import game.enums.ItemStatistics;
 import game.teleportstrategies.AlienCubeStrategy;
-import java.util.List;
+import game.teleportstrategies.BaseTeleportStrategy;
+
+import java.util.Random;
 
 /**
  * Alien Cube warp space-time, it is an item and can be used as a teleportation device.
@@ -44,22 +46,20 @@ public class AlienCube extends Item implements Sellable {
         this.makePortable();
     }
 
-    /**
-     * Provides 3 random teleport destination options
-     * @param owner the actor that owns the item
-     * @param map the map where the actor is performing the action on
-     * @return actions for each random destination
-     */
     @Override
     public ActionList allowableActions(Actor owner, GameMap map) {
         ActionList actions = new ActionList();
+        int validOptionsFound = 0;
 
-        AlienCubeStrategy strategy = new AlienCubeStrategy(map.at(0, 0), this);
+        while (validOptionsFound < NUM_OPTIONS) {
+            Location randomLocation = BaseTeleportStrategy.findRandomValidLocation(map, owner);
+            if (randomLocation == null) break;
 
-        List<Location> targets = strategy.getRandomDestinations(map, owner, NUM_OPTIONS);
-        for (Location loc : targets) {
-            actions.add(new TeleportAction(new AlienCubeStrategy(loc, this)));
+            String menuDescription = "Scattered Coordinates at (" + randomLocation.x() + ", " + randomLocation.y() + ")";
+            actions.add(new TeleportAction(new AlienCubeStrategy(randomLocation, menuDescription)));
+            validOptionsFound++;
         }
+
         return actions;
     }
 

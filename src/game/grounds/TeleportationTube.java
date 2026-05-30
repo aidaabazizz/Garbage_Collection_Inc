@@ -5,8 +5,7 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.TeleportAction;
-import game.capabilities.TeleportStrategy;
-import game.enums.Ability;
+import game.teleportstrategies.BaseTeleportStrategy;
 
 import java.util.List;
 
@@ -23,16 +22,15 @@ public class TeleportationTube extends Ground {
      * List of possible destination locations for teleportation
      * These locations are predetermined and fixed at the time of tube creation.
      */
-    private final List<TeleportStrategy> strategies;
+    private final List<BaseTeleportStrategy> strategies;
 
     /**
      * Construct a new Teleportation Tube with the specified destination locations
      * @param strategies a list of strategies that represents a destination
      */
-    public TeleportationTube(List<TeleportStrategy> strategies) {
+    public TeleportationTube(List<BaseTeleportStrategy> strategies) {
         super('Φ', "Teleportation Tube");
         this.strategies = strategies;
-        this.enableAbility(Ability.IS_TELEPORTATION_TUBE);
     }
 
     /**
@@ -42,11 +40,14 @@ public class TeleportationTube extends Ground {
      * @param direction the direction of the Ground from the Actor
      * @return an action list that contains the teleport action if the actor can interact with the tube
      */
+
     @Override
     public ActionList allowableActions(Actor actor, Location location, String direction) {
         ActionList actions = new ActionList();
+        // If direction is empty, it means the actor is standing directly on top of the 'Φ' tile
         if (direction.isEmpty()) {
-            for (TeleportStrategy strategy : strategies) {
+            for (BaseTeleportStrategy strategy : strategies) {
+                // Pass the strategy to the updated Action block
                 actions.add(new TeleportAction(strategy));
             }
         }
