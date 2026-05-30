@@ -1,13 +1,8 @@
 package game.teleportstrategies;
 
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.grounds.ToxicWaste;
-import game.items.AlienCube;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This will support the teleportation of using alien cube.
@@ -15,73 +10,64 @@ import java.util.List;
  * location into Toxic Waste and consumes the cube upon use.
  *
  * @author Victoria Tay Wen Xie
- * @version 1.0
+ * @version 2.0
  */
 public class AlienCubeStrategy extends BaseTeleportStrategy {
-    /** Destination location */
-    private final Location destination;
-    /** Adjacent corruption radius */
-    private final static int ADJACENT_TILE = 1;
-    /** This will refer to the Alien Cube */
-    private final AlienCube cube;
 
     /**
-     * Creates a strategy for a chosen destination
-     * @param destination the destination location
-     * @param cube the Alien cube being used
+     * Constructs an AlienCubeStrategy with a fixed target destination.
+     *
+     * @param target the destination location for teleportation
+     * @param destinationName the display name of the destination
      */
-    public AlienCubeStrategy(Location destination, AlienCube cube) {
-        this.destination = destination;
-        this.cube = cube;
+    public AlienCubeStrategy(Location target, String destinationName) {
+        super(target, destinationName);
     }
 
     /**
-     * This helper finds the 3 random spots required by the Alien Cube
-     * using the inherited base utility.
-     */
-    public List<Location> getRandomDestinations(GameMap map, Actor actor, int count) {
-        List<Location> targets = new ArrayList<>();
-        while (targets.size() < count) {
-            Location loc = getRandomValidLocation(map, actor); // Inherited from Base
-            if (loc != null && !targets.contains(loc)) {
-                targets.add(loc);
-            }
-        }
-        return targets;
-    }
-
-    /**
-     * Returns the chosen destination
-     * @param actor the teleporting actor
-     * @param map the current map
-     * @return the destination location
+     * Determines the actual destination of the teleportation.
+     * In this case, the destination is fixed and already precomputed.
+     *
+     * @param target the intended destination location
+     * @return the same target location
      */
     @Override
-    public Location getDestination(Actor actor, GameMap map) {
-        return destination;
+    protected Location determineActualDestination(Location target) {
+        return target;
     }
 
     /**
-     * This will corrupt source tiles to Toxic Waste and removes the alien cube from inventory
-     * @param actor       The actor being moved.
-     * @param source      The location where the teleportation started.
-     * @param destination The location where the actor arrived.
-     * @param map         The map where the side effects should be applied.
+     * Applies effects at the source location before teleportation.
+     * Converts all nearby tiles into Toxic Waste.
+     *
+     * @param source the location the actor is teleporting from
      */
     @Override
-    public void applySideEffects(Actor actor, Location source, Location destination, GameMap map) {
-        for (Location adj : source.getNearbyLocations(ADJACENT_TILE)) {
-            adj.setGround(new ToxicWaste());
+    public void applySourceEffects(Location source) {
+        for (Location adjacent : source.getNearbyLocations(1)) {
+            adjacent.setGround(new ToxicWaste());
         }
     }
 
     /**
-     * Returns menu description
-     * @param actor the teleporting actor
-     * @return menu description string
+     * Applies effects at the destination location after teleportation.
+     * No additional effects are applied.
+     *
+     * @param destination the location the actor arrives at
      */
     @Override
-    public String menuDescription(Actor actor) {
-        return "Warp to (" + destination.x() + ", " + destination.y() + ")";
+    public void applyDestinationEffects(Location destination) {
+        // No destination effects
+    }
+
+    /**
+     * Returns a description of the teleportation action.
+     *
+     * @param actor the actor performing the teleportation
+     * @return a string describing the teleportation action
+     */
+    @Override
+    public String getActionDescription(Actor actor) {
+        return actor + " warps to " + getDestinationName() + " using Alien Cube";
     }
 }

@@ -35,6 +35,7 @@ public class WarperTree extends AbstractTree {
      * @return The starting growth stage (Sapling) for the warper tree.
      */
     private static TreeStage createLifecycle() {
+        // Injects the refactored TreeWarpStrategy directly into the Mature growth stage execution block
         TreeStage mature = new WarperMatureStage(new TreeWarpStrategy(), MATURE_CHAR);
 
         AbstractTreeStage sapling = new EvolutionStage(

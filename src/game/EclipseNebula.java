@@ -9,7 +9,6 @@ import game.actors.*;
 import game.doors.AluminiumDoor;
 import game.doors.IronDoor;
 import game.doors.TitaniumDoor;
-import game.enums.Ability;
 import game.enums.AccessLevel;
 import game.finance.Wallet;
 import game.grounds.*;
@@ -19,8 +18,8 @@ import game.inventory.WeightLimitedInventory;
 import game.items.*;
 import game.managers.CreatureSpawner;
 import game.managers.Spawner;
+import game.teleportstrategies.BaseTeleportStrategy;
 import game.teleportstrategies.TeleportTubeStrategy;
-import game.capabilities.TeleportStrategy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -229,16 +228,16 @@ public class EclipseNebula extends World {
             throw new IllegalStateException("Teleportation Tube placeholders (Φ) missing from maps!");
         }
 
-        // Configure Moon Tube
-        List<TeleportStrategy> moonStrategies = new ArrayList<>();
-        moonStrategies.add(new TeleportTubeStrategy(moonMap.at(5, 15)));
-        moonStrategies.add(new TeleportTubeStrategy(overflowTubeLoc));
+        // Configure Moon Tube destinations
+        List<BaseTeleportStrategy> moonStrategies = new ArrayList<>();
+        moonStrategies.add(new TeleportTubeStrategy(moonMap.at(5, 15), "Moon 99 Secure Safe-Zone"));
+        moonStrategies.add(new TeleportTubeStrategy(overflowTubeLoc, "20-Overflow Factory Entrance"));
         moonTubeLoc.setGround(new TeleportationTube(moonStrategies));
 
-        // Configure Overflow Tube
-        List<TeleportStrategy> overflowStrategies = new ArrayList<>();
-        overflowStrategies.add(new TeleportTubeStrategy(moonTubeLoc));
-        overflowStrategies.add(new TeleportTubeStrategy(overflowMap.at(10, 10)));
+        // Configure Overflow Tube destinations
+        List<BaseTeleportStrategy> overflowStrategies = new ArrayList<>();
+        overflowStrategies.add(new TeleportTubeStrategy(moonTubeLoc, "99-Deprecated Outpost"));
+        overflowStrategies.add(new TeleportTubeStrategy(overflowMap.at(10, 10), "20-Overflow Lower Catacombs"));
         overflowTubeLoc.setGround(new TeleportationTube(overflowStrategies));
     }
 
@@ -249,7 +248,8 @@ public class EclipseNebula extends World {
     private Location findLocationOfSymbol(GameMap map) {
         for (int x : map.getXRange()) {
             for (int y : map.getYRange()) {
-                if (map.at(x, y).getGround().hasAbility(Ability.IS_TELEPORTATION_TUBE)) {
+                // FIX: Check the display character of the ground tile directly!
+                if (map.at(x, y).getGround().getDisplayChar() == 'Φ') {
                     return map.at(x, y);
                 }
             }
@@ -331,8 +331,4 @@ public class EclipseNebula extends World {
             this.addPlayer(worker, map.at(startX++, 4));
         }
     }
-
-
-
-
 }
