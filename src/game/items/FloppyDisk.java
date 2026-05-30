@@ -7,6 +7,7 @@ import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import game.enums.ItemStatistics;
 import game.capabilities.Sellable;
 import game.capabilities.CreditHolder;
+import game.highvoltage.MaterialCapability;
 
 import java.util.Random;
 
@@ -32,6 +33,7 @@ public class FloppyDisk extends Item implements Sellable {
         super("Floppy Disk", '⊟');
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(1));
         this.makePortable();
+        this.enableAbility(MaterialCapability.MAGNETIC);
     }
 
     /**

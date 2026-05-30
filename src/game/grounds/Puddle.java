@@ -2,12 +2,14 @@ package game.grounds;
 
 import edu.monash.fit2099.engine.actions.ActionList;
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.ConsumeAction;
 import game.enums.Ability;
 import game.capabilities.Consumable;
 import game.capabilities.PoisonStatus;
+import game.highvoltage.ChargeReactive;
 
 /**
  * A body of liquid on the ground that can be consumed by actors.
@@ -17,7 +19,7 @@ import game.capabilities.PoisonStatus;
  *
  * @author Jewell Gomes
  */
-public class Puddle extends Ground implements Consumable {
+public class Puddle extends Ground implements Consumable, ChargeReactive {
 
     /** The amount of health restored when drinking purified water. */
     private static final int HEAL_POINTS = 1;
@@ -32,6 +34,19 @@ public class Puddle extends Ground implements Consumable {
      */
     public Puddle() {
         super('~', "Puddle");
+    }
+
+    /**
+     * A3 REQ3: Structural Terrain Morphing.
+     * When hit by a ChargeSource, the Puddle physically replaces itself
+     * on the map with a high-energy hazard.
+     */
+    @Override
+    public void reactToCharge(Location location, Display display, String sourceName) {
+        // Physically replaces this Ground instance with the ElectrifiedPuddle hazard.
+        display.println("\u001B[36m" + "The puddle is hit by " + sourceName +
+                " and becomes electrified!" + "\u001B[0m");
+        location.setGround(new ElectrifiedPuddle());
     }
 
     /**
