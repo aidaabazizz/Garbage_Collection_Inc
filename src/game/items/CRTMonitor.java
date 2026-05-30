@@ -12,6 +12,7 @@ import game.capabilities.FireStackable;
 import game.capabilities.Sellable;
 import game.capabilities.CreditHolder;
 import game.grounds.Fire;
+import game.highvoltage.MaterialCapability;
 
 import java.util.Random;
 
@@ -38,6 +39,7 @@ public class CRTMonitor extends Item implements Sellable {
         super("CRT Monitor", '◙');
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(30));
         this.makePortable();
+        this.enableAbility(MaterialCapability.MAGNETIC);
     }
 
     /**
