@@ -5,9 +5,11 @@ import edu.monash.fit2099.engine.actions.ActionList;
 import edu.monash.fit2099.engine.actions.DoNothingAction;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.behaviours.Behaviour;
+import edu.monash.fit2099.engine.capabilities.Status;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.items.Inventory;
 import edu.monash.fit2099.engine.positions.GameMap;
+import game.highvoltage.ParalyzedStatus;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -34,11 +36,25 @@ public abstract class NonPlayerCharacter extends Actor {
         super(name, displayChar, hitPoints, inventory);
     }
 
+    private boolean isParalyzed() {
+        for (Status status : this.statuses()) {
+            if (status.getClass() == ParalyzedStatus.class && status.isStatusActive()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     /**
      * Iterates through the behaviors in priority order and returns the first valid action.
      */
     @Override
     public Action playTurn(ActionList actions, Action lastAction, GameMap map, Display display) {
+        if (this.isParalyzed()) {
+            display.println("\u001B[33m" + this + " is paralyzed by the electric charge and cannot move!\u001B[0m");
+            return new DoNothingAction();
+        }
         for (Behaviour<Actor, Action> behaviour : behaviours.values()) {
             Action action = behaviour.operate(this, map.locationOf(this));
             if (action != null) return action;
