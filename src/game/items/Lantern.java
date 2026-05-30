@@ -16,6 +16,7 @@ import game.capabilities.Sellable;
 import game.capabilities.UpdateNotifier;
 import game.enums.ItemStatistics;
 import game.grounds.Fire;
+import game.highvoltage.MaterialCapability;
 
 import java.util.Random;
 
@@ -60,6 +61,7 @@ public class Lantern extends Item implements UpdateNotifier, Sellable, Infectabl
         super("Lantern", '&');
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(WEIGHT));
         this.makePortable();
+        this.enableAbility(MaterialCapability.MAGNETIC);
     }
 
     /**
