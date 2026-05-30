@@ -1,4 +1,5 @@
 package game.weather;
+import game.weather.WeatherApiException;
 
 /**
  * Provides API configuration for the weather system.
