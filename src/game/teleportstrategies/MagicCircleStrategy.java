@@ -94,6 +94,6 @@ public class MagicCircleStrategy extends BaseTeleportStrategy {
      */
     @Override
     public String getActionDescription(Actor actor) {
-        return actor + " travels to " + getDestinationName() + " using Magic Circle";
+        return actor + " travels to another " + getDestinationName() + " using Magic Circle";
     }
 }

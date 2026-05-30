@@ -41,14 +41,11 @@ public class TeleportAction extends Action {
     @Override
     public String execute(Actor actor, GameMap map) {
         Location sourceLocation = map.locationOf(actor);
-
         if (sourceLocation == null) {
             return actor + " cannot determine its baseline coordinates.";
         }
-
         teleportStrategy.teleport(actor, sourceLocation);
-
-        return actor + " travels to " + teleportStrategy.getDestinationName();
+        return teleportStrategy.getActionDescription(actor);
     }
 
     /**

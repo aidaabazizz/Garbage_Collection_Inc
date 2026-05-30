@@ -14,6 +14,8 @@ import game.grounds.Fire;
  * @version 2.0
  */
 public class TeleportTubeStrategy extends BaseTeleportStrategy {
+    /** A flag to track whether teleport tube malfunctioned when teleporting actor **/
+    private boolean malfunctioned = false;
 
     /**
      * Constructs a TeleportTubeStrategy with a specified destination.
@@ -38,8 +40,12 @@ public class TeleportTubeStrategy extends BaseTeleportStrategy {
     protected Location determineActualDestination(Location target) {
         if (RANDOM.nextDouble() < 0.50) {
             Location random = findRandomValidLocation(target.map(), getTeleportingActor());
-            if (random != null) return random;
+            if (random != null) {
+                malfunctioned = true;
+                return random;
+            }
         }
+        malfunctioned = false;
         return target;
     }
 
@@ -78,6 +84,11 @@ public class TeleportTubeStrategy extends BaseTeleportStrategy {
      */
     @Override
     public String getActionDescription(Actor actor) {
+        if (malfunctioned) {
+            return actor + " attempts to travel to " + getDestinationName()
+                    + " using Teleportation Tube, but it malfunctions! "
+                    + actor + " is sent to a random location!";
+        }
         return actor + " travels to " + getDestinationName() + " using Teleportation Tube";
     }
 }
