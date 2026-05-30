@@ -1,9 +1,5 @@
 package game.teleportstrategies;
-
-import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import java.util.Random;
 
 /**
  * A teleportation strategy specific to the Mature Warper Tree.
@@ -34,8 +30,7 @@ public class TreeWarpStrategy extends BaseTeleportStrategy {
      */
     @Override
     protected Location determineActualDestination(Location target) {
-        Actor actor = target.getActor();
-        Location result = BaseTeleportStrategy.findRandomValidLocation(target.map(), actor);
+        Location result = findRandomValidLocation(target.map(), getTeleportingActor());
         return result != null ? result : target;
     }
 

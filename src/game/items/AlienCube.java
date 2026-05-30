@@ -14,6 +14,8 @@ import game.enums.ItemStatistics;
 import game.teleportstrategies.AlienCubeStrategy;
 import game.teleportstrategies.BaseTeleportStrategy;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -46,18 +48,31 @@ public class AlienCube extends Item implements Sellable {
         this.makePortable();
     }
 
+    /**
+     * Generates a list of allowable teleport actions for this item.
+     * Random valid map locations are generated and presented as teleport options.
+     * Duplicate or invalid locations are ignored. A maximum of 3
+     * destinations options are shown.
+     * @param owner the actor carrying the item
+     * @param map the current game map
+     * @return a list of teleport actions available to the actor
+     */
     @Override
     public ActionList allowableActions(Actor owner, GameMap map) {
         ActionList actions = new ActionList();
-        int validOptionsFound = 0;
+        List<Location> chosen = new ArrayList<>();
+        int attempts = 0;
 
-        while (validOptionsFound < NUM_OPTIONS) {
+        while (chosen.size() < NUM_OPTIONS && attempts < 200) {
+            attempts++;
             Location randomLocation = BaseTeleportStrategy.findRandomValidLocation(map, owner);
             if (randomLocation == null) break;
+            if (chosen.contains(randomLocation)) continue;
 
-            String menuDescription = "Scattered Coordinates at (" + randomLocation.x() + ", " + randomLocation.y() + ")";
+            chosen.add(randomLocation);
+            String menuDescription = "Scattered Coordinates at ("
+                    + randomLocation.x() + ", " + randomLocation.y() + ")";
             actions.add(new TeleportAction(new AlienCubeStrategy(randomLocation, menuDescription)));
-            validOptionsFound++;
         }
 
         return actions;

@@ -16,20 +16,53 @@ import java.util.Random;
  * @author Jewell Gomes
  */
 public abstract class BaseTeleportStrategy {
-    protected Location targetLocation;
-    private final String destinationName;
-    protected final Random random = new Random();
 
+    private Actor teleportingActor;
+
+    /**
+     * The target location for teleportation.
+     */
+    protected Location targetLocation;
+
+    /**
+     * The name of the teleportation destination.
+     */
+    private final String destinationName;
+
+    /**
+     * Random number generator used by teleportation strategies.
+     */
+    protected static final Random RANDOM = new Random();
+
+    /**
+     * Constructs a teleportation strategy with a fixed destination.
+     *
+     * @param targetLocation the target location for teleportation
+     * @param destinationName the name of the destination
+     */
     public BaseTeleportStrategy(Location targetLocation, String destinationName) {
         this.targetLocation = targetLocation;
         this.destinationName = destinationName;
     }
 
+    /**
+     * Constructs a teleportation strategy without a fixed destination.
+     *
+     * @param destinationName the name of the destination
+     */
     public BaseTeleportStrategy(String destinationName) {
         this.targetLocation = null;
         this.destinationName = destinationName;
     }
 
+    /**
+     * Finds a random valid location on the given map that can be occupied
+     * by the specified actor.
+     *
+     * @param map the map to search
+     * @param actor the actor to be teleported
+     * @return a random valid location, or null if none is found
+     */
     public static Location findRandomValidLocation(GameMap map, Actor actor) {
         Random rand = new Random();
         int xMin = map.getXRange().min();
@@ -41,6 +74,7 @@ public abstract class BaseTeleportStrategy {
             int x = xMin + rand.nextInt((xMax - xMin) + 1);
             int y = yMin + rand.nextInt((yMax - yMin) + 1);
             Location candidate = map.at(x, y);
+
             if (candidate.getGround().canActorEnter(actor) && !candidate.containsAnActor()) {
                 return candidate;
             }
@@ -49,40 +83,71 @@ public abstract class BaseTeleportStrategy {
     }
 
     /**
-     * Template method that handles the core execution loop.
+     * Executes the teleportation process.
+     * Applies source effects, determines the destination, moves the actor,
+     * and applies destination effects.
+     *
+     * @param actor the actor being teleported
+     * @param source the location the actor is teleporting from
      */
     public final void teleport(Actor actor, Location source) {
-        if (actor == null || source == null) {
-            return;
-        }
-
-        // 1. Trigger source-side effects (e.g., Alien Cube turning ground to Toxic Waste)
+        if (actor == null || source == null) return;
+        this.teleportingActor = actor; // store before use
         applySourceEffects(source);
-
-        // 2. Determine actual destination map and location
-        Location destination = determineActualDestination(this.targetLocation != null ? this.targetLocation : source);
+        Location destination = determineActualDestination(
+                this.targetLocation != null ? this.targetLocation : source
+        );
         if (destination == null) return;
-
-        // 3. Move the actor safely
-        GameMap targetMap = destination.map();
-        targetMap.moveActor(actor, destination);
-
-        // 4. Trigger destination side-effects
+        destination.map().moveActor(actor, destination);
         applyDestinationEffects(destination);
     }
 
+    protected Actor getTeleportingActor() {
+        return teleportingActor;
+    }
+
+    /**
+     * Returns the name of the teleportation destination.
+     *
+     * @return the destination name
+     */
     public String getDestinationName() {
         return this.destinationName;
     }
 
+    /**
+     * Determines the actual destination location.
+     * Subclasses may override this method to implement custom destination
+     * selection logic.
+     *
+     * @param target the intended destination location
+     * @return the actual destination location
+     */
     protected Location determineActualDestination(Location target) {
         return target;
     }
 
+    /**
+     * Returns a description of the teleportation action.
+     *
+     * @param actor the actor performing the teleportation
+     * @return a string describing the teleportation action
+     */
     public String getActionDescription(Actor actor) {
         return actor + " teleports to " + getDestinationName();
     }
 
+    /**
+     * Applies effects at the source location before teleportation.
+     *
+     * @param source the source location
+     */
     protected abstract void applySourceEffects(Location source);
+
+    /**
+     * Applies effects at the destination location after teleportation.
+     *
+     * @param destination the destination location
+     */
     protected abstract void applyDestinationEffects(Location destination);
 }

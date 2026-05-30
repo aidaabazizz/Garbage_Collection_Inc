@@ -40,14 +40,11 @@ public class TeleportationTube extends Ground {
      * @param direction the direction of the Ground from the Actor
      * @return an action list that contains the teleport action if the actor can interact with the tube
      */
-
     @Override
     public ActionList allowableActions(Actor actor, Location location, String direction) {
         ActionList actions = new ActionList();
-        // If direction is empty, it means the actor is standing directly on top of the 'Φ' tile
         if (direction.isEmpty()) {
             for (BaseTeleportStrategy strategy : strategies) {
-                // Pass the strategy to the updated Action block
                 actions.add(new TeleportAction(strategy));
             }
         }

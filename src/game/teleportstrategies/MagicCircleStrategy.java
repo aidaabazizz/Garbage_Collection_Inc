@@ -7,7 +7,6 @@ import game.items.Flask;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * This is a ground type where magic circle teleports worker to a random magic
@@ -18,61 +17,81 @@ import java.util.Random;
  */
 public class MagicCircleStrategy extends BaseTeleportStrategy {
 
+    /**
+     * Constructs a MagicCircleStrategy with the default destination name
+     * "Magic Circle".
+     */
     public MagicCircleStrategy() {
         super("Magic Circle");
     }
 
+    /**
+     * Determines the destination of the teleportation.
+     * Searches the current map for all unoccupied Magic Circles other than
+     * the source Magic Circle and randomly selects one as the destination.
+     * If no valid destination exists, the source location is returned.
+     *
+     * @param target the Magic Circle being used as the source location
+     * @return a randomly selected valid Magic Circle destination, or the
+     *         source location if no valid destination exists
+     */
     @Override
     protected Location determineActualDestination(Location target) {
-        // Grab the active map and the actor standing at this position
         GameMap map = target.map();
-        Actor actor = target.getActor();
-
         List<Location> validCircles = new ArrayList<>();
-
-        // If no actor is present for some reason, fallback to target
-        if (actor == null) {
-            return target;
-        }
 
         for (int x : map.getXRange()) {
             for (int y : map.getYRange()) {
                 Location loc = map.at(x, y);
-
-                // Ensure target circle doesn't already have an actor standing on it
-                if (loc.getGround().getDisplayChar() == '◎' && !loc.equals(target)) {
-                    if (!loc.containsAnActor()) {
-                        validCircles.add(loc);
-                    }
+                if (loc.getGround().getDisplayChar() == '◎'
+                        && !loc.equals(target)
+                        && !loc.containsAnActor()) {
+                    validCircles.add(loc);
                 }
             }
         }
 
-        // Safe fallback: If all other circles are occupied, stay safely where you are
-        if (validCircles.isEmpty()) {
-            return target;
-        }
-
-        Random rand = new Random();
-        return validCircles.get(rand.nextInt(validCircles.size()));
+        if (validCircles.isEmpty()) return target;
+        return validCircles.get(RANDOM.nextInt(validCircles.size()));
     }
 
+    /**
+     * Applies any effects at the source location before teleportation.
+     * Magic Circles do not produce any departure effects and leave the
+     * source location unchanged.
+     *
+     * @param source the location the actor is teleporting from
+     */
     @Override
     public void applySourceEffects(Location source) {
-        // Magic circles do not destroy or change the ground layout at the source on departure
     }
 
-
+    /**
+     * Applies arrival effects at the destination location.
+     * Attempts to place a Flask in the first adjacent location that is
+     * unoccupied and can be entered. If no such location exists, no Flask
+     * is spawned.
+     *
+     * @param destination the location where the actor arrives
+     */
     @Override
     public void applyDestinationEffects(Location destination) {
         for (Location adjacent : destination.getNearbyLocations(1)) {
-            if (!adjacent.containsAnActor() && adjacent.getGround().canActorEnter(null)) {
+            if (!adjacent.equals(destination)
+                    && !adjacent.containsAnActor()
+                    && adjacent.getGround().canActorEnter(getTeleportingActor())) {
                 adjacent.addItem(new Flask());
                 break;
             }
         }
     }
 
+    /**
+     * Returns a description of the teleportation action.
+     *
+     * @param actor the actor performing the teleportation
+     * @return a string describing the teleportation action
+     */
     @Override
     public String getActionDescription(Actor actor) {
         return actor + " travels to " + getDestinationName() + " using Magic Circle";
