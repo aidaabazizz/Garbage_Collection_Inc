@@ -9,7 +9,6 @@ import game.actors.*;
 import game.doors.AluminiumDoor;
 import game.doors.IronDoor;
 import game.doors.TitaniumDoor;
-import game.enums.Ability;
 import game.enums.AccessLevel;
 import game.finance.Wallet;
 import game.grounds.*;
