@@ -2,8 +2,11 @@ package game.actions;
 
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.capabilities.Status;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.weapons.Weapon;
+import game.highvoltage.ParalyzedStatus;
+import game.highvoltage.ShockedStatus;
 
 /**
  * Special Action for performing an attack on another Actor.
@@ -43,6 +46,22 @@ public class AttackAction extends Action {
     @Override
     public String execute(Actor actor, GameMap map) {
         String result = weapon.attack(actor, target, map);
+
+        boolean targetIsParalyzed = false;
+        for (Status s : target.statuses()) {
+            if (s.getClass() == ParalyzedStatus.class && s.isStatusActive()) {
+                targetIsParalyzed = true;
+                break;
+            }
+        }
+        if (targetIsParalyzed) {
+            actor.hurt(1);
+            actor.addStatus(new ShockedStatus(2));
+            result += String.format("\n\u001B[31m⚡ Electricity arcs back from %s's suit! %s takes 1 damage and is SHOCKED!\u001B[0m",
+                    target, actor);
+        }
+
+
         if (!target.isConscious()) {
             result += "\n" + target.unconscious(actor, map);
         }
