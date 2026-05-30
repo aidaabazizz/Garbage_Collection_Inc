@@ -20,15 +20,14 @@ import game.weapons.UndeadFist;
 public class StaticStalker extends NonPlayerCharacter{
     private static final int STRIKE_DAMAGE = 5;
     private static final int STRIKE_HIT_RATE = 75;
-    /** Priority level for the wandering behavior. */
+    private static final int INITIAL_HEALTH = 50;
     private static final int WANDER_PRIORITY = 999;
-    /** Priority level for the attacking behavior. */
     private static final int ATTACK_PRIORITY = 1;
-    /** Priority level for the hunting behavior during alarms. */
     private static final int HUNT_PRIORITY = 2;
+    private static final double STUN_CHANCE = 0.20;
 
     public StaticStalker() {
-        super("Static Stalker", 'S', 50, new BasicInventory());
+        super("Static Stalker", 'S', INITIAL_HEALTH, new BasicInventory());
         this.behaviours.put(ATTACK_PRIORITY, new AttackBehaviour());
         this.behaviours.put(HUNT_PRIORITY, new HuntBehaviour());
         this.behaviours.put(WANDER_PRIORITY, new WanderBehaviour());
@@ -45,7 +44,7 @@ public class StaticStalker extends NonPlayerCharacter{
                 Actor target = adj.getActor();
                 if (target.hasAbility(Ability.WORKER)) {
                     // 20% chance to stun nearby workers (PDF Page 4 & 12 logic)
-                    if (Math.random() < 0.20) {
+                    if (Math.random() < STUN_CHANCE) {
                         target.addStatus(new ParalyzedStatus(1));
                         display.println(this + "'s Aura stuns " + target + "!");
                     }
