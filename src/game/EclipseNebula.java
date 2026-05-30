@@ -88,6 +88,7 @@ public class EclipseNebula extends World {
 
         // Alien Cubes are found scattered in 20-overflow
         spawnOverflowUniqueItems(overflowMap);
+        spawnOverflowActors(overflowMap);
 
         // 7. Setup players
         // Start them on Moon 99 so they pick up the starting card and use the Tube
@@ -122,6 +123,12 @@ public class EclipseNebula extends World {
 
         // REQ5: Galaxy Portal for CrazyChicken and Elsa
         groundCreator.registerGround('P', GalaxyPortal::new);
+
+        // A3: REQ 3 Galvanic Environment
+        groundCreator.registerGround('⛈', AtmosphericChargeSource::new);
+        groundCreator.registerGround('Ꮺ', TeslaCoil::new);
+        groundCreator.registerGround('⚜', PoweredFloor::new);
+        groundCreator.registerGround('☠', ElectrifiedPuddle::new);
     }
 
     /**
@@ -192,10 +199,10 @@ public class EclipseNebula extends World {
                 "...#__Φ__=....V......≈≈≈≈≈≈≈≈#######________________#≈≈≈≈≈≈≈",
                 "...#_____#.....y....=≈≈≈≈≈≈≈≈#_____=_____________N__#≈≈≈≈≈≈≈",
                 "...#######...≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_◎___###########=######≈≈≈≈≈≈≈",
-                ".............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_____#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
+                "⛈.........Ꮺ..≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_____#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
                 "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#########=#####≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
-                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#_____________#≈≈≈≈≈≈≈≈≈#___◎__#≈≈≈≈≈≈≈",
-                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#______o______#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
+                "~...≈≈≈≈≈≈.☠.≈≈≈≈≈≈≈≈#_____________#≈≈≈≈≈≈≈≈≈#___◎__#≈≈≈≈≈≈≈",
+                "..⚜.≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#______o______#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
                 ".............≈≈≈≈≈≈≈≈######=########≈≈≈≈≈≈≈≈≈####=###≈≈≈≈≈≈≈",
                 "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈",
                 "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈V≈≈≈≈≈≈#_#≈≈≈≈≈###############_#######≈≈≈",
@@ -276,7 +283,7 @@ public class EclipseNebula extends World {
     }
 
     /**
-     * Spawns Requirement 2 items and markers onto the overflow factory moon.
+     * Spawns Requirement 2 and A3 REQ3 magnetic items and markers onto the overflow factory moon.
      *
      * @param map the GameMap to populate
      * @throws Exception if item placement logic encounters an error
@@ -285,6 +292,24 @@ public class EclipseNebula extends World {
         // REQ 2: Alien Cubes spawned as portable items in factory moon
         map.at(45, 3).addItem(new AlienCube());
         map.at(45, 14).addItem(new AlienCube());
+        map.at(8, 3).addItem(new PortableBattery());
+        map.at(8, 7).addItem(new PortableBattery());
+        map.at(4, 6).addItem(new CRTMonitor());
+        map.at(5, 6).addItem(new FloppyDisk());
+        map.at(6, 6).addItem(new Lantern());
+    }
+
+    /**
+     * Spawns A3 requirement 3 new actor which is the DormantStaticCreature 'O' into the overflow map.
+     *
+     * @param map the GameMap to populate
+     */
+    private void spawnOverflowActors(GameMap map) {
+        try {
+            map.at(6, 7).addActor(new DormantStaticCreature());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
