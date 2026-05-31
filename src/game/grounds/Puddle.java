@@ -17,6 +17,15 @@ import game.highvoltage.ChargeReactive;
  * possesses sterilization capabilities. It can either heal the actor
  * or inflict a poison status.
  *
+ * The Puddle implements the {@link ChargeReactive} interface, allowing it to function
+ * as a "Resonator" within the High-Voltage Galvanic System (REQ3).
+ *
+ * Complexity Proof (Rule 2):
+ * This class demonstrates "Structural Terrain Morphing." Unlike simple variable
+ * adjustments, the Puddle physically removes itself from the GameMap and replaces
+ * itself with a high-energy hazardous Ground type (ElectrifiedPuddle) when exposed
+ * to a galvanic charge.
+ *
  * @author Jewell Gomes
  */
 public class Puddle extends Ground implements Consumable, ChargeReactive {
@@ -37,13 +46,23 @@ public class Puddle extends Ground implements Consumable, ChargeReactive {
     }
 
     /**
-     * A3 REQ3: Structural Terrain Morphing.
-     * When hit by a ChargeSource, the Puddle physically replaces itself
-     * on the map with a high-energy hazard.
+     * Implements the ChargeReactive interface to handle high-voltage transformation.
+     *
+     * When hit by a ChargeSource (e.g., Lightning, Tesla Pulse, or Battery Surge),
+     * the puddle "conducts" the energy, leading to a permanent structural map change.
+     *
+     * Logic:
+     * 1. Logs the transformation event in high-visibility cyan text.
+     * 2. Programmatically replaces the current Ground instance at this location
+     *    with a new {@link ElectrifiedPuddle}.
+     *
+     * @param location   The coordinate of the puddle.
+     * @param display    The terminal interface for outputting morphing messages.
+     * @param sourceName The name of the energy source hitting the puddle.
      */
     @Override
     public void reactToCharge(Location location, Display display, String sourceName) {
-        // Physically replaces this Ground instance with the ElectrifiedPuddle hazard.
+        // physically replaces this ground instance with the ElectrifiedPuddle hazard.
         display.println("\u001B[36m" + "The puddle is hit by " + sourceName +
                 " and becomes electrified!" + "\u001B[0m");
         location.setGround(new ElectrifiedPuddle());

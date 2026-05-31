@@ -249,6 +249,12 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         this.addStatus(new BlizzardDisorientationStatus(duration));
     }
 
+    /**
+     * Helper to detect ParalyzedStatus via class metadata comparison.
+     * Used to implement turn-skipping logic for electric hazards.
+     *
+     * @return true if the actor has an active ParalyzedStatus.
+     */
     private boolean isParalyzed() {
         for (Status status : this.statuses()) {
             if (status.getClass() == ParalyzedStatus.class && status.isStatusActive()) {

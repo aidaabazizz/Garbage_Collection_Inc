@@ -39,7 +39,7 @@ public class CRTMonitor extends Item implements Sellable {
         super("CRT Monitor", '◙');
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(30));
         this.makePortable();
-        this.enableAbility(MaterialCapability.MAGNETIC);
+        this.enableAbility(MaterialCapability.MAGNETIC); // Added for magnetic item
     }
 
     /**

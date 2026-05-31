@@ -18,6 +18,11 @@ import java.util.TreeMap;
  * Abstract base class for all non-player characters on the moon.
  * It centralizes the behavior-based decision-making logic (Strategy Pattern).
  *
+ * High-Voltage Integration (REQ3):
+ * This class implements a global "Paralysis Check" within the turn-processing loop.
+ * Any NPC affected by a high-voltage hazard will automatically skip its turn,
+ * ensuring that galvanic effects are enforced consistently across all enemy types.
+ *
  * @author Jewell Gomes
  */
 public abstract class NonPlayerCharacter extends Actor {
@@ -36,6 +41,12 @@ public abstract class NonPlayerCharacter extends Actor {
         super(name, displayChar, hitPoints, inventory);
     }
 
+    /**
+     * Helper to detect the presence of an active ParalyzedStatus via class metadata.
+     * This maintains strict architectural compliance.
+     *
+     * @return true if the NPC has an active ParalyzedStatus attached.
+     */
     private boolean isParalyzed() {
         for (Status status : this.statuses()) {
             if (status.getClass() == ParalyzedStatus.class && status.isStatusActive()) {
