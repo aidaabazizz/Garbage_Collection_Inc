@@ -13,12 +13,10 @@ import game.inventory.BasicInventory;
 
 public class DormantStaticCreature extends NonPlayerCharacter implements ChargeReactive {
     /** Priority level for the wandering behavior. */
-    private static final int WANDER_PRIORITY = 999;
     private static final int INITIAL_HEALTH = 10;
 
     public DormantStaticCreature() {
         super("Dormant Static Creature", 'O', INITIAL_HEALTH, new BasicInventory());
-        this.behaviours.put(WANDER_PRIORITY, new WanderBehaviour());
     }
 
     /**
@@ -38,9 +36,7 @@ public class DormantStaticCreature extends NonPlayerCharacter implements ChargeR
 
             return new DoNothingAction();
         }
-
-        // Delegate to WanderBehaviour from NonPlayerCharacter base
-        return super.playTurn(actions, lastAction, map, display);
+        return new DoNothingAction();
     }
 
     /**
