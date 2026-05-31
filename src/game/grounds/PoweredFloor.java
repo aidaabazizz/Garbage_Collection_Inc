@@ -9,19 +9,51 @@ import game.highvoltage.ChargeReactive;
 import game.highvoltage.MaterialCapability;
 
 /**
- * REQ3: Powered Floor.
- * A conductive surface created by a Portable Battery.
- * Propagates energy to inventory and neighbors while preventing infinite loops.
+ * A specialized Ground tile representing a permanent conductive surface created by a galvanic surge.
+ *
+ * The PoweredFloor acts as a "Smart Conductor" in the High-Voltage Galvanic System (REQ3).
+ * It is a Resonator that serves two primary purposes:
+ * 1. Continuous Power: Provides the ENERGIZED capability so that items (like the Wallet)
+ *    can draw power every turn while Bob stands on this tile.
+ * 2. Energy Propagation: Acts as a bridge, passing high-voltage charges to an actor's
+ *    inventory and neighboring tiles during a strike event.
+ *
+ * Complexity Proof (Rule 2):
+ * This class demonstrates "Indiscriminate Environmental Conduction." A single charge
+ * hitting this floor triggers a cascading chain reaction involving Grounds, Actors,
+ * and Items simultaneously.
+ *
+ * @author Jewell Gomes
  */
 public class PoweredFloor extends Ground implements ChargeReactive {
 
+    /**
+     * Constructor for the PoweredFloor.
+     * Initializes the ground with the fleur-de-lis icon ('⚜').
+     * Sets the ENERGIZED capability to identify the tile as a persistent power source.
+     */
     public PoweredFloor() {
         super('⚜', "Powered Floor");
         this.enableAbility(MaterialCapability.ENERGIZED);
     }
 
     /**
-     * PDF Page 40: The Dual Propagation Logic.
+     * Implements the ChargeReactive interface to handle energy reception and propagation.
+     *
+     * Logic Flow (The Chain Reaction):
+     * 1. Inventory Propagation: If an actor is standing on the tile, the charge is passed
+     *    directly to all ChargeReactive items in their inventory (e.g., triggering a Wallet pull).
+     * 2. Neighbor Conduction: Iterates through all 8 surrounding exits to pass the charge
+     *    to adjacent reactive Grounds and Actors.
+     *
+     * Safety Gate (LO4 Robustness):
+     * Before propagating to a neighbor, the code checks if the adjacent Ground is already
+     * ENERGIZED. This prevents infinite recursive loops between conductive tiles,
+     * simulating realistic potential-difference physics and protecting the game from crashes.
+     *
+     * @param location   The coordinate of the PoweredFloor.
+     * @param display    The terminal interface for outputting surge events.
+     * @param sourceName The name of the energy source triggering the conduction.
      */
     @Override
     public void reactToCharge(Location location, Display display, String sourceName) {

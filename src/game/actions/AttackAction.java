@@ -26,6 +26,7 @@ public class AttackAction extends Action {
      *
      * @param target    The Actor to be attacked.
      * @param direction The direction of the target.
+     * @param weapon The weapon used for the attack.
      */
     public AttackAction(Actor target, String direction, Weapon weapon) {
         this.target = target;
@@ -47,16 +48,11 @@ public class AttackAction extends Action {
     public String execute(Actor actor, GameMap map) {
         String result = weapon.attack(actor, target, map);
 
-        boolean targetIsParalyzed = false;
-        for (Status s : target.statuses()) {
-            if (s.getClass() == ParalyzedStatus.class && s.isStatusActive()) {
-                targetIsParalyzed = true;
-                break;
-            }
-        }
-        if (targetIsParalyzed) {
-            actor.hurt(1);
-            actor.addStatus(new ShockedStatus(2));
+        // If the target is paralyzed, they act as a "Reflective Surface".
+        // The attacker takes damage from the "Thorns" effect of the target's suit.
+        // The kinetic energy of the hit triggers a secondary status on the attacker.
+        if (isTargetConductive(target)) {
+            processReflectiveSurge(actor);
             result += String.format("\n\u001B[31m⚡ Electricity arcs back from %s's suit! %s takes 1 damage and is SHOCKED!\u001B[0m",
                     target, actor);
         }
@@ -66,6 +62,27 @@ public class AttackAction extends Action {
             result += "\n" + target.unconscious(actor, map);
         }
         return result;
+    }
+
+    /**
+     * Helper method to check if the target has an active ParalyzedStatus.
+     * This isolates the "Status Parsing" logic from the "Action Execution" logic.
+     */
+    private boolean isTargetConductive(Actor target) {
+        for (Status s : target.statuses()) {
+            if (s.getClass() == ParalyzedStatus.class && s.isStatusActive()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Logic for what happens to an attacker when they hit a paralyzed target.
+     */
+    private void processReflectiveSurge(Actor attacker) {
+        attacker.hurt(1);
+        attacker.addStatus(new ShockedStatus(2));
     }
 
     /**

@@ -33,7 +33,7 @@ public class FloppyDisk extends Item implements Sellable {
         super("Floppy Disk", '⊟');
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(1));
         this.makePortable();
-        this.enableAbility(MaterialCapability.MAGNETIC);
+        this.enableAbility(MaterialCapability.MAGNETIC); // Added for magnetic item
     }
 
     /**

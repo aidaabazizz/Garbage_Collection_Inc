@@ -61,7 +61,7 @@ public class Lantern extends Item implements UpdateNotifier, Sellable, Infectabl
         super("Lantern", '&');
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(WEIGHT));
         this.makePortable();
-        this.enableAbility(MaterialCapability.MAGNETIC);
+        this.enableAbility(MaterialCapability.MAGNETIC); // Added for magnetic item
     }
 
     /**
