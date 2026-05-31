@@ -28,6 +28,7 @@ public class ElectrifiedPuddle extends Ground  implements ChargeReactive {
 
     @Override
     public void tick(Location location) {
+        Display display = new Display();
         lifeSpan--;
 
         if (lifeSpan <= 0) {
@@ -44,8 +45,10 @@ public class ElectrifiedPuddle extends Ground  implements ChargeReactive {
         for (Exit exit : location.getExits()) {
             Location adj = exit.getDestination();
             if (adj.containsAnActor()) {
+                Actor neighbor = adj.getActor();
                 if (Math.random() < PARALYZED_CHANCE) {
-                    adj.getActor().addStatus(new ParalyzedStatus(1));
+                    neighbor.addStatus(new ParalyzedStatus(1));
+                    display.println("\u001B[33m" + "⚡ Arcs of electricity jump from the puddle and paralyze " + neighbor + "!" + "\u001B[0m");
                 }
             }
         }
