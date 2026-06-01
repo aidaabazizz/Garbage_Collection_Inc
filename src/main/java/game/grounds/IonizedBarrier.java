@@ -1,8 +1,11 @@
 package game.grounds;
 
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.items.Item;
+import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
+import game.highvoltage.MaterialCapability;
 
 /**
  * A specialized Ground tile representing solidified high-voltage energy that physically blocks passage.
@@ -11,7 +14,7 @@ import edu.monash.fit2099.engine.positions.Location;
  * spawned by a {@link game.items.PortableBattery} surge to create a protective "cage"
  * around the user.
  *
- * Complexity Proof (Rule 2 + HD Criteria):
+ * Complexity Proof:
  * 1. Temporary Structural Blocking: Implements physics-based pathing interference by
  *    returning false in canActorEnter, forcing NPCs to recalculate movement paths.
  * 2. Dynamic Map Lifecycle: Manages its own turn-based duration, automatically reverting
@@ -50,6 +53,8 @@ public class IonizedBarrier extends Ground {
      *
      * Decrements the lifeSpan counter. When the energy dissipates (lifeSpan <= 0),
      * the tile is programmatically replaced with a new instance of standard {@link Floor}.
+     * It locks the item (magnetic) that are located on and adjacent to the ionized barrier for 3 turns,
+     * meaning until the ionized barrier becomes a floor.
      *
      * @param location The coordinate where the barrier is located.
      */
@@ -57,7 +62,41 @@ public class IonizedBarrier extends Ground {
     public void tick(Location location) {
         lifeSpan--;
         if (lifeSpan <= 0) {
+            unlockNearbyItems(location);
             location.setGround(new Floor());
+            return;
+        }
+        // lock items directly on the ionized barrier.
+        for (Item item : location.getItems()) {
+            if (item.hasAbility(MaterialCapability.MAGNETIC)) {
+                item.enableAbility(MaterialCapability.MAGNETICALLY_LOCKED);
+            }
+        }
+
+        // lock items on the adjacent tiles of the ionized barrier.
+        for (Exit exit : location.getExits()) {
+            Location adj = exit.getDestination();
+            for (Item item : adj.getItems()) {
+                if (item.hasAbility(MaterialCapability.MAGNETIC)) {
+                    item.enableAbility(MaterialCapability.MAGNETICALLY_LOCKED);
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes the locking tag from items so they can be picked up normally again.
+     *
+     * @param location The coordinate where the barrier is located.
+     */
+    private void unlockNearbyItems(Location location) {
+        for (Item item : location.getItems()) {
+            item.disableAbility(MaterialCapability.MAGNETICALLY_LOCKED);
+        }
+        for (Exit exit : location.getExits()) {
+            for (Item item : exit.getDestination().getItems()) {
+                item.disableAbility(MaterialCapability.MAGNETICALLY_LOCKED);
+            }
         }
     }
 }
