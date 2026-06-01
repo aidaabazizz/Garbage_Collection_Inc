@@ -22,18 +22,30 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Superior HD Test Suite for REQ3: AtmosphericChargeSource.
+ * Comprehensive test suite for {@link AtmosphericChargeSource}, validating the
+ * high-voltage environmental mechanics introduced in Requirement 3.
  *
- * Rubric Alignment Proof:
- * 1. 3 Distinct Cases: Normal (Surge Hierarchy), Boundary (Map-wide limits), Edge (Robustness).
- * 2. Deterministic: Focuses on releaseCharge logic to avoid Math.random() flakiness.
- * 3. DIP Discovery: Specifically tests Actor Evolution and Item Conduction via interfaces.
+ * This suite verifies the "Indiscriminate Surge" logic, ensuring that lightning
+ * strikes correctly identify and interact with Actors, Items, and Ground
+ * through the {@link ChargeReactive} interface.
+ *
+ * Design Proof:
+ * By testing the discovery of the ChargeReactive interface, this suite confirms
+ * that the system adheres to the Dependency Inversion Principle (DIP), as the
+ * charge source interacts with abstractions rather than concrete classes.
+ *
+ * @author Jewell Gomes
  */
 class AtmosphericChargeSourceTest {
     private AtmosphericChargeSource chargeSource;
     private GameMap mockedMap;
     private Display mockedDisplay;
 
+    /**
+     * Initializes the testing environment before each test case.
+     * Sets up a mocked map with defined coordinate ranges and default
+     * location stubs to ensure deterministic behavior.
+     */
     @BeforeEach
     void setUp() {
         chargeSource = new AtmosphericChargeSource();
@@ -46,6 +58,10 @@ class AtmosphericChargeSourceTest {
         lenient().when(mockedMap.at(anyInt(), anyInt())).thenReturn(mock(Location.class));
     }
 
+    /**
+     * Normal Case: Verifies that a direct lightning strike correctly deducts
+     * health and applies {@link ShockedStatus} to an {@link Actor} on the target tile.
+     */
     @Test
     @DisplayName("Normal: Prove Indiscriminate Surge zaps Actor HP and applies ShockedStatus")
     void testCombatInteraction() {
@@ -74,6 +90,11 @@ class AtmosphericChargeSourceTest {
         assertTrue(statusCaptor.getValue() instanceof ShockedStatus);
     }
 
+    /**
+     * Superior Case: Validates the Metamorphosis/Evolution mechanic.
+     * Proves that the system discovers the {@link ChargeReactive} capability on
+     * an Actor (e.g., a Dormant Creature) and triggers its transformation logic.
+     */
     @Test
     @DisplayName("Superior: Prove strike triggers Metamorphosis via Interface Discovery (DIP)")
     void testActorEvolution() {
@@ -96,6 +117,10 @@ class AtmosphericChargeSourceTest {
         verify(reactiveInterface).reactToCharge(eq(targetLoc), any(), any());
     }
 
+    /**
+     * Boundary Case: Ensures the charge source can correctly target tiles
+     * at the extreme edges of the {@link GameMap} without out-of-bounds errors.
+     */
     @Test
     @DisplayName("Boundary: Prove strike selects coordinates map-wide (Map Corner check)")
     void testTargetingBoundaries() {
@@ -112,6 +137,10 @@ class AtmosphericChargeSourceTest {
         verify(cornerGround).reactToCharge(eq(cornerTile), any(), any());
     }
 
+    /**
+     * Edge Case: Confirms that items lying on the ground (unheld) still react
+     * to electrical charges if they implement {@link ChargeReactive}.
+     */
     @Test
     @DisplayName("Edge: Prove Item discovery works for dropped items without an Actor")
     void testFloorItemReaction() {
@@ -130,6 +159,10 @@ class AtmosphericChargeSourceTest {
         verify((ChargeReactive) floorItem).reactToCharge(eq(targetLoc), any(), any());
     }
 
+    /**
+     * Edge Case: Ensures robustness by verifying that strikes on tiles with
+     * no reactive ground, no actors, and no items do not cause NullPointerExceptions.
+     */
     @Test
     @DisplayName("Edge: Prove non-reactive tiles are handled safely (Robustness)")
     void testSafetyWithEmptyTiles() {

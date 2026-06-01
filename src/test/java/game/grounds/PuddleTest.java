@@ -18,8 +18,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Superior HD Test Suite for REQ3: High-Voltage Galvanic System.
- * Focuses strictly on Puddle morphing, ElectrifiedPuddle lifecycle, and AoE hazards.
+ * Unit testing suite for Puddle and ElectrifiedPuddle (REQ 3).
+ * This class validates the full lifecycle of environmental water hazards,
+ * including their transition from safe terrain to lethal high-voltage traps.
+ *
+ * Deterministic testing of randomized events and
+ * strict verification of structural map changes.
+ *
+ * @author Jewell Gomes
  */
 class PuddleTest {
     private Puddle puddle;
@@ -27,6 +33,10 @@ class PuddleTest {
     private Actor mockedActor;
     private Display mockedDisplay;
 
+    /**
+     * Initializes the testing environment.
+     * Uses Mockito to isolate the Puddle logic from the Engine's GameMap structure.
+     */
     @BeforeEach
     void setUp() {
         puddle = new Puddle();
@@ -39,6 +49,11 @@ class PuddleTest {
         when(mockedLocation.map()).thenReturn(mockedMap);
     }
 
+    /**
+     * Normal Case: Structural Morphing.
+     * Verifies that a safe Puddle correctly removes itself and replaces itself
+     * with an ElectrifiedPuddle when triggered by a ChargeSource.
+     */
     @Test
     @DisplayName("Normal: Prove Puddle transforms into ElectrifiedPuddle hazard when zapped")
     void testStructuralMorphing() {
@@ -54,6 +69,11 @@ class PuddleTest {
                 "Ground must morph into ElectrifiedPuddle after strike.");
     }
 
+    /**
+     * Boundary Case: Temporal Lifecycle.
+     * Validates the 8-turn duration limit. This ensures the hazard exists as long
+     * as specified in the requirements and self-destructs exactly at the turn boundary.
+     */
     @Test
     @DisplayName("Boundary: Prove hazard reverts to normal Puddle exactly after 8 turns")
     void testTimedLifecycle() {
@@ -71,6 +91,12 @@ class PuddleTest {
         verify(mockedLocation).setGround(any(Puddle.class));
     }
 
+    /**
+     * Edge Case: Energy Refreshment.
+     * Checks if the hazard can have its lifespan reset by external energy pulses,
+     * allowing for complex interactions where a Tesla Coil can keep a puddle
+     * "alive" indefinitely.
+     */
     @Test
     @DisplayName("Edge: Prove secondary strikes refresh the hazard's energy lifespan")
     void testEnergyRefreshOverride() {
@@ -89,6 +115,11 @@ class PuddleTest {
         verify(mockedLocation, never()).setGround(any(Puddle.class));
     }
 
+    /**
+     * Interaction Case: On-Tile Combat Effects.
+     * Verifies that the hazard correctly identifies an occupant and applies
+     * the specific ShockedStatus and health attrition required by REQ 3.
+     */
     @Test
     @DisplayName("Prove occupant receives ShockedStatus and 1 HP damage")
     void testHazardOnTileInteraction() {
@@ -112,6 +143,12 @@ class PuddleTest {
                 "Occupant must receive the specific ShockedStatus.");
     }
 
+    /**
+     * Requirement Verification: Deterministic Arcing logic.
+     * Proves that the ElectrifiedPuddle scans its neighbors for arcing targets.
+     * This avoids random "flakiness" by verifying the scan occurs rather than
+     * the 20% success result.
+     */
     @Test
     @DisplayName("Verify AoE Scan logic evaluates neighbors for arcing")
     void testAoEScanLogic() {

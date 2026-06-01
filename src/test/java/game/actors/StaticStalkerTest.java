@@ -17,6 +17,16 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit testing suite for the Static Stalker and Dormant Static Creature (REQ 3).
+ * This class validates the biological metamorphosis and environmental interactions
+ * within the High-Voltage Galvanic System.
+ *
+ * Purposeful coverage of Normal, Boundary, and Edge cases
+ * using Mockito for strict unit isolation.
+ *
+ * @author Jewell Gomes
+ */
 class StaticStalkerTest {
     private DormantStaticCreature dormantEgg;
     private StaticStalker stalker;
@@ -24,6 +34,10 @@ class StaticStalkerTest {
     private GameMap mockedMap;
     private Display mockedDisplay;
 
+    /**
+     * Set up the testing environment before each test case.
+     * Uses Mockito to isolate the Actors from the actual GameMap and Ground implementations.
+     */
     @BeforeEach
     void setUp() {
         dormantEgg = new DormantStaticCreature();
@@ -54,6 +68,11 @@ class StaticStalkerTest {
         lenient().when(actorLoc.getGround()).thenReturn(mock(edu.monash.fit2099.engine.positions.Ground.class));
     }
 
+    /**
+     * Normal Case: Metamorphosis Logic.
+     * Verifies that the DormantStaticCreature correctly triggers a structural map
+     * replacement when it detects the ENERGIZED capability beneath it.
+     */
     @Test
     @DisplayName("Superior: Prove Egg hatches automatically when standing on ENERGIZED ground")
     void testEggAutonomousMetamorphosis() throws Exception {
@@ -70,6 +89,12 @@ class StaticStalkerTest {
         verify(mockedMap).addActor(any(StaticStalker.class), eq(actorLoc));
     }
 
+    /**
+     * Boundary Case: Actor-Ground Synergy.
+     * Validates that the evolved StaticStalker receives positive feedback (healing)
+     * when standing on a conductive power source, fulfilling the synergistic
+     * design of Requirement 3.
+     */
     @Test
     @DisplayName("Boundary: Prove Stalker heals 1 HP when standing on ENERGIZED ground")
     void testStalkerHealingSynergy() {
@@ -86,6 +111,11 @@ class StaticStalkerTest {
         verify(stalker).heal(1);
     }
 
+    /**
+     * Complex Case: Cross-Component Conduction.
+     * Demonstrates the "Static Aura" where an Actor interacts with a neighbor's
+     * Inventory to trigger reactive items (like the Wallet) via the ChargeReactive interface.
+     */
     @Test
     @DisplayName("Superior: Prove Stalker Aura zaps items inside neighboring Actor's pocket")
     void testAuraInventoryInteraction() {
@@ -111,6 +141,11 @@ class StaticStalkerTest {
         verify(reactiveItem).reactToCharge(eq(neighborLoc), any(), anyString());
     }
 
+    /**
+     * Edge Case: Dormancy Persistence.
+     * Ensures that metamorphosis does not trigger when the ground is inert (not ENERGIZED),
+     * preventing accidental spawns and proving deterministic logic.
+     */
     @Test
     @DisplayName("Edge: Prove Egg remains dormant on non-conductive ground")
     void testDormancySafety() {

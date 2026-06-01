@@ -14,8 +14,13 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 
 /**
- * Requirement 3: High-Voltage Reflective Logic Testing.
- * Tests the interaction between AttackAction and the Galvanic System.
+ * Unit tests for {@link AttackAction} specifically focusing on the high-voltage
+ * reflective surface logic introduced in Requirement 3.
+ *
+ * This suite ensures that the "Reflective Surface" mechanic (where electricity
+ * arcs back to the attacker) triggers correctly based on the target's status state.
+ *
+ * @author Jewell Gomes
  */
 class AttackActionTest {
 
@@ -24,6 +29,11 @@ class AttackActionTest {
     private Weapon weapon;
     private GameMap map;
 
+    /**
+     * Set up the testing environment before each test case.
+     * Initialize mocks for the attacker, target, weapon, and map to isolate
+     * the AttackAction logic.
+     */
     @BeforeEach
     void setUp() {
         attacker = mock(Actor.class);
@@ -36,6 +46,11 @@ class AttackActionTest {
         when(weapon.attack(attacker, target, map)).thenReturn("Attacker hits target");
     }
 
+    /**
+     * Normal Case: Verifies that when an attacker hits a target with an active
+     * {@link ParalyzedStatus}, the reflective logic triggers, dealing damage
+     * and applying a {@link ShockedStatus} to the attacker.
+     */
     @Test
     @DisplayName("Normal Case: Prove electricity arcs back when hitting a paralyzed target")
     void testReflectiveSurgeOnParalyzedTarget() {
@@ -57,6 +72,10 @@ class AttackActionTest {
         verify(attacker).addStatus(any(ShockedStatus.class));
     }
 
+    /**
+     * Edge Case: Verifies that no reflective damage or status is applied to the
+     * attacker if the target does not possess any high-voltage statuses.
+     */
     @Test
     @DisplayName("Edge Case: No reflection occurs if the target is NOT paralyzed")
     void testNoReflectionOnStandardTarget() {
@@ -73,6 +92,11 @@ class AttackActionTest {
         verify(attacker, never()).addStatus(any());
     }
 
+    /**
+     * Boundary Case: Verifies that the reflective surface does not trigger if the
+     * {@link ParalyzedStatus} exists on the target but has expired (0 turns remaining).
+     * This ensures the logic respects the status lifecycle.
+     */
     @Test
     @DisplayName("Boundary Case: No reflection if ParalyzedStatus is present but INACTIVE")
     void testNoReflectionOnExpiredStatus() {

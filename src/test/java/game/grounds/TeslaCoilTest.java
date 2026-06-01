@@ -19,11 +19,27 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit Test for REQ3: Tesla Coil.
+ * This class verifies the complex temporal, geometric, and conduction logic of the Ion Tower.
+ *
+ * Logic handled:
+ * 1. Manhattan Radius 2 Calculation (Diamond Scan).
+ * 2. Overload/Bypass Mechanics.
+ * 3. Indiscriminate Conduction (Chaining to Inventory).
+ * 4. Safety-Gate / Infinite Loop Prevention.
+ *
+ * @author Jewell Gomes
+ */
 class TeslaCoilTest {
     private TeslaCoil teslaCoil;
     private Location coilLoc;
     private GameMap map;
 
+    /**
+     * Initializes a mocked facility environment.
+     * Sets up a deterministic 11x11 grid with range boundaries to support coordinate math.
+     */
     @BeforeEach
     void setUp() {
         teslaCoil = new TeslaCoil();
@@ -44,6 +60,11 @@ class TeslaCoilTest {
         });
     }
 
+    /**
+     * CASE 1: Normal/Boundary/Edge - Geometric math.
+     * Verifies that the Manhattan math (|relX| + |relY| <= 2) correctly identifies
+     * targets at distance 1 and 2, but safely ignores tiles at distance 3.
+     */
     @Test
     @DisplayName("Superior: Prove Manhattan AoE hits Normal(1), Boundary(2), and misses Edge(3)")
     void testManhattanAoE() {
@@ -62,6 +83,11 @@ class TeslaCoilTest {
         verify(map, never()).at(5, 8); // Proof of Edge case logic
     }
 
+    /**
+     * CASE 2: Complex Interaction - Chained Conduction.
+     * Proves "Rule 2" by verifying that electricity travels from the Ground (Coil)
+     * to the Actor (HP damage) and then into the Actor's pocket (Item reaction).
+     */
     @Test
     @DisplayName("Superior: Prove Indiscriminate Conduction zaps Items inside Actor Inventory")
     void testChainReaction() {
@@ -84,6 +110,11 @@ class TeslaCoilTest {
         verify((ChargeReactive) reactiveItem).reactToCharge(any(), any(), any());
     }
 
+    /**
+     * CASE 3: Edge - The "Overload" Bypass.
+     * Verifies that hit-driven reactions bypass the 3-turn capacitor timer,
+     * ensuring the system is responsive to external environmental events.
+     */
     @Test
     @DisplayName("Edge: Prove 'Overload' allows immediate discharge regardless of timer")
     void testOverloadMechanic() {
@@ -95,6 +126,11 @@ class TeslaCoilTest {
         verify(map, atLeast(13)).at(anyInt(), anyInt());
     }
 
+    /**
+     * CASE 4: Superior/LO4 - Recursive Loop Prevention.
+     * Verifies the "Safety Gate" requirement. If another energized source is
+     * in the radius, conduction must stop to prevent a StackOverflow crash.
+     */
     @Test
     @DisplayName("Superior: Prove Safety-Gate prevents recursive loops between energized tiles")
     void testRecursiveLoopPrevention() {
@@ -113,6 +149,10 @@ class TeslaCoilTest {
         verify(anotherCoil, never()).reactToCharge(any(), any(), any());
     }
 
+    /**
+     * CASE 5: Normal - User Interface.
+     * Verifies that the coil provides the manual override action to players standing nearby.
+     */
     @Test
     @DisplayName("Normal: Verify manual override action is provided to player")
     void testAllowableActions() {

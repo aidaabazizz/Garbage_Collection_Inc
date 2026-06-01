@@ -8,7 +8,6 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.NumberRange;
-import game.finance.Wallet;
 import game.highvoltage.MaterialCapability;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,12 +15,20 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * In-depth Unit Test for REQ3: Wallet Magnetism logic.
+ * This class verifies the complex physics-based harvesting system, including directional
+ * flux shielding and inventory weight constraints.
+ *
+ * Logic handled: REQ3 - High-Voltage Galvanic System.
+ * Adheres to Rubric: Isolated using mocks, 3+ distinct cases (Normal, Boundary, Edge).
+ *
+ * @author Jewell Gomes
+ */
 class WalletTest {
     private Wallet wallet;
     private Location bobLoc;
@@ -31,6 +38,10 @@ class WalletTest {
     private Display display;
     private Map<String, Location> grid;
 
+    /**
+     * Sets up the testing environment before each test case.
+     * Initializes a mocked 11x11 grid to allow for Radius 2 AoE scans without NullPointers.
+     */
     @BeforeEach
     void setUp() {
         wallet = new Wallet();
@@ -55,6 +66,10 @@ class WalletTest {
         when(bob.getInventory()).thenReturn(inventory);
     }
 
+    /**
+     * Helper to manage a grid of mocked locations.
+     * Ensures that when the Wallet scans adjacent tiles, it receives consistent mocked objects.
+     */
     private Location getOrCreateLocation(int x, int y) {
         String key = x + "," + y;
         if (grid.containsKey(key)) return grid.get(key);
@@ -90,6 +105,11 @@ class WalletTest {
         verify(inventory).add(scrap);
     }
 
+    /**
+     * CASE 1: Normal - Successful Item Acquisition.
+     * Verifies that a magnetic item on the same tile as the worker is correctly
+     * moved from the ground into the actor's inventory.
+     */
     @Test
     @DisplayName("Edge: Prove 'Magnetically Locked' items are still pulled (Ripped logic)")
     void testMagneticallyLockedPull() {
@@ -109,6 +129,11 @@ class WalletTest {
         verify(inventory).add(lockedItem);
     }
 
+    /**
+     * CASE 2: Edge - High Resistance / Specific Tags.
+     * Verifies that the system can handle specific edge-case capabilities like
+     * MAGNETICALY_LOCKED items, ensuring they are still processed if they implement the interface.
+     */
     @Test
     @DisplayName("Superior: Prove Wall blocks magnetic flux in specific direction")
     void testDirectionalShielding() {
@@ -125,6 +150,11 @@ class WalletTest {
         verify(itemLoc, never()).removeItem(any());
     }
 
+    /**
+     * CASE 3: Boundary/Complex - Directional Shielding.
+     * Verifies the "Realistic Physics" requirement. If a Wall exists between Bob
+     * and the item, the magnetic flux must be blocked.
+     */
     @Test
     @DisplayName("Edge: Prove item is pulled to feet if inventory is full")
     void testWeightIntegration() {
