@@ -2,12 +2,14 @@ package game.grounds;
 
 import edu.monash.fit2099.engine.actions.ActionList;
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.ConsumeAction;
 import game.enums.Ability;
 import game.capabilities.Consumable;
 import game.capabilities.PoisonStatus;
+import game.highvoltage.ChargeReactive;
 
 /**
  * A body of liquid on the ground that can be consumed by actors.
@@ -15,9 +17,18 @@ import game.capabilities.PoisonStatus;
  * possesses sterilization capabilities. It can either heal the actor
  * or inflict a poison status.
  *
+ * The Puddle implements the {@link ChargeReactive} interface, allowing it to function
+ * as a "Resonator" within the High-Voltage Galvanic System (REQ3).
+ *
+ * Complexity Proof (Rule 2):
+ * This class demonstrates "Structural Terrain Morphing." Unlike simple variable
+ * adjustments, the Puddle physically removes itself from the GameMap and replaces
+ * itself with a high-energy hazardous Ground type (ElectrifiedPuddle) when exposed
+ * to a galvanic charge.
+ *
  * @author Jewell Gomes
  */
-public class Puddle extends Ground implements Consumable {
+public class Puddle extends Ground implements Consumable, ChargeReactive {
 
     /** The amount of health restored when drinking purified water. */
     private static final int HEAL_POINTS = 1;
@@ -32,6 +43,29 @@ public class Puddle extends Ground implements Consumable {
      */
     public Puddle() {
         super('~', "Puddle");
+    }
+
+    /**
+     * Implements the ChargeReactive interface to handle high-voltage transformation.
+     *
+     * When hit by a ChargeSource (e.g., Lightning, Tesla Pulse, or Battery Surge),
+     * the puddle "conducts" the energy, leading to a permanent structural map change.
+     *
+     * Logic:
+     * 1. Logs the transformation event in high-visibility cyan text.
+     * 2. Programmatically replaces the current Ground instance at this location
+     *    with a new {@link ElectrifiedPuddle}.
+     *
+     * @param location   The coordinate of the puddle.
+     * @param display    The terminal interface for outputting morphing messages.
+     * @param sourceName The name of the energy source hitting the puddle.
+     */
+    @Override
+    public void reactToCharge(Location location, Display display, String sourceName) {
+        // physically replaces this ground instance with the ElectrifiedPuddle hazard.
+        display.println("\u001B[36m" + "The puddle is hit by " + sourceName +
+                " and becomes electrified!" + "\u001B[0m");
+        location.setGround(new ElectrifiedPuddle());
     }
 
     /**

@@ -3,11 +3,9 @@ package game.teleportstrategies;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.capabilities.TeleportStrategy;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
+
 
 /**
  * An abstract base class that serves as a foundation for all teleportation behaviors
@@ -17,49 +15,139 @@ import java.util.Random;
  *
  * @author Jewell Gomes
  */
-public abstract class BaseTeleportStrategy implements TeleportStrategy {
-    /**
-     * Random number generator used for coordinate selection and malfunction checks.
-     */
-    protected final Random random = new Random();
+public abstract class BaseTeleportStrategy {
+
+    private Actor teleportingActor;
 
     /**
-     * Identifies a random location on the specified map that is both passable and
-     * currently unoccupied.
-     * To ensure game stability and fulfill the robustness requirements of LO4,
-     * this method scans the map to collect all valid positions rather than using
-     * a random-guess loop. This prevents the application from hanging or entering
-     * an infinite loop if the map is entirely occupied by creatures or objects.
+     * The target location for teleportation.
+     */
+    protected Location targetLocation;
+
+    /**
+     * The name of the teleportation destination.
+     */
+    private final String destinationName;
+
+    /**
+     * Random number generator used by teleportation strategies.
+     */
+    protected static final Random RANDOM = new Random();
+
+    /**
+     * Constructs a teleportation strategy with a fixed destination.
      *
-     * @param map   The game map to search for a destination.
-     * @param actor The actor intended to be moved.
-     * @return A randomly selected valid Location, or null if no valid spots exist.
+     * @param targetLocation the target location for teleportation
+     * @param destinationName the name of the destination
      */
-    protected Location getRandomValidLocation(GameMap map, Actor actor) {
-        List<Location> validSpots = new ArrayList<>();
-        for (int x : map.getXRange()) {
-            for (int y : map.getYRange()) {
-                Location loc = map.at(x, y);
-                if (loc.canActorEnter(actor) && !loc.containsAnActor()) {
-                    validSpots.add(loc);
-                }
-            }
-        }
-
-        if (validSpots.isEmpty()) {
-            return null;
-        }
-        return validSpots.get(random.nextInt(validSpots.size()));
+    public BaseTeleportStrategy(Location targetLocation, String destinationName) {
+        this.targetLocation = targetLocation;
+        this.destinationName = destinationName;
     }
 
     /**
-     * Executes any secondary environmental triggers that occur as a result of teleportation.
+     * Constructs a teleportation strategy without a fixed destination.
      *
-     * @param actor       The actor being moved.
-     * @param source      The location where the teleportation started.
-     * @param destination The location where the actor arrived.
-     * @param map         The map where the side effects should be applied.
+     * @param destinationName the name of the destination
      */
-    @Override
-    public void applySideEffects(Actor actor, Location source, Location destination, GameMap map) {}
+    public BaseTeleportStrategy(String destinationName) {
+        this.targetLocation = null;
+        this.destinationName = destinationName;
+    }
+
+    /**
+     * Finds a random valid location on the given map that can be occupied
+     * by the specified actor.
+     *
+     * @param map the map to search
+     * @param actor the actor to be teleported
+     * @return a random valid location, or null if none is found
+     */
+    public static Location findRandomValidLocation(GameMap map, Actor actor) {
+        Random rand = new Random();
+        int xMin = map.getXRange().min();
+        int xMax = map.getXRange().max();
+        int yMin = map.getYRange().min();
+        int yMax = map.getYRange().max();
+
+        for (int i = 0; i < 100; i++) {
+            int x = xMin + rand.nextInt((xMax - xMin) + 1);
+            int y = yMin + rand.nextInt((yMax - yMin) + 1);
+            Location candidate = map.at(x, y);
+
+            if (candidate.getGround().canActorEnter(actor) && !candidate.containsAnActor()) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Executes the teleportation process.
+     * Applies source effects, determines the destination, moves the actor,
+     * and applies destination effects.
+     *
+     * @param actor the actor being teleported
+     * @param source the location the actor is teleporting from
+     */
+    public final void teleport(Actor actor, Location source) {
+        if (actor == null || source == null) return;
+        this.teleportingActor = actor; // store before use
+        applySourceEffects(source);
+        Location destination = determineActualDestination(
+                this.targetLocation != null ? this.targetLocation : source
+        );
+        if (destination == null) return;
+        destination.map().moveActor(actor, destination);
+        applyDestinationEffects(destination);
+    }
+
+    protected Actor getTeleportingActor() {
+        return teleportingActor;
+    }
+
+    /**
+     * Returns the name of the teleportation destination.
+     *
+     * @return the destination name
+     */
+    public String getDestinationName() {
+        return this.destinationName;
+    }
+
+    /**
+     * Determines the actual destination location.
+     * Subclasses may override this method to implement custom destination
+     * selection logic.
+     *
+     * @param target the intended destination location
+     * @return the actual destination location
+     */
+    protected Location determineActualDestination(Location target) {
+        return target;
+    }
+
+    /**
+     * Returns a description of the teleportation action.
+     *
+     * @param actor the actor performing the teleportation
+     * @return a string describing the teleportation action
+     */
+    public String getActionDescription(Actor actor) {
+        return actor + " teleports to " + getDestinationName();
+    }
+
+    /**
+     * Applies effects at the source location before teleportation.
+     *
+     * @param source the source location
+     */
+    protected abstract void applySourceEffects(Location source);
+
+    /**
+     * Applies effects at the destination location after teleportation.
+     *
+     * @param destination the destination location
+     */
+    protected abstract void applyDestinationEffects(Location destination);
 }

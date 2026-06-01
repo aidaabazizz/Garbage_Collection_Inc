@@ -12,10 +12,8 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.capabilities.*;
 import game.enums.Ability;
+import game.highvoltage.ParalyzedStatus;
 import game.managers.AlarmManager;
-import edu.monash.fit2099.engine.items.Item;
-import game.finance.Wallet;
-import game.managers.CreatureSpawner;
 import game.actions.DisorientedMoveAction;
 import game.managers.Spawner;
 
@@ -144,6 +142,11 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             return lastAction.getNextAction();
         }
 
+        if (this.isParalyzed()) {
+            display.println("\u001B[33m" + this + " is paralyzed by the electric charge and cannot move!\u001B[0m");
+            return new DoNothingAction();
+        }
+
         if (isDisoriented()) {
             ActionList wrappedActions = new ActionList();
             Set<String> addedDirections = new HashSet<>();
@@ -244,5 +247,20 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     @Override
     public void disorient(int duration) {
         this.addStatus(new BlizzardDisorientationStatus(duration));
+    }
+
+    /**
+     * Helper to detect ParalyzedStatus via class metadata comparison.
+     * Used to implement turn-skipping logic for electric hazards.
+     *
+     * @return true if the actor has an active ParalyzedStatus.
+     */
+    private boolean isParalyzed() {
+        for (Status status : this.statuses()) {
+            if (status.getClass() == ParalyzedStatus.class && status.isStatusActive()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

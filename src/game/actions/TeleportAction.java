@@ -4,70 +4,58 @@ import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.actors.ContractedWorker;
-import game.capabilities.TeleportStrategy;
-import game.enums.Ability;
+import game.teleportstrategies.BaseTeleportStrategy;
 
 /**
  * This teleport action delegates its behaviour to the teleport strategies.
  * This action follows the Strategy pattern, allowing different teleportation behaviours
  *
  * @author Victoria Tay Wen Xie
- * @version 1.0
+ * @version 2.0
  */
 public class TeleportAction extends Action {
 
     /**
-     * Teleportation strategy that defines specific behaviour for each teleportable
+     * The teleportation strategy used to perform the action.
      */
-    private final TeleportStrategy strategy;
+    private final BaseTeleportStrategy teleportStrategy;
 
     /**
-     * Constructor for TeleportAction with the specified teleportation strategt
-     * @param strategy this defines how teleportation works
+     * Constructs a TeleportAction with a given teleport strategy.
+     *
+     * @param teleportStrategy the strategy that defines teleport behaviour
      */
-    public TeleportAction(TeleportStrategy strategy) {
-        this.strategy = strategy;
+    public TeleportAction(BaseTeleportStrategy teleportStrategy) {
+        this.teleportStrategy = teleportStrategy;
     }
 
     /**
-     * This executes the teleportation process
-     * @param actor The actor performing the action.
-     * @param map The map the actor is on.
-     * @return A string that describes the result of the teleportation
+     * Executes the teleport action.
+     * Retrieves the actor's current location and delegates the teleport logic
+     * to the selected strategy.
+     *
+     * @param actor the actor performing the action
+     * @param map the game map the actor is currently on
+     * @return a string describing the result of the teleportation
      */
     @Override
     public String execute(Actor actor, GameMap map) {
-        Location source = map.locationOf(actor);
-        Location destination = strategy.getDestination(actor, map);
-
-        if (destination == source) {
-            return actor + " is already at that location!";
+        Location sourceLocation = map.locationOf(actor);
+        if (sourceLocation == null) {
+            return actor + " cannot determine its baseline coordinates.";
         }
-
-        if (destination == null) {
-            return "No valid teleport location found!";
-        }
-
-        if (destination.containsAnActor()) {
-            return "Destination is occupied by " + destination.getActor() + "! Cannot teleport.";
-        }
-
-        map.moveActor(actor, destination);
-        strategy.applySideEffects(actor, source, destination, map);
-        return actor + " teleported from " + source + " to " + destination;
+        teleportStrategy.teleport(actor, sourceLocation);
+        return teleportStrategy.getActionDescription(actor);
     }
 
     /**
-     * Returns the menu description for this teleportation action.
-     * @param actor The actor performing the action.
-     * @return a string that describes the action
+     * Returns the menu description shown to the player.
+     *
+     * @param actor the actor performing the action
+     * @return a string describing the teleport action
      */
     @Override
     public String menuDescription(Actor actor) {
-        if (actor.hasAbility(Ability.WORKER)) {
-            return strategy.menuDescription(actor);
-        }
-        return null;
-    };
+        return teleportStrategy.getActionDescription(actor);
+    }
 }

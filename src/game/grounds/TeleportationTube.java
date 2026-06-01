@@ -5,8 +5,7 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.TeleportAction;
-import game.capabilities.TeleportStrategy;
-import game.enums.Ability;
+import game.teleportstrategies.BaseTeleportStrategy;
 
 import java.util.List;
 
@@ -23,16 +22,15 @@ public class TeleportationTube extends Ground {
      * List of possible destination locations for teleportation
      * These locations are predetermined and fixed at the time of tube creation.
      */
-    private final List<TeleportStrategy> strategies;
+    private final List<BaseTeleportStrategy> strategies;
 
     /**
      * Construct a new Teleportation Tube with the specified destination locations
      * @param strategies a list of strategies that represents a destination
      */
-    public TeleportationTube(List<TeleportStrategy> strategies) {
+    public TeleportationTube(List<BaseTeleportStrategy> strategies) {
         super('Φ', "Teleportation Tube");
         this.strategies = strategies;
-        this.enableAbility(Ability.IS_TELEPORTATION_TUBE);
     }
 
     /**
@@ -46,7 +44,7 @@ public class TeleportationTube extends Ground {
     public ActionList allowableActions(Actor actor, Location location, String direction) {
         ActionList actions = new ActionList();
         if (direction.isEmpty()) {
-            for (TeleportStrategy strategy : strategies) {
+            for (BaseTeleportStrategy strategy : strategies) {
                 actions.add(new TeleportAction(strategy));
             }
         }

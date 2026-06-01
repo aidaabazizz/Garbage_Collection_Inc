@@ -1,72 +1,94 @@
 package game.teleportstrategies;
+
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.positions.GameMap;
-import edu.monash.fit2099.engine.positions.Ground;
+import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Location;
 import game.grounds.Fire;
 
 /**
  * Teleportation Tube strategy.
- * It will teleport worker to fixed destinations with 50% malfunction chancs.
+ * It will teleport worker to fixed destinations with 50% malfunction chance.
  * The effect after teleportation is burning adjacent tiles on arrival.
  *
  * @author Victoria Tay Wen Xie
- * @version 1.0
+ * @version 2.0
  */
 public class TeleportTubeStrategy extends BaseTeleportStrategy {
-    /** Adjacent tile search radius. */
-    private static final int ADJACENT_TILE_DISTANCE = 1;
-    /** Fire duration in turns */
-    private static final int FIRE_DURATION = 2;
-    /** Fixed destination location */
-    private Location destination;
+    /** A flag to track whether teleport tube malfunctioned when teleporting actor **/
+    private boolean malfunctioned = false;
 
     /**
-     * This constructor help creates a strategy for a specifc destination
-     * @param destination the fixed teleport destination
+     * Constructs a TeleportTubeStrategy with a specified destination.
+     *
+     * @param targetLocation the intended destination location
+     * @param destinationName the name of the destination displayed to the player
      */
-    public TeleportTubeStrategy(Location destination) {
-        this.destination = destination;
+    public TeleportTubeStrategy(Location targetLocation, String destinationName) {
+        super(targetLocation, destinationName);
     }
 
     /**
-     * Returns destination with 50% malfunction chance.
-     * @param actor the teleporting actor
-     * @param map the current map
-     * @return predetermined locations or random destinations
+     * Determines the actor's actual destination.
+     * There is a 50% chance that the teleportation tube malfunctions,
+     * causing the actor to be sent to a random valid location on the same map.
+     * Otherwise, the actor arrives at the intended destination.
+     *
+     * @param target the intended destination location
+     * @return the actual destination location after malfunction checks
      */
     @Override
-    public Location getDestination(Actor actor, GameMap map) {
-        if (random.nextBoolean()) {
-            return getRandomValidLocation(destination.map(), actor);
+    protected Location determineActualDestination(Location target) {
+        if (RANDOM.nextDouble() < 0.50) {
+            Location random = findRandomValidLocation(target.map(), getTeleportingActor());
+            if (random != null) {
+                malfunctioned = true;
+                return random;
+            }
         }
-        return destination;
+        malfunctioned = false;
+        return target;
     }
 
     /**
-     * Sets adjacent tiles on fire at the destination
-     * @param actor       The actor being moved.
-     * @param source      The location where the teleportation started.
-     * @param destination The location where the actor arrived.
-     * @param map         The map where the side effects should be applied.
+     * Applies any effects at the source location before teleportation.
+     * Teleportation Tubes do not apply any source-side effects.
+     *
+     * @param source the location the actor is teleporting from
      */
     @Override
-    public void applySideEffects(Actor actor, Location source, Location destination, GameMap map) {
-        for (Location adjacent : destination.getNearbyLocations(ADJACENT_TILE_DISTANCE)) {
-            Ground ground = adjacent.getGround();
-            if (ground.canActorEnter(actor)) {
-                adjacent.setGround(new Fire(ground, FIRE_DURATION));
+    protected void applySourceEffects(Location source) {}
+
+    /**
+     * Applies arrival effects at the destination location.
+     * All adjacent locations containing burnable ground
+     * are replaced with a Fire ground instance.
+     *
+     * @param destination the location the actor arrives at
+     */
+    @Override
+    protected void applyDestinationEffects(Location destination) {
+        for (Exit exit : destination.getExits()) {
+            Location adjLocation = exit.getDestination();
+            char groundChar = adjLocation.getGround().getDisplayChar();
+            if (groundChar == '_') {
+                adjLocation.setGround(new Fire(adjLocation.getGround()));
             }
         }
     }
 
     /**
-     * This return menu description
-     * @param actor the teleporting actor
-     * @return menu description string
+     * Returns a description of the teleportation action for display to the player.
+     *
+     * @param actor the actor performing the teleportation
+     * @return a string describing the teleportation action
      */
     @Override
-    public String menuDescription(Actor actor) {
-        return "Teleport " + actor + " to " + destination.map() + "(" + destination.x() + "," + destination.y() + ") using teleportation tube.";
+    public String getActionDescription(Actor actor) {
+        if (malfunctioned) {
+            return actor + " attempts to travel to " + getDestinationName()
+                    + " using Teleportation Tube, but it malfunctions! "
+                    + actor + " is sent to a random location!";
+        }
+        return actor + " travels to " + getDestinationName() + " using Teleportation Tube";
     }
 }

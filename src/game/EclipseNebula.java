@@ -9,7 +9,6 @@ import game.actors.*;
 import game.doors.AluminiumDoor;
 import game.doors.IronDoor;
 import game.doors.TitaniumDoor;
-import game.enums.Ability;
 import game.enums.AccessLevel;
 import game.finance.Wallet;
 import game.grounds.*;
@@ -19,8 +18,8 @@ import game.inventory.WeightLimitedInventory;
 import game.items.*;
 import game.managers.CreatureSpawner;
 import game.managers.Spawner;
+import game.teleportstrategies.BaseTeleportStrategy;
 import game.teleportstrategies.TeleportTubeStrategy;
-import game.capabilities.TeleportStrategy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,6 +87,7 @@ public class EclipseNebula extends World {
 
         // Alien Cubes are found scattered in 20-overflow
         spawnOverflowUniqueItems(overflowMap);
+        spawnOverflowActors(overflowMap);
 
         // 7. Setup players
         // Start them on Moon 99 so they pick up the starting card and use the Tube
@@ -122,6 +122,12 @@ public class EclipseNebula extends World {
 
         // REQ5: Galaxy Portal for CrazyChicken and Elsa
         groundCreator.registerGround('P', GalaxyPortal::new);
+
+        // A3: REQ 3 Galvanic Environment
+        groundCreator.registerGround('⛈', AtmosphericChargeSource::new);
+        groundCreator.registerGround('Ꮺ', TeslaCoil::new);
+        groundCreator.registerGround('⚜', PoweredFloor::new);
+        groundCreator.registerGround('☠', ElectrifiedPuddle::new);
     }
 
     /**
@@ -192,10 +198,10 @@ public class EclipseNebula extends World {
                 "...#__Φ__=....V......≈≈≈≈≈≈≈≈#######________________#≈≈≈≈≈≈≈",
                 "...#_____#.....y....=≈≈≈≈≈≈≈≈#_____=_____________N__#≈≈≈≈≈≈≈",
                 "...#######...≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_◎___###########=######≈≈≈≈≈≈≈",
-                ".............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_____#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
+                "⛈.........Ꮺ..≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_____#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
                 "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#########=#####≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
-                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#_____________#≈≈≈≈≈≈≈≈≈#___◎__#≈≈≈≈≈≈≈",
-                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#______o______#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
+                "~...≈≈≈≈≈≈.☠.≈≈≈≈≈≈≈≈#_____________#≈≈≈≈≈≈≈≈≈#___◎__#≈≈≈≈≈≈≈",
+                "..⚜.≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#______o______#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
                 ".............≈≈≈≈≈≈≈≈######=########≈≈≈≈≈≈≈≈≈####=###≈≈≈≈≈≈≈",
                 "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈",
                 "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈V≈≈≈≈≈≈#_#≈≈≈≈≈###############_#######≈≈≈",
@@ -222,16 +228,16 @@ public class EclipseNebula extends World {
             throw new IllegalStateException("Teleportation Tube placeholders (Φ) missing from maps!");
         }
 
-        // Configure Moon Tube
-        List<TeleportStrategy> moonStrategies = new ArrayList<>();
-        moonStrategies.add(new TeleportTubeStrategy(moonMap.at(5, 15)));
-        moonStrategies.add(new TeleportTubeStrategy(overflowTubeLoc));
+        // Configure Moon Tube destinations
+        List<BaseTeleportStrategy> moonStrategies = new ArrayList<>();
+        moonStrategies.add(new TeleportTubeStrategy(moonMap.at(5, 15), "Moon 99 Secure Safe-Zone"));
+        moonStrategies.add(new TeleportTubeStrategy(overflowTubeLoc, "20-Overflow Factory Entrance"));
         moonTubeLoc.setGround(new TeleportationTube(moonStrategies));
 
-        // Configure Overflow Tube
-        List<TeleportStrategy> overflowStrategies = new ArrayList<>();
-        overflowStrategies.add(new TeleportTubeStrategy(moonTubeLoc));
-        overflowStrategies.add(new TeleportTubeStrategy(overflowMap.at(10, 10)));
+        // Configure Overflow Tube destinations
+        List<BaseTeleportStrategy> overflowStrategies = new ArrayList<>();
+        overflowStrategies.add(new TeleportTubeStrategy(moonTubeLoc, "99-Deprecated Outpost"));
+        overflowStrategies.add(new TeleportTubeStrategy(overflowMap.at(10, 10), "20-Overflow Lower Catacombs"));
         overflowTubeLoc.setGround(new TeleportationTube(overflowStrategies));
     }
 
@@ -242,7 +248,8 @@ public class EclipseNebula extends World {
     private Location findLocationOfSymbol(GameMap map) {
         for (int x : map.getXRange()) {
             for (int y : map.getYRange()) {
-                if (map.at(x, y).getGround().hasAbility(Ability.IS_TELEPORTATION_TUBE)) {
+                // FIX: Check the display character of the ground tile directly!
+                if (map.at(x, y).getGround().getDisplayChar() == 'Φ') {
                     return map.at(x, y);
                 }
             }
@@ -276,7 +283,7 @@ public class EclipseNebula extends World {
     }
 
     /**
-     * Spawns Requirement 2 items and markers onto the overflow factory moon.
+     * Spawns Requirement 2 and A3 REQ3 magnetic items and markers onto the overflow factory moon.
      *
      * @param map the GameMap to populate
      * @throws Exception if item placement logic encounters an error
@@ -285,6 +292,24 @@ public class EclipseNebula extends World {
         // REQ 2: Alien Cubes spawned as portable items in factory moon
         map.at(45, 3).addItem(new AlienCube());
         map.at(45, 14).addItem(new AlienCube());
+        map.at(8, 3).addItem(new PortableBattery());
+        map.at(8, 7).addItem(new PortableBattery());
+        map.at(4, 6).addItem(new CRTMonitor());
+        map.at(5, 6).addItem(new FloppyDisk());
+        map.at(6, 6).addItem(new Lantern());
+    }
+
+    /**
+     * Spawns A3 requirement 3 new actor which is the DormantStaticCreature 'O' into the overflow map.
+     *
+     * @param map the GameMap to populate
+     */
+    private void spawnOverflowActors(GameMap map) {
+        try {
+            map.at(6, 7).addActor(new DormantStaticCreature());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -306,8 +331,4 @@ public class EclipseNebula extends World {
             this.addPlayer(worker, map.at(startX++, 4));
         }
     }
-
-
-
-
 }

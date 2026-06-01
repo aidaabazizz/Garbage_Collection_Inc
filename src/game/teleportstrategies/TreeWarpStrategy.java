@@ -1,8 +1,4 @@
 package game.teleportstrategies;
-
-
-import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 
 /**
@@ -17,29 +13,40 @@ import edu.monash.fit2099.engine.positions.Location;
 public class TreeWarpStrategy extends BaseTeleportStrategy {
 
     /**
-     * Determines a random valid destination on the current map for the warp event.
-     * The method searches for a location that is both passable by the actor
-     * and currently unoccupied.
-     *
-     * @param actor The actor that is being warped by the tree.
-     * @param map   The GameMap where the warp is occurring.
-     * @return A random valid Location for the actor to be moved to.
+     * Constructs a new TreeWarpStrategy with a default destination name.
      */
-    @Override
-    public Location getDestination(Actor actor, GameMap map) {
-        return getRandomValidLocation(map, actor);
+    public TreeWarpStrategy() {
+        super("Random Location");
     }
 
     /**
-     * Provides a description of the action for the player menu.
-     * Since the Warper Tree is an automatic environmental hazard and not a
-     * player-initiated action, this returns an empty string to avoid appearing in menus.
+     * Determines a random valid destination on the current map.
+     * Retrieves the actor at the source location and delegates to the
+     * shared {@link BaseTeleportStrategy#findRandomValidLocation} utility.
+     * Falls back to the original location if no valid destination is found.
      *
-     * @param actor The actor performing the action.
-     * @return An empty string.
+     * @param target The source location from which the actor is being warped.
+     * @return A random valid {@link Location}, or the original target as a fallback.
      */
     @Override
-    public String menuDescription(Actor actor) {
-        return "";
+    protected Location determineActualDestination(Location target) {
+        Location result = findRandomValidLocation(target.map(), getTeleportingActor());
+        return result != null ? result : target;
     }
+
+    /**
+     * No source effects are applied when the tree warps a worker.
+     *
+     * @param source The location the actor is departing from.
+     */
+    @Override
+    protected void applySourceEffects(Location source) {}
+
+    /**
+     * No destination effects are applied when the tree warps a worker.
+     *
+     * @param destination The location the actor arrives at.
+     */
+    @Override
+    protected void applyDestinationEffects(Location destination) {}
 }
