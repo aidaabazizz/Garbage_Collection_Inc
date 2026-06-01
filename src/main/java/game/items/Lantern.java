@@ -1,5 +1,6 @@
 package game.items;
 
+import edu.monash.fit2099.engine.actions.ActionList;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Exit;
@@ -192,5 +193,25 @@ public class Lantern extends Item implements UpdateNotifier, Sellable, Infectabl
     @Override
     public String toString() {
         return super.toString() + " (Oil: " + oil + ")";
+    }
+
+    /**
+     * Determines the interactions available for this item while it is on the ground.
+     *
+     * Logic (REQ 3 - High Voltage System):
+     * If the item possesses the MAGNETICALLY_LOCKED capability, it indicates that
+     * the local high-voltage induction is too strong for manual retrieval.
+     * In this state, an empty ActionList is returned, effectively disabling the
+     * 'Pick Up' interaction until the energy dissipates.
+     *
+     * @param location The current location of the item on the GameMap.
+     * @return A list of allowable actions; empty if the item is magnetically locked.
+     */
+    @Override
+    public ActionList allowableActions(Location location) {
+        if (this.hasAbility(MaterialCapability.MAGNETICALLY_LOCKED)) {
+            return new ActionList(); // Cannot be picked up by hand
+        }
+        return super.allowableActions(location);
     }
 }
