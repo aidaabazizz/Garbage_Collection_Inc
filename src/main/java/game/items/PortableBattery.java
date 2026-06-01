@@ -26,7 +26,7 @@ import java.util.List;
  * The PortableBattery is a cornerstone of Requirement 3. It is designed to be a
  * "Strategic Trigger" that allows the player to manually manipulate the facility environment.
  *
- * Complexity Proof (Rule 2 + HD Criteria):
+ * Complexity Proof:
  * 1. Structural Terrain Morphing: Converts standard floors into permanent power outlets.
  * 2. Dynamic Structural Engineering: Spawns temporary blocking barriers (IonizedBarrier).
  * 3. Indiscriminate Area Effect: Simultaneously triggers evolution in NPCs, damage

@@ -14,7 +14,7 @@ import game.highvoltage.MaterialCapability;
  * spawned by a {@link game.items.PortableBattery} surge to create a protective "cage"
  * around the user.
  *
- * Complexity Proof (Rule 2 + HD Criteria):
+ * Complexity Proof:
  * 1. Temporary Structural Blocking: Implements physics-based pathing interference by
  *    returning false in canActorEnter, forcing NPCs to recalculate movement paths.
  * 2. Dynamic Map Lifecycle: Manages its own turn-based duration, automatically reverting

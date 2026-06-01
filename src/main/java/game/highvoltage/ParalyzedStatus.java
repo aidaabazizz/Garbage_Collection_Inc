@@ -12,7 +12,7 @@ import edu.monash.fit2099.engine.positions.Location;
  * It functions as a "Behavior Modifier" that forces an Actor to skip their
  * playTurn phase for the duration of the effect.
  *
- * Complexity Proof (Rule 2 + HD Criteria):
+ * Complexity Proof:
  * 1. Behavioral Modification: Directly intercepts and prevents Actor actions
  *    (Movement, Attack, Interaction).
  * 2. Reflective Shield Synergy: As per the documentation, while an actor has this
