@@ -59,54 +59,46 @@ public class MotivationStatus implements Status {
      */
     @Override
     public void tickStatus(GameEntity entity, Location location) {
-        if (hasPulsed) {
-            return;
-        }
+        if (hasPulsed) return;
         hasPulsed = true;
 
-        // AoE scan: examine every exit from the pulse origin
+        // Move ALL the loop logic you had in the Whistle to HERE
         for (Exit exit : origin.getExits()) {
-            Location adjacent = exit.getDestination();
+            Location adj = exit.getDestination();
+            if (adj.containsAnActor() && !adj.getActor().hasAbility(Ability.WORKER)) {
+                Actor enemy = adj.getActor();
+                Location dest = findKnockbackDest(adj, exit.getName());
 
-            if (!adjacent.containsAnActor()) {
-                continue;
-            }
-
-            Actor target = adjacent.getActor();
-
-            // Only knock back non-worker actors (enemies/creatures)
-            // Uses capability check — no instanceof (DIP)
-            if (target.hasAbility(Ability.WORKER)) {
-                continue;
-            }
-
-            // Find the tile 2 steps further in the same direction
-            Location knockbackDest = findKnockbackDestination(adjacent, exit.getName());
-
-            if (knockbackDest != null && knockbackDest.canActorEnter(target)) {
-                // Clear path — reposition the actor
-                origin.map().moveActor(target, knockbackDest);
-            } else {
-                // Blocked — apply impact damage
-                target.hurt(IMPACT_DAMAGE);
+                if (dest != null && dest.canActorEnter(enemy)) {
+                    origin.map().moveActor(enemy, dest);
+                    System.out.println(">>> " + enemy + " is blasted away!");
+                } else {
+                    enemy.hurt(5);
+                    System.out.println(">>> " + enemy + " slams into a wall!");
+                }
             }
         }
     }
+//
+//    /**
+//     * Searches the exits of {@code from} to find the tile in the same named
+//     * direction, giving us the "2 tiles away" destination.
+//     *
+//     * @param from          the adjacent tile the enemy currently occupies
+//     * @param directionName the exit name (e.g. "North") to follow
+//     * @return the destination 2 tiles from origin, or null if not found
+//     */
+//    private Location findKnockbackDestination(Location from, String directionName) {
+//        for (Exit pushExit : from.getExits()) {
+//            if (pushExit.getName().equals(directionName)) {
+//                return pushExit.getDestination();
+//            }
+//        }
+//        return null;
+//    }
 
-    /**
-     * Searches the exits of {@code from} to find the tile in the same named
-     * direction, giving us the "2 tiles away" destination.
-     *
-     * @param from          the adjacent tile the enemy currently occupies
-     * @param directionName the exit name (e.g. "North") to follow
-     * @return the destination 2 tiles from origin, or null if not found
-     */
-    private Location findKnockbackDestination(Location from, String directionName) {
-        for (Exit pushExit : from.getExits()) {
-            if (pushExit.getName().equals(directionName)) {
-                return pushExit.getDestination();
-            }
-        }
+    private Location findKnockbackDest(Location from, String dir) {
+        for (Exit e : from.getExits()) if (e.getName().equals(dir)) return e.getDestination();
         return null;
     }
 
@@ -119,4 +111,5 @@ public class MotivationStatus implements Status {
     public boolean isStatusActive() {
         return !hasPulsed;
     }
+
 }
