@@ -3,13 +3,18 @@ package game.actors;
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actions.ActionList;
 import edu.monash.fit2099.engine.actions.DoNothingAction;
+import edu.monash.fit2099.engine.actions.MoveActorAction;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.capabilities.Status;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.displays.Menu;
 import edu.monash.fit2099.engine.items.Inventory;
+import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
+import edu.monash.fit2099.engine.weapons.IntrinsicWeapon;
+import game.actions.InvertedMoveAction;
+import game.actions.RageStrikeAction;
 import game.capabilities.*;
 import game.enums.Ability;
 import game.managers.AlarmManager;
@@ -18,8 +23,12 @@ import game.finance.Wallet;
 import game.managers.CreatureSpawner;
 import game.actions.DisorientedMoveAction;
 import game.managers.Spawner;
+import game.sanctuary.DamageInterceptor;
+import game.utils.SpatialSearch;
+import game.weapons.WorkerFists;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -55,39 +64,11 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         super(name, displayChar, hitPoints, inventory);
         this.spawner = spawner;
         this.enableAbility(Ability.WORKER);
+        this.setIntrinsicWeapon(new WorkerFists());
+
     }
 
-    /**
-     * Checks if this worker is currently frozen.
-     * Uses class comparison - NOT instanceof, NOT switch.
-     * Reliably detects FrozenStatus attached to this actor.
-     *
-     * @return true if frozen and status is active, false otherwise
-     */
-    private boolean isFrozen() {
-        for (Status status : this.statuses()) {
-            if (status.getClass() == FrozenStatus.class && status.isStatusActive()) {
-                return true;
-            }
-        }
-        return false;
-    }
 
-    /**
-     * Checks if this worker is currently disoriented by a blizzard.
-     * Uses class comparison - NOT instanceof, NOT switch.
-     * Reliably detects BlizzardDisorientationStatus attached to this actor.
-     *
-     * @return true if disoriented and status is active, false otherwise
-     */
-    private boolean isDisoriented() {
-        for (Status status : this.statuses()) {
-            if (status.getClass() == BlizzardDisorientationStatus.class && status.isStatusActive()) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Orchestrates the worker's turn by processing environmental status and user input.
@@ -107,7 +88,6 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
      */
     @Override
     public Action playTurn(ActionList actions, Action lastAction, GameMap map, Display display) {
-
         display.endLine();
         // Check global facility state
         if (AlarmManager.getInstance().isActive()) {
@@ -120,14 +100,12 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             display.println(deathMessage);
             return new DoNothingAction();
         }
-
         // Output current environmental or internal status effects
         for (Status status : this.statuses()) {
             display.println(this.name + " is affected by: " + status.toString());
         }
 
-        // REQ5 Freeze check using class comparison
-        if (isFrozen()) {
+        if (this.hasStatus(FrozenStatus.class)) {
             display.println("\u001B[36m" + this + " is frozen solid! Cannot take any actions until the ice melts!\u001B[0m");
             return new DoNothingAction();
         }
@@ -144,37 +122,85 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             return lastAction.getNextAction();
         }
 
-        if (isDisoriented()) {
-            ActionList wrappedActions = new ActionList();
-            Set<String> addedDirections = new HashSet<>();
-            String[] allDirections = {"North", "South", "East", "West", "North-East", "South-East", "South-West", "North-West"};
-
-            for (Action action : actions.getUnmodifiableActionList()) {
-                String description = action.menuDescription(this);
-                String moveDirection = null;
-
-                for (String dir : allDirections) {
-                    if (description.contains(dir)) {
-                        moveDirection = dir;
-                        break;
-                    }
-                }
-                if (moveDirection != null && !addedDirections.contains(moveDirection)) {
-                    addedDirections.add(moveDirection);
-                    String hotKey = getHotKeyForDirection(moveDirection);
-                    wrappedActions.add(new DisorientedMoveAction(moveDirection, hotKey));
-                } else if (moveDirection == null) {
-                    wrappedActions.add(action);
-                }
+        // 3. REQ4: Killer Mode targeting (Using your SpatialSearch utility)
+        if (this.hasStatus(KillerInstinctStatus.class)) {
+            List<Actor> targets = SpatialSearch.getActorsWithinDistance(map.locationOf(this), 3);
+            for (Actor target : targets) {
+                if (target != this) actions.add(new RageStrikeAction(target, "range", getIntrinsicWeapon()));
             }
-
-            Menu menu = new Menu(wrappedActions);
-            return menu.showMenu(this, display);
         }
 
-        // return/print the console menu with original actions
-        Menu menu = new Menu(actions);
-        return menu.showMenu(this, display);
+        // 4. Movement Logic (The "Correct" way to handle both A2 and A3)
+        ActionList processedActions = actions;
+
+        // REQ4: Portals show "Inverted" labels in the menu
+        if (this.hasStatus(ReversedMovementStatus.class)) {
+            display.println("\u001B[35mSpatial anomaly detected: Movement is inverted!\u001B[0m");
+            processedActions = processInvertedActions(actions, map);
+        }
+        // REQ5: Blizzard uses "Sneaky" labels (looks like normal movement)
+        else if (this.hasStatus(BlizzardDisorientationStatus.class)) {
+            display.println("\u001B[36mThe blizzard is blinding! You feel disoriented...\u001B[0m");
+            processedActions = processDisorientedActions(actions);
+        }
+
+        return new Menu(processedActions).showMenu(this, display);
+    }
+
+    /**
+     * REQ4 Helper: Scans a 3-tile radius and injects RageStrikeAction for every actor found.
+     */
+    private void injectRageStrikeActions(ActionList actions, GameMap map) {
+        Location here = map.locationOf(this);
+
+        // USE UTILITY: Get all actors in a 3-tile radius
+       List<Actor> targets = SpatialSearch.getActorsWithinDistance(here, 3);
+
+        for (Actor target : targets) {
+            // Only inject if the target is NOT me
+            if (target != this) {
+                actions.add(new RageStrikeAction(target, "within range", this.getIntrinsicWeapon()));
+            }
+        }
+    }
+
+    /**
+     * REQ4 Helper: Wraps movement actions with InvertedMoveAction.
+     */
+    private ActionList processInvertedActions(ActionList actions, GameMap map) {
+        ActionList inverted = new ActionList();
+        for (Action action : actions.getUnmodifiableActionList()) {
+            inverted.add(wrapIfMovementInverted(action, map));
+        }
+        return inverted;
+    }
+
+    /**
+     * REQ5 Helper: Wraps movement actions with DisorientedMoveAction (Blizzard).
+     */
+    private ActionList processDisorientedActions(ActionList actions) {
+        ActionList wrapped = new ActionList();
+        Set<String> addedDirections = new HashSet<>();
+        String[] allDirections = {"North", "South", "East", "West", "North-East", "South-East", "South-West", "North-West"};
+
+        for (Action action : actions.getUnmodifiableActionList()) {
+            String description = action.menuDescription(this);
+            String moveDirection = null;
+
+            for (String dir : allDirections) {
+                if (description.contains(dir)) {
+                    moveDirection = dir;
+                    break;
+                }
+            }
+            if (moveDirection != null && !addedDirections.contains(moveDirection)) {
+                addedDirections.add(moveDirection);
+                wrapped.add(new DisorientedMoveAction(moveDirection, getHotKeyForDirection(moveDirection)));
+            } else if (moveDirection == null) {
+                wrapped.add(action);
+            }
+        }
+        return wrapped;
     }
 
     /**
@@ -195,6 +221,61 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             }
         }
         return "";
+    }
+
+
+    @Override
+    public void hurt(int points) {
+        if (this.hasAbility(DamageInterceptor.PROTECTED)) {
+            points = points / 2;
+        }
+        super.hurt(points);
+    }
+
+    /**
+     * REQ4 Helper: Identifies movement actions and flips them.
+     * This follows SRP by keeping coordinate math out of playTurn.
+     */
+    private Action wrapIfMovementInverted(Action action, GameMap map) {
+        // 1. Identify if the action is a movement action
+        // We use the menuDescription to find the direction snippet
+        String desc = action.menuDescription(this);
+        String moveSnippet = " moves ";
+        int moveIndex = desc.indexOf(moveSnippet);
+
+        // If " moves " isn't in the description, it's not a move action we care about
+        if (moveIndex == -1) return action;
+
+        // Extract just the direction part (e.g., "North-East")
+        String actionDirection = desc.substring(moveIndex + moveSnippet.length());
+
+        Location here = map.locationOf(this);
+
+        // 2. Scan exits for an EXACT match
+        for (Exit exit : here.getExits()) {
+            // Use .equals() instead of .contains() to prevent "North" matching "North-East"
+            if (actionDirection.equals(exit.getName())) {
+                Location intendedDest = exit.getDestination();
+
+                // Calculate the Mirror Image vector
+                int dx = intendedDest.x() - here.x();
+                int dy = intendedDest.y() - here.y();
+
+                int flippedX = here.x() - dx;
+                int flippedY = here.y() - dy;
+
+                if (map.getXRange().contains(flippedX) && map.getYRange().contains(flippedY)) {
+                    Location flippedDest = map.at(flippedX, flippedY);
+
+                    // Return the Inverted Action with the original label and hotkey
+                    // This creates the "Highjacked Input" effect
+                    return new InvertedMoveAction(flippedDest, exit.getName(), exit.getHotKey());
+                }
+            }
+        }
+
+        // Fallback: if we couldn't find a matching exit, return the original action
+        return action;
     }
 
     /**
@@ -236,7 +317,7 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     }
 
     /**
-     * Disorients the worker by adding BlizzardDisorientationStatus for the specified duration.
+     * Disorients the worker by adding ReversedMovementStatus for the specified duration.
      * Called when Elsa enters BLIZZARD state.
      *
      * @param duration The number of turns the worker remains disoriented.
