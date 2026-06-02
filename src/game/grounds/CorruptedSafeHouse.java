@@ -1,115 +1,95 @@
 package game.grounds;
 
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.positions.Exit;
-import edu.monash.fit2099.engine.positions.GameMap;
-import edu.monash.fit2099.engine.positions.Ground;
-import edu.monash.fit2099.engine.positions.Location;
+import edu.monash.fit2099.engine.positions.*;
 import game.capabilities.SanctuaryStatus;
+import game.enums.Ability;
 import game.enums.DistortionCapability;
+import game.sanctuary.DamageInterceptor;
 import game.sanctuary.DistortionSource;
 
-
+/**
+ * A safe house that protects workers but creates a ring of BlueFire around it.
+ *
+ * Lifecycle (per spec):
+ * - Worker enters    → fresh SanctuaryStatus added; BlueFire spawns for 5 turns
+ * - Worker stays 1-5 → BlueFire re-spawns each turn; damage halved; 30% heal
+ * - Worker stays 6+  → BlueFire stops (isProtectionActive() false); healing continues
+ * - Worker leaves    → SanctuaryStatus expires in tickStatus(); BlueFire stops next tick
+ * - Worker re-enters → old status is inactive, new SanctuaryStatus added (full reset)
+ */
 public class CorruptedSafeHouse extends Ground implements DistortionSource {
 
-    /** Whether this safe house has been stabilised by a SuperComputer action. */
     private boolean isStabilised = false;
 
-    /**
-     * Creates a CorruptedSafeHouse with the CORRUPTED capability tag.
-     */
     public CorruptedSafeHouse() {
         super('⌂', "Corrupted Safe House");
         this.enableAbility(DistortionCapability.CORRUPTED);
     }
 
-    /**
-     * Each turn: if an actor stands here, grant SanctuaryStatus and (if not
-     * stabilised) spawn BlueFire on safe exits.
-     *
-     * @param location this tile's location on the map
-     */
     @Override
     public void tick(Location location) {
-        if (!location.containsAnActor()) {
+        if (!location.containsAnActor() || !location.getActor().hasAbility(Ability.WORKER)) {
             return;
         }
-        releaseDistortion(location.getActor(), location.map(), location);
 
+        Actor actor = location.getActor();
+
+        // Only grant sanctuary if not stabilised
         if (!isStabilised) {
-            spawnBlueFire(location);
+            if (!actor.hasStatus(SanctuaryStatus.class)) {
+                actor.addStatus(new SanctuaryStatus());
+                actor.enableAbility(DamageInterceptor.PROTECTED);
+                if (Math.random() <= 0.30) {
+                    actor.heal(1);
+                    System.out.println(">>> " + actor + " is healed by the sanctuary energy.");
+                }
+            }
+
+            SanctuaryStatus status = actor.statusesOf(SanctuaryStatus.class).get(0);
+            if (status.isProtectionActive()) {
+                spawnBlueFire(location);
+            }
         }
+        // If stabilised: no new status, no BlueFire, but existing status continues ticking naturally
     }
-
     /**
-     * Grants the actor {@link SanctuaryStatus} for 5 turns.
-     *
-     * @param actor    the actor entering the safe house
-     * @param map      the game map
-     * @param location this tile's location
-     * @return result description
-     */
-    @Override
-    public String releaseDistortion(Actor actor, GameMap map, Location location) {
-        actor.addStatus(new SanctuaryStatus(5));
-        return actor + " enters the sanctuary — but the air around it ignites!";
-    }
-
-    /**
-     * Stabilises this safe house: disables CORRUPTED capability and prevents
-     * further BlueFire spawning.
-     *
-     * @param location this tile's location (unused but required by interface)
-     * @return result description
-     */
-    @Override
-    public String stabilise(Location location) {
-        isStabilised = true;
-        this.disableAbility(DistortionCapability.CORRUPTED);
-        return "Blue Fire spread has been suppressed around the safe house!";
-    }
-
-    /**
-     * Sets stabilised state directly (for testing or alternative control flows).
-     *
-     * @param stabilised the new stabilised state
-     */
-    public void setStabilised(boolean stabilised) {
-        this.isStabilised = stabilised;
-    }
-
-    /**
-     * Spawns {@link BlueFire} on adjacent exits, guarding against overwriting
-     * grounds that should not be replaced (e.g. ToxicWaste, other DistortionSources,
-     * existing BlueFire, Walls).
-     *
-     * <p>FIX: Previously overwrote any ground. Now only replaces walkable,
-     * non-hazardous grounds (Floor, Dirt, Puddle) identified by capability absence.
-     * This prevents silently destroying ToxicWaste or other DistortionSources.</p>
-     *
-     * @param location this tile's location
+     * Spawns BlueFire on adjacent exits.
+     * Guards: won't overwrite DistortionSources, impassable grounds, or existing hazards.
      */
     private void spawnBlueFire(Location location) {
         for (Exit exit : location.getExits()) {
-            Location destination = exit.getDestination();
-            Ground existing = destination.getGround();
+            Location dest = exit.getDestination();
+            Ground existing = dest.getGround();
 
-            // Guard 1: Don't overwrite another DistortionSource (portals, rage ground, etc.)
+            // Skip DistortionSources (portals, rage ground, this safe house)
             if (existing.hasAbility(DistortionCapability.CORRUPTED)) {
                 continue;
             }
 
-            // Guard 2: Don't overwrite impassable grounds (Walls, Doors)
-            if (existing.hasAbility(DistortionCapability.IMPASSABLE)) {
-                continue;
-            }
+            // Skip impassable grounds (walls, doors)
+            if (!existing.canActorEnter(null)) continue;
 
-            // Guard 3: Don't overwrite existing timed hazards (BlueFire already burning)
+            // Skip existing hazards (already burning)
             if (existing.hasAbility(DistortionCapability.ACTIVE_HAZARD)) {
                 continue;
             }
 
-            destination.setGround(new BlueFire(5,existing));
+            dest.setGround(new BlueFire(3, existing));
         }
     }
+
+    @Override
+    public String releaseDistortion(Actor actor, GameMap map, Location location) {
+        return actor + " enters the sanctuary — but the air around it ignites!";
+    }
+
+    @Override
+    public String stabilise(Location location) {
+        isStabilised = true;
+        this.disableAbility(DistortionCapability.CORRUPTED);
+        return "Blue Fire spread has been suppressed!";
+    }
+
+//
 }
