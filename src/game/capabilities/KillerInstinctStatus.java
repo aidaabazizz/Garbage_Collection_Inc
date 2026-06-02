@@ -21,4 +21,10 @@ public class KillerInstinctStatus implements Status {
     public boolean isStatusActive() {
         return remainingTurns > 0;
     }
+
+    @Override
+    public String toString() {
+        // FIX: This removes the @memoryAddress from your console
+        return "Killer Instinct (" + remainingTurns + " turns left)";
+    }
 }
