@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.effects.SanctuaryField;
 import game.items.HeavenToken;
+import game.sanctuary.DamageInterceptor;
 
 public class ActivateHeavenTokenAction extends Action {
     /** The token to consume on use. */
@@ -34,19 +35,18 @@ public class ActivateHeavenTokenAction extends Action {
      */
     @Override
     public String execute(Actor actor, GameMap map) {
-        // Consume the item (one-use)
         actor.getInventory().remove(token);
 
-        // Replace the actor's current tile with SanctuaryField ground.
-        // Ground.tick() is called every turn by GameMap.tick() automatically.
         Location here = map.locationOf(actor);
         here.setGround(new SanctuaryField(FIELD_DURATION, here.getGround()));
 
+        // Set protection immediately — tick already ran this turn
+        actor.enableAbility(DamageInterceptor.PROTECTED);
         return String.format(
-                "%s uses the Heaven Token! A holy sanctuary field manifests for %d turns.\n" +
-                        "Actors within 1 tile are protected from direct damage!",
+                "%s uses the Heaven Token! A holy sanctuary field manifests for %d turns.\n"+
                 actor, FIELD_DURATION
         );
+
     }
 
     /**
