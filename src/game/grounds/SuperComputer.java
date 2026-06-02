@@ -3,10 +3,14 @@ package game.grounds;
 import edu.monash.fit2099.engine.actions.ActionList;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.items.Item;
+import edu.monash.fit2099.engine.positions.Exit;
+import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.PurchaseAction;
 import game.actions.SellAction;
+import game.actions.StabiliseDistortionAction;
+import game.enums.DistortionCapability;
 import game.capabilities.Purchasable;
 import game.capabilities.Sellable;
 import game.enums.AccessLevel;
@@ -14,14 +18,18 @@ import game.items.AccessCard;
 import game.items.FirstAidKit;
 import game.items.SterilisationBox;
 import game.enums.Ability;
+import game.sanctuary.SanctuaryTool;
+
+import java.util.List;
 
 /**
  * A Supercomputer terminal that allows workers to buy and sell items.
  *
  * @author Suchir
- * @version 1.0
+ * @author Chathya Attanayake (modified by)
+ * @version 2.0
  */
-public class SuperComputer extends Ground {
+public class SuperComputer extends Ground implements SanctuaryTool {
 
     /**
      * Constructor for Supercomputer.
@@ -45,6 +53,17 @@ public class SuperComputer extends Ground {
         if (!actor.hasAbility(Ability.WORKER)) {
             return actions;
         }
+
+        // --- REQ4: COMPLEX INTERACTION (Scanning for Distortions) ---
+        // Scan adjacent tiles for Corrupted grounds using Capabilities
+        List<Location> corruptedSites = game.utils.SpatialSearch.getAdjacentLocationsWithCapability(
+                location,
+                game.enums.DistortionCapability.CORRUPTED
+        );
+        for (Location site : corruptedSites) {
+            actions.add(new game.actions.StabiliseDistortionAction(site));
+        }
+
 
         for (Item item : actor.getInventory().getItems()) {
             Sellable sellable = item.asCapability(Sellable.class).orElse(null);
@@ -73,5 +92,10 @@ public class SuperComputer extends Ground {
         if (purchasable != null) {
             actions.add(new PurchaseAction(item, purchasable));
         }
+    }
+
+    @Override
+    public String activateSanctuaryEffect(Actor actor, GameMap map, Location location) {
+        return "Supercomputer emits a low-frequency stabilization hum throughout the sector.";
     }
 }
