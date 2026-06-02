@@ -294,4 +294,32 @@ public class SpatialSearch {
         Location workerLoc = map.locationOf(worker);
         return calculateDistance(center, workerLoc);
     }
+
+    /**
+     * REQ4: Collects all actors within a radius (radial search).
+     */
+    public static List<Actor> getActorsWithinDistance(Location center, int radius) {
+        List<Actor> actors = new ArrayList<>();
+        for (Location loc : center.getNearbyLocations(radius)) {
+            if (loc.containsAnActor()) {
+                actors.add(loc.getActor());
+            }
+        }
+        return actors;
+    }
+
+    /**
+     * REQ4: Finds adjacent tiles that have a specific capability (e.g., CORRUPTED).
+     */
+    public static List<Location> getAdjacentLocationsWithCapability(Location center, Enum<?> capability) {
+        List<Location> matches = new ArrayList<>();
+        for (Exit exit : center.getExits()) {
+            Location adj = exit.getDestination();
+            if (adj.getGround().hasAbility(capability)) {
+                matches.add(adj);
+            }
+        }
+        return matches;
+    }
 }
+
