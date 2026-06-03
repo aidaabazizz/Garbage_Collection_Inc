@@ -50,20 +50,37 @@ public class WeatherAnomalyManager {
         Location location = map.locationOf(actor);
         StringBuilder result = new StringBuilder();
 
+        result.append("Weather synced from ")
+                .append(snapshot.getSourceLocation())
+                .append(": ")
+                .append(snapshot.getTemperature())
+                .append("°C, ")
+                .append(snapshot.getHumidity())
+                .append("% humidity, ")
+                .append(snapshot.getWindSpeed())
+                .append(" wind speed, ")
+                .append(snapshot.getCondition())
+                .append(".")
+                .append("\n");
+
+        boolean anomalyDetected = false;
+
         for (WeatherAnomalyInterpreter interpreter : interpreters) {
             if (interpreter.canInterpret(snapshot)) {
                 result.append(interpreter.interpret(snapshot, actor, map)).append("\n");
+                anomalyDetected = true;
             }
         }
 
         for (AnomalyWorldEffect effect : effects) {
             if (effect.canApply(snapshot)) {
                 result.append(effect.applyEffect(actor, map, location, snapshot)).append("\n");
+                anomalyDetected = true;
             }
         }
 
-        if (result.isEmpty()) {
-            return "Weather sync complete. No anomaly conditions were detected.";
+        if (!anomalyDetected) {
+            result.append("No anomaly conditions were detected.");
         }
 
         return result.toString();

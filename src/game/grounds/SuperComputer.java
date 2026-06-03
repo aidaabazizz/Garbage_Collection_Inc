@@ -14,6 +14,7 @@ import game.items.AccessCard;
 import game.items.FirstAidKit;
 import game.items.SterilisationBox;
 import game.enums.Ability;
+import game.weather.WeatherSystemFactory;
 
 /**
  * A Supercomputer terminal that allows workers to buy and sell items.
@@ -58,6 +59,7 @@ public class SuperComputer extends Ground {
         addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_ONE));
         addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_TWO));
         addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_THREE));
+        actions.add(WeatherSystemFactory.createWeatherSyncAction());
 
         return actions;
     }

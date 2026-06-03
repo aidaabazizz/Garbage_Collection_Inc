@@ -85,8 +85,17 @@ public class WeatherApiClient {
         int humidity = (int) extractDouble(body, "\"humidity\":");
         double windSpeed = extractDouble(body, "\"speed\":");
         String condition = extractString(body, "\"main\":\"");
+        String cityName = extractString(body, "\"name\":\"");
+        String countryCode = extractString(body, "\"country\":\"");
 
-        return new WeatherSnapshot(temperature, humidity, windSpeed, condition);
+        return new WeatherSnapshot(
+                temperature,
+                humidity,
+                windSpeed,
+                condition,
+                cityName,
+                countryCode
+        );
     }
 
     /**
