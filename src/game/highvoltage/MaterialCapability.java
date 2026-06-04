@@ -32,11 +32,5 @@ public enum MaterialCapability {
      * susceptible to magnetic flux and can be physically pulled across the map
      * by a powered Wallet.
      */
-    MAGNETIC,
-    /**
-     * Identifies an Item that is currently pinned to the floor by intense
-     * high-voltage induction (e.g., from an Ionized Barrier).
-     * While an item has this tag, it resists manual pick-up attempts by actors.
-     */
-    MAGNETICALLY_LOCKED
+    MAGNETIC
 }

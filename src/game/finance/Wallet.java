@@ -157,8 +157,6 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
         Actor worker = location.getActor();
         display.println("\u001B[36m⚡ The wallet's magnetic coils are powered by " + sourceName + "! \u001B[0m");
 
-        pullItemsFromLocation(location, location, worker, display);
-
         // scan a 5x5 square with the Worker in the center
         for (int x = -MAGNETIC_RADIUS; x <= MAGNETIC_RADIUS; x++) {
             for (int y = -MAGNETIC_RADIUS; y <= MAGNETIC_RADIUS; y++) {
@@ -213,19 +211,12 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
         List<Item> itemsOnTile = new ArrayList<>(source.getItems());
         for (Item item : itemsOnTile) {
             if (item.hasAbility(MaterialCapability.MAGNETIC)) {
-                // determine if the item was locked by a barrier
-                String actionVerb = item.hasAbility(MaterialCapability.MAGNETICALLY_LOCKED)
-                        ? "was RIPPED from the induction field"
-                        : "flew";
-
+                source.removeItem(item);
                 if (bob.getInventory().add(item)) {
-                    source.removeItem(item);
-                    display.println("\u001B[36m" + item + " " + actionVerb + " into " + bob + "'s inventory!\u001B[0m");
-                } else if (source != bobLoc) {
-                    // Only move to feet if the item isn't already at Bob's feet
-                    source.removeItem(item);
-                    bobLoc.addItem(item);
-                    display.println("\u001B[33m" + item + " " + actionVerb + " to " + bob + "'s feet!\u001B[0m");
+                    display.println("\u001B[36m" + item + " flew into " + bob + "'s inventory!\u001B[0m");
+                } else {
+                    bobLoc.addItem(item); // pull to feet
+                    display.println("\u001B[33m" + item + " was pulled to " + bob + "'s feet!\u001B[0m");
                 }
             }
         }

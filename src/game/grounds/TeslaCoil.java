@@ -25,7 +25,7 @@ import game.highvoltage.ShockedStatus;
  *    simultaneously within its radius.
  * 4. Manual Override: Provides a player-facing action to bypass the charging timer.
  *
- * @author Jewell Gomes
+ * @author [Your Student Name/ID]
  */
 public class TeslaCoil extends Ground implements ChargeSource, ChargeReactive {
     /** Internal capacitor countdown. Fires at 0. */
