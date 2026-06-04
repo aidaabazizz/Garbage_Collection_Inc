@@ -1,27 +1,27 @@
 package game.grounds;
 
-import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.highvoltage.ChargeReactive;
-import game.highvoltage.MaterialCapability;
+import game.highvoltage.ChargeUtils;
+import game.highvoltage.GalvanicCharge;
+import game.enums.MaterialCapability;
 
 /**
  * A specialized Ground tile representing a permanent conductive surface created by a galvanic surge.
  *
- * The PoweredFloor acts as a "Smart Conductor" in the High-Voltage Galvanic System (REQ3).
- * It is a Resonator that serves two primary purposes:
- * 1. Continuous Power: Provides the ENERGIZED capability so that items (like the Wallet)
- *    can draw power every turn while Bob stands on this tile.
- * 2. Energy Propagation: Acts as a bridge, passing high-voltage charges to an actor's
- *    inventory and neighboring tiles during a strike event.
+ * The PoweredFloor acts as a "Smart Conductor" in the High-Voltage Galvanic System (Requirement 3).
+ * It serves a dual purpose in the galvanic ecosystem:
+ * 1. Persistent Resonator: Provides the ENERGIZED capability, allowing equipment
+ *    (like the Wallet) to draw power every turn while an actor stands on this tile.
+ * 2. Active Propagator: Acts as a conductive bridge, passing high-voltage charges
+ *    to the occupant's inventory and all neighboring tiles during a strike event.
  *
- * Complexity Proof (Rule 2):
+ * Complexity Proof (Requirement 3):
  * This class demonstrates "Indiscriminate Environmental Conduction." A single charge
  * hitting this floor triggers a cascading chain reaction involving Grounds, Actors,
- * and Items simultaneously.
+ * and Items across multiple coordinates simultaneously.
  *
  * @author Jewell Gomes
  */
@@ -40,46 +40,47 @@ public class PoweredFloor extends Ground implements ChargeReactive {
     /**
      * Implements the ChargeReactive interface to handle energy reception and propagation.
      *
-     * Logic Flow (The Chain Reaction):
-     * 1. Inventory Propagation: If an actor is standing on the tile, the charge is passed
-     *    directly to all ChargeReactive items in their inventory (e.g., triggering a Wallet pull).
-     * 2. Neighbor Conduction: Iterates through all 8 surrounding exits to pass the charge
-     *    to adjacent reactive Grounds and Actors.
+     * The execution follows a "Cascade Logic" flow:
+     * 1. Recursion Prevention: Checks the {@code GalvanicCharge} visited set to prevent
+     *    infinite electrical loops between adjacent conductive tiles.
+     * 2. Impact Phase: Utilizes {@link ChargeUtils#zapTile} to process damage,
+     *    status effects, and item reactions for the actor currently on this tile.
+     * 3. Propagation Phase: Iterates through all 8 surrounding exits to pass the
+     *    charge to adjacent reactive Grounds (morphing/refreshing them) and
+     *    nearby Actors (zapping them via arcing).
      *
-     * Safety Gate (LO4 Robustness):
-     * Before propagating to a neighbor, the code checks if the adjacent Ground is already
-     * ENERGIZED. This prevents infinite recursive loops between conductive tiles,
-     * simulating realistic potential-difference physics and protecting the game from crashes.
+     * Robustness (LO4):
+     * The use of {@code charge.getVisited()} simulates realistic potential-difference
+     * physics, ensuring energy flows outward from the source without crashing the
+     * engine through stack overflow.
      *
-     * @param location   The coordinate of the PoweredFloor.
-     * @param display    The terminal interface for outputting surge events.
-     * @param sourceName The name of the energy source triggering the conduction.
+     * @param location The coordinate of the PoweredFloor receiving the charge.
+     * @param charge   The GalvanicCharge context containing source info and propagation memory.
      */
     @Override
-    public void reactToCharge(Location location, Display display, String sourceName) {
-
-        // 1. INVENTORY PROPAGATION (PDF Page 41)
-        // If an actor is standing here, pass the energy to their pocket (Magnetize Wallet)
-        if (location.containsAnActor()) {
-            Actor worker = location.getActor();
-            worker.getInventory().getItemsAs(ChargeReactive.class)
-                    .forEach(item -> item.reactToCharge(location, display, sourceName));
+    public void reactToCharge(Location location, GalvanicCharge charge) {
+        if (charge.getVisited().contains(location)) {
+            return;
         }
 
+        // 2. THE IMPACT (Bob and Inventory)
+        // zapTile will perform the .visit() call, mark the tile, and deal damage.
+        ChargeUtils.zapTile(location, charge, true);
+
+        // 3. THE PROPAGATION (Neighbors)
         for (Exit exit : location.getExits()) {
             Location adj = exit.getDestination();
 
-            if (!adj.getGround().hasAbility(MaterialCapability.ENERGIZED)) {
+            // Ground wave (Puddles stack, Floors continue)
+            ChargeReactive neighbor = adj.getGroundAs(ChargeReactive.class);
+            if (neighbor != null) {
+                charge.getDisplay().println("⚡ The " + this + " conducts energy to the " + neighbor + "!");
+                neighbor.reactToCharge(adj, charge);
+            }
 
-                ChargeReactive groundReactive = adj.getGroundAs(ChargeReactive.class);
-                if (groundReactive != null) {
-                    groundReactive.reactToCharge(adj, display, sourceName);
-                }
-
-                if (adj.containsAnActor()) {
-                    adj.getActor().asCapability(ChargeReactive.class)
-                            .ifPresent(r -> r.reactToCharge(adj, display, sourceName));
-                }
+            // Neighbor Actors (Zap people on dry dirt next to the floor)
+            if (adj.containsAnActor()) {
+                ChargeUtils.zapTile(adj, charge, true);
             }
         }
     }

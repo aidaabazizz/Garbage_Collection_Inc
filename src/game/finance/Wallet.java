@@ -9,7 +9,8 @@ import game.enums.Ability;
 import game.enums.ItemStatistics;
 import edu.monash.fit2099.engine.items.Item;
 import game.highvoltage.ChargeReactive;
-import game.highvoltage.MaterialCapability;
+import game.highvoltage.GalvanicCharge;
+import game.enums.MaterialCapability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,8 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
     private static final int MAX_CREDITS = 1000;
     /** The radius of the magnetic field in tiles. */
     private static final int MAGNETIC_RADIUS = 2;
+    /** The damage value associated with the wallet's induction wave (none). */
+    private static final int DAMAGE = 0;
     private int credits;
 
     /**
@@ -45,7 +48,7 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
     public Wallet() {
         super("Wallet", '$');
         this.credits = 0;
-        this.makeNonPortable();
+        this.makePortable();
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(0));
         this.enableAbility(Ability.ESSENTIAL);
         this.enableAbility(MaterialCapability.MAGNETIC);
@@ -123,39 +126,41 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
     }
 
     /**
-     * Senses the environment every turn.
-     * If the ground beneath the holder is ENERGIZED (e.g., PoweredFloor, Puddle),
-     * the wallet automatically triggers its magnetic pull logic.
+     * Senses the environment each turn to facilitate Actor-to-Ground synergy.
+     * If the ground beneath the holder possesses the ENERGIZED capability (e.g.,
+     * PoweredFloor or Puddle), the wallet draws power and triggers its magnetic pull.
      *
      * @param currentLocation The location of the actor holding the wallet.
-     * @param actor           The actor holding the wallet.
+     * @param actor           The actor carrying the wallet.
      */
     @Override
     public void tick(Location currentLocation, Actor actor) {
-        Display display = new Display();
         // This allows the wallet to draw power from PoweredFloors, ElectrifiedPuddle, AtmosphericChargeSource, TeslaCoil
         if (currentLocation.getGround().hasAbility(MaterialCapability.ENERGIZED)) {
-            String sourceName = "the " + currentLocation.getGround() + " beneath Bob's feet";
-            this.reactToCharge(currentLocation, display, sourceName);
+            GalvanicCharge passiveWave = new GalvanicCharge("the energized ground", new Display(), DAMAGE);
+            this.reactToCharge(currentLocation, passiveWave);
         }
     }
 
     /**
      * Implements the ChargeReactive interface to activate magnetic harvesting.
      *
-     * The method performs a geometric scan of the surrounding 5x5 area. For each
-     * valid tile, it performs a "Flux Check" to see if the path is blocked by a wall.
-     * If the path is clear, it attempts to pull any MAGNETIC items to the center.
+     * When triggered by a charge, this method:
+     * 1. Scans a 5x5 grid centered on the holder.
+     * 2. Performs a "Flux Block" check for every tile in the radius to ensure
+     *    walls do not obstruct the magnetic field.
+     * 3. Pulls all items with the MAGNETIC capability toward the holder.
      *
-     * @param location   The origin of the magnetic field.
-     * @param display    The terminal interface for outputting "flying item" messages.
-     * @param sourceName The name of the power source activating the magnets.
+     * @param location The origin location where the charge was received.
+     * @param charge   The context of the galvanic charge triggering the reaction.
      */
     @Override
-    public void reactToCharge(Location location, Display display, String sourceName) {
+    public void reactToCharge(Location location, GalvanicCharge charge) {
         if (!location.containsAnActor()) return;
         Actor worker = location.getActor();
-        display.println("\u001B[36m⚡ The wallet's magnetic coils are powered by " + sourceName + "! \u001B[0m");
+        charge.getDisplay().println("\u001B[36m⚡ The wallet's magnetic coils are powered by " + charge.getSourceName() + "! \u001B[0m");
+
+        pullItemsFromLocation(location, location, worker, charge.getDisplay());
 
         // scan a 5x5 square with the Worker in the center
         for (int x = -MAGNETIC_RADIUS; x <= MAGNETIC_RADIUS; x++) {
@@ -176,25 +181,48 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
                         continue;
                     }
 
-                    pullItemsFromLocation(targetLoc, location, worker, display);
+                    pullItemsFromLocation(targetLoc, location, worker, charge.getDisplay());
                 }
             }
         }
     }
 
     /**
-     * Simulates physical shielding. Determines if there is an impassable obstacle
-     * (Wall) between the magnet and the target item.
+     * Simulates physical flux shielding using a ray-casting approximation.
      *
-     * @param start The center location (Bob).
-     * @param end   The target location (Scrap Item).
-     * @return true if the path is blocked by a non-passable ground type.
+     * This method determines if an impassable obstacle (e.g., a Wall) exists
+     * along the direct vector between the magnetic source and the target item.
+     *
+     * Visual/Mechanical Impact:
+     * 1. Magnetic Shadowing: If a wall is detected at distance 1, it casts a
+     *    shadow that prevents the pull of items at distance 2.
+     * 2. Structural Synergy: Ensures that map layout directly limits the
+     *    effectiveness of electrical harvesting.
+     *
+     * @param start The origin of the magnetic pull (the Actor).
+     * @param end   The target location containing potential scrap.
+     * @return true if an impassable tile blocks the path; false otherwise.
      */
     private boolean isPathBlocked(Location start, Location end) {
-        int stepX = Integer.compare(end.x(), start.x());
-        int stepY = Integer.compare(end.y(), start.y());
-        Location firstStep = start.map().at(start.x() + stepX, start.y() + stepY);
-        return !firstStep.getGround().canActorEnter(null);
+        int currX = start.x();
+        int currY = start.y();
+        int targetX = end.x();
+        int targetY = end.y();
+
+        // move step by step from Bob toward the item
+        while (currX != targetX || currY != targetY) {
+            currX += Integer.compare(targetX, currX);
+            currY += Integer.compare(targetY, currY);
+
+            Location step = start.map().at(currX, currY);
+            // if any tile in the path is a Wall, the magnetic flux is blocked
+            if (!step.getGround().canActorEnter(null)) {
+                return true;
+            }
+            // if we reached the item, we are done
+            if (currX == targetX && currY == targetY) break;
+        }
+        return false;
     }
 
     /**
@@ -211,12 +239,19 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
         List<Item> itemsOnTile = new ArrayList<>(source.getItems());
         for (Item item : itemsOnTile) {
             if (item.hasAbility(MaterialCapability.MAGNETIC)) {
-                source.removeItem(item);
+                // determine if the item was locked by a barrier
+                String actionVerb = item.hasAbility(MaterialCapability.MAGNETICALLY_LOCKED)
+                        ? "was RIPPED from the induction field"
+                        : "flew";
+
                 if (bob.getInventory().add(item)) {
-                    display.println("\u001B[36m" + item + " flew into " + bob + "'s inventory!\u001B[0m");
-                } else {
-                    bobLoc.addItem(item); // pull to feet
-                    display.println("\u001B[33m" + item + " was pulled to " + bob + "'s feet!\u001B[0m");
+                    source.removeItem(item);
+                    display.println("\u001B[36m" + item + " " + actionVerb + " into " + bob + "'s inventory!\u001B[0m");
+                } else if (source != bobLoc) {
+                    // Only move to feet if the item isn't already at Bob's feet
+                    source.removeItem(item);
+                    bobLoc.addItem(item);
+                    display.println("\u001B[33m" + item + " " + actionVerb + " to " + bob + "'s feet!\u001B[0m");
                 }
             }
         }

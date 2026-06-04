@@ -2,10 +2,9 @@ package game.actions;
 
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.capabilities.Status;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.weapons.Weapon;
-import game.highvoltage.ParalyzedStatus;
+import game.enums.MaterialCapability;
 import game.highvoltage.ShockedStatus;
 
 /**
@@ -20,6 +19,12 @@ public class AttackAction extends Action {
     private Actor target;
     private String direction;
     private Weapon weapon;
+    private static final int REFLECTIVE_DAMAGE = 1;
+    private static final int REFLECTIVE_SHOCK_DURATION = 2;
+    /** ANSI escape code for red text (used for high-voltage danger warnings). */
+    private static final String RED_TEXT = "\u001B[31m";
+    /** ANSI escape code to reset terminal text color. */
+    private static final String RESET_COLOR = "\u001B[0m";
 
     /**
      * Constructor to create an AttackAction.
@@ -51,10 +56,8 @@ public class AttackAction extends Action {
         // If the target is paralyzed, they act as a "Reflective Surface".
         // The attacker takes damage from the "Thorns" effect of the target's suit.
         // The kinetic energy of the hit triggers a secondary status on the attacker.
-        if (isTargetConductive(target)) {
-            processReflectiveSurge(actor);
-            result += String.format("\n\u001B[31m⚡ Electricity arcs back from %s's suit! %s takes 1 damage and is SHOCKED!\u001B[0m",
-                    target, actor);
+        if (target.hasAbility(MaterialCapability.REFLECTIVE)) {
+            result += processReflectiveFeedback(actor, target);
         }
 
 
@@ -65,24 +68,21 @@ public class AttackAction extends Action {
     }
 
     /**
-     * Helper method to check if the target has an active ParalyzedStatus.
-     * This isolates the "Status Parsing" logic from the "Action Execution" logic.
+     * Handles the specific Requirement 3 logic for electrical "Arc Back."
+     *
+     * This method applies damage and a debilitating status to the attacker.
+     * EXTENSIBILITY NOTE: Teammates can add similar helper methods for
+     * other capabilities (e.g., Fire, Ice) to keep execute() clean.
+     *
+     * @param attacker The actor who hit the reflective surface.
+     * @param victim   The actor wearing the reflective suit.
+     * @return A formatted string describing the electrical arc.
      */
-    private boolean isTargetConductive(Actor target) {
-        for (Status s : target.statuses()) {
-            if (s.getClass() == ParalyzedStatus.class && s.isStatusActive()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Logic for what happens to an attacker when they hit a paralyzed target.
-     */
-    private void processReflectiveSurge(Actor attacker) {
-        attacker.hurt(1);
-        attacker.addStatus(new ShockedStatus(2));
+    private String processReflectiveFeedback(Actor attacker, Actor victim) {
+        attacker.hurt(REFLECTIVE_DAMAGE);
+        attacker.addStatus(new ShockedStatus(REFLECTIVE_SHOCK_DURATION));
+        return String.format("\n%s⚡ Electricity arcs back from %s's suit! %s takes %d damage and is SHOCKED!%s",
+                RED_TEXT, victim, attacker, REFLECTIVE_DAMAGE, RESET_COLOR);
     }
 
     /**

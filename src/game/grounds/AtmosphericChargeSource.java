@@ -1,31 +1,28 @@
 package game.grounds;
 
-import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
-import game.highvoltage.ChargeReactive;
-import game.highvoltage.ChargeSource;
-import game.highvoltage.MaterialCapability;
-import game.highvoltage.ShockedStatus;
+import game.enums.MaterialCapability;
+import game.highvoltage.*;
 
 import java.util.Random;
 
 /**
  * A specialized Ground tile that acts as a map-wide lightning generator.
  *
- * The AtmosphericChargeSource represents the unpredictable environmental energy of the moon
- * facility. Every turn, it has a randomized chance to strike a coordinate on the current map,
- * acting as the primary autonomous "Emitter" for the High-Voltage Galvanic System (REQ3).
+ * The AtmosphericChargeSource represents the unpredictable environmental energy of the
+ * moon facility. Every turn, it has a randomized chance to strike any coordinate on
+ * the current map, acting as the primary autonomous "Emitter" for the
+ * High-Voltage Galvanic System (Requirement 3).
  *
- * Complexity Proof (Rule 2):
- * 1. Remote State Manipulation: Unlike standard grounds, this class selects coordinates
- *    randomly across the entire map, demonstrating advanced usage of the engine's coordinate system.
- * 2. Indiscriminate Surge: A single strike initiates a cascading interaction chain:
- *    a) Ground: Morphs terrain (e.g., Puddles into Electrified Hazards).
- *    b) Actor: Applies direct damage and combat status effects (ShockedStatus).
- *    c) Evolution: Triggers biological metamorphosis in reactive actors.
- *    d) Equipment: Remotely activates items in an actor's pocket or on the floor.
+ * Complexity Proof (Requirement 3):
+ * 1. Remote State Manipulation: Unlike standard grounds that only affect their own
+ *    coordinate, this class selects random targets across the entire map.
+ * 2. Cascading Surge Logic: A single strike initiates a chain of interactions
+ *    including terrain morphing, combat status effects, and metabolic metamorphosis.
+ * 3. Indiscriminate Emitter: Demonstrates the ability for the environment to
+ *    interact with Actors and Items simultaneously via the Galvanic system.
  *
  * @author Jewell Gomes
  */
@@ -34,6 +31,11 @@ public class AtmosphericChargeSource extends Ground implements ChargeSource {
     private final Random rand = new Random();
     /** The probability (10%) of a lightning strike occurring on any given turn. */
     private static final double LIGHTNING_CHANCE = 0.10;
+    /**
+     * The amount of damage dealt to an Actor directly hit by a bolt.
+     */
+    private static final int DAMAGE = 3;
+    private final Display display = new Display();
 
     /**
      * Constructor for the AtmosphericChargeSource.
@@ -41,17 +43,18 @@ public class AtmosphericChargeSource extends Ground implements ChargeSource {
      * Sets the ENERGIZED capability so that actors standing on this tile can power equipment.
      */
     public AtmosphericChargeSource() {
-        super('⛈', "Atmospheric Controller");
+        super('⛈', "Atmospheric Charge Source");
         this.enableAbility(MaterialCapability.ENERGIZED);
     }
 
     /**
      * Executes the autonomous turn logic.
      *
-     * Every turn, a 10% probability check is performed. If successful:
-     * 1. A random (x, y) coordinate is selected from the current map's valid range.
-     * 2. A high-visibility alert is printed to the console using ANSI color codes.
-     * 3. The releaseCharge method is invoked at the target coordinate.
+     * Every turn, there is a 10% chance that a lightning bolt is generated.
+     * If triggered, the method:
+     * 1. Calculates a random coordinate within the map's valid X and Y ranges.
+     * 2. Logs the strike location to the console with high-visibility color.
+     * 3. Releases a {@link GalvanicCharge} at the target location.
      *
      * @param location The fixed location of the AtmosphericChargeSource tile.
      */
@@ -63,53 +66,32 @@ public class AtmosphericChargeSource extends Ground implements ChargeSource {
             int strikeX = rand.nextInt(maxX + 1);
             int strikeY = rand.nextInt(maxY + 1);
             Location strikePoint = location.map().at(strikeX,  strikeY);
-
-            Display display = new Display();
+            GalvanicCharge bolt = new GalvanicCharge("a massive Lightning Bolt", display, DAMAGE);
             String yellow = "\u001B[33m";
             String reset = "\u001B[0m";
             display.println(yellow + "⛈ A bolt strikes the facility at (" + strikeX + ", " + strikeY + ")!" + reset);
-            this.releaseCharge(strikePoint, display, "a massive Lightning Bolt");
+            this.releaseCharge(strikePoint, bolt);
         }
     }
 
     /**
      * Implements the ChargeSource interface to release energy into a specific location.
      *
-     * This method utilizes the Dependency Inversion Principle (DIP) to interact with
-     * any object implementing {@link ChargeReactive} without knowing its concrete class.
+     * This method utilizes the Dependency Inversion Principle (DIP) and helper utilities
+     * to propagate energy through the target tile's components.
      *
-     * Propagation Hierarchy:
-     * 1. Ground Reaction: Checks if the tile's Ground implements ChargeReactive.
-     * 2. Actor Combat: Deals 3 damage and applies 2 turns of ShockedStatus.
-     * 3. Actor Reaction: Triggers specific metamorphosis logic if the actor is reactive.
-     * 4. Inventory Reaction: Triggers any reactive items Bob is carrying (e.g., Wallet).
-     * 5. Floor Item Reaction: Triggers any reactive items lying on the ground.
+     * Propagation Sequence:
+     * 1. Ground Reaction: Checks if the tile's Ground is reactive (e.g., morphing Puddles).
+     * 2. Tile Zap: Processes damage and statuses for Actors, triggers metamorphosis
+     *    in reactive creatures, and powers reactive items in inventories or on the floor.
      *
-     * @param location   The location being struck by lightning.
-     * @param display    The terminal interface for outputting surge events.
-     * @param sourceName The name of this energy source ("a massive Lightning Bolt").
+     * @param location The location being struck by the lightning bolt.
+     * @param charge   The GalvanicCharge context containing source info and damage values.
      */
     @Override
-    public void releaseCharge(Location location, Display display, String sourceName) {
-        ChargeReactive ground = location.getGroundAs(ChargeReactive.class);
-        if (ground != null) {
-            ground.reactToCharge(location, display, sourceName);
-        }
+    public void releaseCharge(Location location, GalvanicCharge charge) {
+        ChargeUtils.triggerGroundReaction(location, charge);
 
-        if (location.containsAnActor()) {
-            Actor victim = location.getActor();
-
-            victim.hurt(3);
-            victim.addStatus(new ShockedStatus(2));
-
-
-            victim.asCapability(ChargeReactive.class)
-                    .ifPresent(actorReactive -> actorReactive.reactToCharge(location, display, sourceName));
-
-            victim.getInventory().getItemsAs(ChargeReactive.class)
-                    .forEach(item -> item.reactToCharge(location, display, sourceName));
-        }
-        location.getItemsAs(ChargeReactive.class)
-                .forEach(item -> item.reactToCharge(location, display, sourceName));
+        ChargeUtils.zapTile(location, charge, true);
     }
 }

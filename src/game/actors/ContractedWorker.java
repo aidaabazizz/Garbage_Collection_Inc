@@ -12,7 +12,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.capabilities.*;
 import game.enums.Ability;
-import game.highvoltage.ParalyzedStatus;
+import game.enums.MaterialCapability;
 import game.managers.AlarmManager;
 import game.actions.DisorientedMoveAction;
 import game.managers.Spawner;
@@ -250,17 +250,12 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     }
 
     /**
-     * Helper to detect ParalyzedStatus via class metadata comparison.
-     * Used to implement turn-skipping logic for electric hazards.
+     * Helper method to detect if the NPC is currently affected by paralysis.
+     * This checks for the {@link MaterialCapability#PARALYZED} capability.
      *
-     * @return true if the actor has an active ParalyzedStatus.
+     * @return true if the NPC is paralyzed and should skip its turn; false otherwise.
      */
     private boolean isParalyzed() {
-        for (Status status : this.statuses()) {
-            if (status.getClass() == ParalyzedStatus.class && status.isStatusActive()) {
-                return true;
-            }
-        }
-        return false;
+        return this.hasAbility(MaterialCapability.PARALYZED);
     }
 }

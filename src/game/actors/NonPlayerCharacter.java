@@ -5,11 +5,10 @@ import edu.monash.fit2099.engine.actions.ActionList;
 import edu.monash.fit2099.engine.actions.DoNothingAction;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.behaviours.Behaviour;
-import edu.monash.fit2099.engine.capabilities.Status;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.items.Inventory;
 import edu.monash.fit2099.engine.positions.GameMap;
-import game.highvoltage.ParalyzedStatus;
+import game.enums.MaterialCapability;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -42,18 +41,13 @@ public abstract class NonPlayerCharacter extends Actor {
     }
 
     /**
-     * Helper to detect the presence of an active ParalyzedStatus via class metadata.
-     * This maintains strict architectural compliance.
+     * Helper method to detect if the NPC is currently affected by paralysis.
+     * This checks for the {@link MaterialCapability#PARALYZED} capability.
      *
-     * @return true if the NPC has an active ParalyzedStatus attached.
+     * @return true if the NPC is paralyzed and should skip its turn; false otherwise.
      */
     private boolean isParalyzed() {
-        for (Status status : this.statuses()) {
-            if (status.getClass() == ParalyzedStatus.class && status.isStatusActive()) {
-                return true;
-            }
-        }
-        return false;
+        return this.hasAbility(MaterialCapability.PARALYZED);
     }
 
 
