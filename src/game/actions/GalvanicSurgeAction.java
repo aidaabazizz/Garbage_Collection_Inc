@@ -5,6 +5,7 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
+import game.highvoltage.ChargeContext;
 import game.highvoltage.ChargeSource;
 import game.highvoltage.GalvanicCharge;
 
@@ -92,7 +93,7 @@ public class GalvanicSurgeAction extends Action {
     public String execute(Actor actor, GameMap map) {
         Location locationToTrigger = (this.center != null) ? this.center : map.locationOf(actor);
         // Create the Wave Context ( Memory + Display + Name)
-        GalvanicCharge charge = new GalvanicCharge(this.name, new Display(), MANUAL_SURGE_DAMAGE);
+        ChargeContext charge = new GalvanicCharge(this.name, new Display(), MANUAL_SURGE_DAMAGE);
 
         // Execute the surge using the new signature
         source.releaseCharge(locationToTrigger, charge);

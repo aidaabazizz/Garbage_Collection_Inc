@@ -57,10 +57,10 @@ public class PortableBattery extends Item implements ChargeSource {
      *    radius receive a high-voltage strike.
      *
      * @param location The origin coordinate where the battery is activated.
-     * @param charge   The GalvanicCharge context containing source metadata and damage payload.
+     * @param charge   The ChargeContext context containing source metadata and damage payload.
      */
     @Override
-    public void releaseCharge(Location location, GalvanicCharge charge) {
+    public void releaseCharge(Location location, ChargeContext charge) {
         if (location.getGroundAs(ChargeReactive.class) == null) {
             if (!location.getGround().hasAbility(MaterialCapability.ENERGIZED)) {
                 location.setGround(new PoweredFloor());
@@ -78,7 +78,7 @@ public class PortableBattery extends Item implements ChargeSource {
             Location adj = exit.getDestination();
 
             if (adj.getGroundAs(ChargeReactive.class) == null && adj.getGround().canActorEnter(null)) {
-                adj.setGround(new IonizedBarrier());
+                adj.setGround(new IonizedBarrier(adj.getGround()));
             }
 
             // C. Universal Impact (Zaps anyone standing on the neighbor tiles)

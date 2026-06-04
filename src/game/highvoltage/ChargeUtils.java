@@ -27,7 +27,7 @@ public class ChargeUtils {
      * Coordinates the high-voltage effects on a specific map tile.
      *
      * This method manages a multi-stage interaction chain:
-     * 1. Recursion Guard: Uses the {@link GalvanicCharge} memory to ensure a single
+     * 1. Recursion Guard: Uses the {@link ChargeContext} memory to ensure a single
      *    electrical wave only "zaps" a specific coordinate once, preventing
      *    duplicate damage and infinite loops.
      * 2. Actor Impact: Deals damage and optionally applies {@link ShockedStatus}.
@@ -40,7 +40,7 @@ public class ChargeUtils {
      * @param charge      The charge context containing damage values and propagation memory.
      * @param applyStatus true if the strike should apply a Shocked status to actors.
      */
-    public static void zapTile(Location target, GalvanicCharge charge, boolean applyStatus) {
+    public static void zapTile(Location target, ChargeContext charge, boolean applyStatus) {
         // If this energy wave already zapped this specific tile, stop.
         // This ensures Bob only takes ZAP_DAMAGE once per lightning strike.
         // recursion guard to ensure bob only takes damage once per lightning wave.
@@ -83,7 +83,7 @@ public class ChargeUtils {
      * @param location The location whose ground is being energized.
      * @param charge   The context of the galvanic charge.
      */
-    public static void triggerGroundReaction(Location location, GalvanicCharge charge) {
+    public static void triggerGroundReaction(Location location, ChargeContext charge) {
         ChargeReactive ground = location.getGroundAs(ChargeReactive.class);
         if (ground != null) {
             ground.reactToCharge(location, charge);
@@ -98,7 +98,7 @@ public class ChargeUtils {
      * @param r      The reactive entity (Actor).
      * @param charge The charge context.
      */
-    private static void reactiveGroundAction(Location loc, ChargeReactive r, GalvanicCharge charge) {
+    private static void reactiveGroundAction(Location loc, ChargeReactive r, ChargeContext charge) {
         r.reactToCharge(loc, charge);
     }
 }

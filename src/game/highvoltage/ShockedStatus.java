@@ -60,7 +60,7 @@ public class ShockedStatus extends DamageOverTimeStatus {
             entity.disableAbility(MaterialCapability.CONDUCTIVE);
         }
         String conduitName = entity+ "'s electric conduit";
-        GalvanicCharge pulse = new GalvanicCharge(conduitName, display, DAMAGE);
+        ChargeContext pulse = new GalvanicCharge(conduitName, display, DAMAGE);
 
         pulse.visit(location);
         /*
