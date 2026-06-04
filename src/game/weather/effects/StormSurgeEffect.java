@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.grounds.AtmosphericChargeSource;
 import game.enums.MaterialCapability;
+import game.highvoltage.GalvanicCharge;
 import game.weather.WeatherSnapshot;
 
 import java.util.ArrayList;
@@ -89,9 +90,14 @@ public class StormSurgeEffect implements AnomalyWorldEffect {
     @Override
     public String applyEffect(Actor actor, GameMap map, Location location, WeatherSnapshot snapshot) {
         Display display = new Display();
-        AtmosphericChargeSource surgeSource = new AtmosphericChargeSource();
+        GalvanicCharge charge = new GalvanicCharge(
+                "a weather-amplified storm surge",
+                display,
+                3
+        );
 
-        surgeSource.releaseCharge(location, display, "a weather-amplified storm surge");
+        AtmosphericChargeSource surgeSource = new AtmosphericChargeSource();
+        surgeSource.releaseCharge(location, charge);
 
         boolean sourcePlaced = false;
 
@@ -105,7 +111,6 @@ public class StormSurgeEffect implements AnomalyWorldEffect {
 
         return "Storm surge intensifies the facility: atmospheric charge erupts around " + actor + ".";
     }
-
     /**
      * Attempts to place an extra AtmosphericChargeSource on a nearby valid tile.
      *

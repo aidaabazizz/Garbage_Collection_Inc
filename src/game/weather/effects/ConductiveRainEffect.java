@@ -4,9 +4,10 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
+import game.enums.MaterialCapability;
 import game.grounds.Puddle;
 import game.highvoltage.ChargeReactive;
-import game.enums.MaterialCapability;
+import game.highvoltage.GalvanicCharge;
 import game.weather.WeatherSnapshot;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class ConductiveRainEffect implements AnomalyWorldEffect {
     private static final int RADIUS = 2;
     private static final int HUMIDITY_THRESHOLD = 75;
     private static final double PUDDLE_SPAWN_CHANCE = 0.35;
+    private static final int MOISTURE_CHARGE_DAMAGE = 0;
 
     private final Random random;
 
@@ -41,10 +43,6 @@ public class ConductiveRainEffect implements AnomalyWorldEffect {
 
     /**
      * Constructor for ConductiveRainEffect with injectable randomness.
-     * <p>
-     * This constructor supports testing because a seeded Random object can be
-     * provided.
-     * </p>
      *
      * @param random the random number generator
      */
@@ -56,7 +54,7 @@ public class ConductiveRainEffect implements AnomalyWorldEffect {
      * Checks whether this effect should apply to the current weather snapshot.
      *
      * @param snapshot the weather snapshot
-     * @return true if humidity or rain should activate conductive rain
+     * @return true if humidity or rain should activate conductive moisture
      */
     @Override
     public boolean canApply(WeatherSnapshot snapshot) {
@@ -65,31 +63,31 @@ public class ConductiveRainEffect implements AnomalyWorldEffect {
     }
 
     /**
-     * Applies conductive rain around the actor.
-     * <p>
-     * Nearby passable tiles may become puddles. Existing reactive grounds are
-     * also triggered using the ChargeReactive interface, allowing puddles,
-     * coils, or future reactive grounds to respond without hard-coded class
-     * checks.
-     * </p>
+     * Applies conductive moisture around the actor.
      *
      * @param actor the actor triggering the weather sync
      * @param map the current game map
      * @param location the actor's current location
      * @param snapshot the weather snapshot
-     * @return a description of the terrain changes caused by rain
+     * @return a description of the terrain changes caused by moisture
      */
     @Override
     public String applyEffect(Actor actor, GameMap map, Location location, WeatherSnapshot snapshot) {
         Display display = new Display();
+        GalvanicCharge charge = new GalvanicCharge(
+                "conductive moisture",
+                display,
+                MOISTURE_CHARGE_DAMAGE
+        );
+
         int puddlesCreated = 0;
         int reactionsTriggered = 0;
 
         for (Location target : nearbyLocations(map, location)) {
             ChargeReactive reactiveGround = target.getGroundAs(ChargeReactive.class);
 
-            if (reactiveGround != null) {
-                reactiveGround.reactToCharge(target, display, "conductive rain");
+            if (reactiveGround != null && charge.visit(target)) {
+                reactiveGround.reactToCharge(target, charge);
                 reactionsTriggered++;
             }
 
@@ -100,10 +98,10 @@ public class ConductiveRainEffect implements AnomalyWorldEffect {
         }
 
         if (puddlesCreated == 0 && reactionsTriggered == 0) {
-            return "Conductive rain falls, but no nearby terrain is affected.";
+            return "Conductive moisture gathers, but no nearby terrain is affected.";
         }
 
-        return "Conductive rain spreads through the facility: "
+        return "Conductive moisture spreads through the facility: "
                 + puddlesCreated + " puddle(s) formed and "
                 + reactionsTriggered + " reactive ground(s) surged.";
     }
@@ -146,10 +144,6 @@ public class ConductiveRainEffect implements AnomalyWorldEffect {
 
     /**
      * Checks whether a puddle can safely form on this tile.
-     * <p>
-     * Energised tiles are ignored to avoid replacing important electrical
-     * infrastructure such as TeslaCoils or AtmosphericChargeSources.
-     * </p>
      *
      * @param location the target location
      * @param actor the actor used to test passability
