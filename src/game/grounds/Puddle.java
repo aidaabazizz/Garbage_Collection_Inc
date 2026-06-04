@@ -10,21 +10,21 @@ import game.enums.Ability;
 import game.capabilities.Consumable;
 import game.capabilities.PoisonStatus;
 import game.highvoltage.ChargeReactive;
+import game.highvoltage.GalvanicCharge;
 
 /**
  * A body of liquid on the ground that can be consumed by actors.
  * The effects of consuming the liquid depend on whether the consumer
- * possesses sterilization capabilities. It can either heal the actor
- * or inflict a poison status.
+ * possesses sterilization capabilities, leading to either healing or poisoning.
  *
  * The Puddle implements the {@link ChargeReactive} interface, allowing it to function
- * as a "Resonator" within the High-Voltage Galvanic System (REQ3).
+ * as a "Resonator" within the High-Voltage Galvanic System (Requirement 3).
  *
- * Complexity Proof (Rule 2):
- * This class demonstrates "Structural Terrain Morphing." Unlike simple variable
- * adjustments, the Puddle physically removes itself from the GameMap and replaces
- * itself with a high-energy hazardous Ground type (ElectrifiedPuddle) when exposed
- * to a galvanic charge.
+ * Complexity Proof (Requirement 3):
+ * This class demonstrates "Structural Terrain Morphing." When exposed to a galvanic
+ * charge, the Puddle physically removes itself from the GameMap and replaces itself
+ * with a high-energy hazardous Ground type (ElectrifiedPuddle), representing a
+ * fundamental change to the map's topology.
  *
  * @author Jewell Gomes
  */
@@ -48,22 +48,21 @@ public class Puddle extends Ground implements Consumable, ChargeReactive {
     /**
      * Implements the ChargeReactive interface to handle high-voltage transformation.
      *
-     * When hit by a ChargeSource (e.g., Lightning, Tesla Pulse, or Battery Surge),
-     * the puddle "conducts" the energy, leading to a permanent structural map change.
+     * When hit by a ChargeSource (e.g., Lightning or a Battery Surge), the puddle
+     * conducts the energy and undergoes a permanent structural map change.
      *
-     * Logic:
-     * 1. Logs the transformation event in high-visibility cyan text.
-     * 2. Programmatically replaces the current Ground instance at this location
+     * Transformation Steps:
+     * 1. Logs the event to the display using high-visibility cyan text.
+     * 2. Programmatically replaces this Ground instance at the given location
      *    with a new {@link ElectrifiedPuddle}.
      *
-     * @param location   The coordinate of the puddle.
-     * @param display    The terminal interface for outputting morphing messages.
-     * @param sourceName The name of the energy source hitting the puddle.
+     * @param location The coordinate of the puddle being hit.
+     * @param charge   The GalvanicCharge context representing the incoming surge.
      */
     @Override
-    public void reactToCharge(Location location, Display display, String sourceName) {
+    public void reactToCharge(Location location, GalvanicCharge charge) {
         // physically replaces this ground instance with the ElectrifiedPuddle hazard.
-        display.println("\u001B[36m" + "The puddle is hit by " + sourceName +
+        charge.getDisplay().println("\u001B[36m" + "The puddle is hit by " + charge.getSourceName() +
                 " and becomes electrified!" + "\u001B[0m");
         location.setGround(new ElectrifiedPuddle());
     }
