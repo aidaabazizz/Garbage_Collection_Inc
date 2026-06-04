@@ -4,10 +4,8 @@ import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.behaviours.Behaviour;
 import edu.monash.fit2099.engine.positions.Exit;
-import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.enums.Ability;
-import game.managers.AlarmManager;
+import game.utils.SpatialSearch;
 
 /**
  * REQ4:
@@ -29,11 +27,7 @@ public class HuntBehaviour implements Behaviour<Actor, Action> {
      */
     @Override
     public Action operate(Actor actor, Location location) {
-        if (!AlarmManager.getInstance().isActive()) {
-            return null;
-        }
-
-        Actor target = findNearestWorker(location.map(), location);
+        Actor target = SpatialSearch.findNearestWorker(location.map(), location);
         if (target == null) return null;
 
         Location targetLocation = location.map().locationOf(target);
@@ -49,35 +43,6 @@ public class HuntBehaviour implements Behaviour<Actor, Action> {
             }
         }
         return null;
-    }
-
-    /**
-     * Searches the entire map to locate the nearest conscious worker actor.
-     *
-     * @param map The game map to search.
-     * @param myLoc The starting location for distance calculations.
-     * @return The closest conscious worker actor found on the map, or null if none are present.
-     */
-    private Actor findNearestWorker(GameMap map, Location myLoc) {
-        Actor closest = null;
-        int minDistance = Integer.MAX_VALUE;
-
-        for (int y : map.getYRange()) {
-            for (int x : map.getXRange()) {
-                Location loc = map.at(x, y);
-                if (loc.containsAnActor()) {
-                    Actor target = loc.getActor();
-                    if (target.hasAbility(Ability.WORKER) && target.isConscious()) {
-                        int dist = distance(myLoc, loc);
-                        if (dist < minDistance) {
-                            minDistance = dist;
-                            closest = target;
-                        }
-                    }
-                }
-            }
-        }
-        return closest;
     }
 
     /**

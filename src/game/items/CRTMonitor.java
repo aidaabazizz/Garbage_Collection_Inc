@@ -1,7 +1,6 @@
 package game.items;
 
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Ground;
@@ -22,7 +21,7 @@ import java.util.Random;
  * @author Suchir
  * @version 1.0
  */
-public class CRTMonitor extends Item implements Sellable {
+public class CRTMonitor extends MagneticItem implements Sellable {
     private static final int SELL_PRICE = 25;
     private static final int HEAL_AMOUNT = 5;
     private static final int SHORT_CHANCE = 20;
@@ -35,9 +34,8 @@ public class CRTMonitor extends Item implements Sellable {
      * Assigns a substantial weight of thirty units and makes the item portable.
      */
     public CRTMonitor() {
-        super("CRT Monitor", '◙');
+        super("CRT Monitor", '◙', true);
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(30));
-        this.makePortable();
     }
 
     /**

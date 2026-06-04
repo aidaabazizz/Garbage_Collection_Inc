@@ -12,18 +12,25 @@ import java.util.List;
  * It is responsible for spawning slimes when workers are nearby and
  * eventually growing into a sapling stage. It follows the requirement
  * that each plant can only perform one major action per game turn.
- *
+ * Based on A2 feedback, this class has been refactored to be configuration-driven via
+ * Dependency Injection. It no longer hardcodes its own growth parameters or its successor stage,
+ * allowing for a more flexible and decoupled tree hierarchy.
  * @author Jewell Gomes
  */
 public class FleshySproutStage extends FleshyTreeStage {
-    private static final int GROWTH_THRESHOLD = 20;
-    private static final double GROWTH_CHANCE = 0.25;
-
     /**
-     * Constructor for the Sprout stage.
-     * @param spawner The spawning manager used to handle Slime creation.
+     * Constructor for the FleshySproutStage.
+     * Uses Dependency Injection to initialize growth parameters, ensuring the class
+     * remains a pure logic component independent of specific game-balancing numbers.
+     *
+     * @param spawner   The spawning manager used to handle Slime creation.
+     * @param name      The display name for this stage (e.g., "Fleshy Sprout").
+     * @param threshold The temporal threshold required for growth.
+     * @param chance    The success rate of the growth roll.
      */
-    public FleshySproutStage(Spawner spawner) { super(spawner); }
+    public FleshySproutStage(Spawner spawner, String name, char displayChar, int threshold, double chance) {
+        super(spawner, name, displayChar, threshold, chance);
+    }
     /**
      * This method manages the behavior of the sprout during every turn.
      * It first identifies all workers in the surrounding tiles. If a
@@ -37,11 +44,11 @@ public class FleshySproutStage extends FleshyTreeStage {
     @Override
     public TreeStage execute(Location location) {
         // Ed discussion: Age increases every turn no matter what.
-        updateAge(location, GROWTH_THRESHOLD, "Fleshy Sprout");
+        updateAge(location);
         List<Actor> targets = SpatialSearch.getNearbyWorkers(location);
 
         if (!targets.isEmpty()) {
-            display.println("Fleshy Sprout Tree at " + location + " is producing Slime!");
+            display.println(name + " at " + location + " is producing Slime!");
             for (Actor worker : targets) {
                 spawner.spawnSlime(location);
             }
@@ -49,23 +56,13 @@ public class FleshySproutStage extends FleshyTreeStage {
         }
 
         // growing (only if not spawning)
-        if (checkGrowthThreshold(GROWTH_THRESHOLD, GROWTH_CHANCE, location,"Fleshy Sprout")) {
+        if (checkGrowthThreshold(location) && nextStage != null) {
             display.println(String.format(
-                    "Fleshy Tree Sprout ('%s') at %s grows into a Fleshy Sapling ('v')!",
-                    getDisplayChar(), location));
-            return new FleshySaplingStage(spawner);
+                    "%s at %s grows into %s!",
+                    name, location, nextStage));
+            return this.nextStage; // based on the A2 feedback, reactor the hardcoded transition to use dependency injection
+            // returning the pre-injected nextStage instead of instantiating a specific class
         }
         return this;
-    }
-
-    /**
-     * This method returns the lowercase letter y which is the visual
-     * representation of this stage on the game map.
-     *
-     * @return The character 'y'.
-     */
-    @Override
-    public char getDisplayChar(){
-        return 'y';
     }
 }

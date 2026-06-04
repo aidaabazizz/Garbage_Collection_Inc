@@ -17,8 +17,11 @@ public class FleshyMatureStage extends FleshyTreeStage {
     /**
      * Constructor for the Mature stage.
      * @param spawner The spawning manager used to handle the creation of Undead creatures.
+     * @param displayChar The display character for the fleshy mature stage.
      */
-    public FleshyMatureStage(Spawner spawner) { super(spawner); }
+    public FleshyMatureStage(Spawner spawner, char displayChar) {
+        super(spawner, "Fleshy Mature", displayChar);
+    }
     /**
      * The execute method runs every turn to check the environment around
      * the tree. It looks for any workers in the adjacent tiles and
@@ -31,20 +34,11 @@ public class FleshyMatureStage extends FleshyTreeStage {
     public TreeStage execute(Location location) {
         List<Actor> targets = SpatialSearch.getNearbyWorkers(location);
         if (!targets.isEmpty()) {
-            display.println("Fleshy Mature Tree at " + location + " is producing Undead!");
+            display.println(name + " at " + location + " is producing Undead!");
         }
         for (Actor worker : targets) {
             spawner.spawnUndead(location);
         }
         return this;
     }
-
-    /**
-     * This method returns the uppercase letter Y which is the visual
-     * icon used to show a mature fleshy tree on the game world map.
-     *
-     * @return The character 'Y'.
-     */
-    @Override
-    public char getDisplayChar() { return 'Y'; }
 }

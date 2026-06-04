@@ -3,86 +3,97 @@ package game.teleportstrategies;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.capabilities.TeleportStrategy;
 import game.items.Flask;
-import game.grounds.MagicCircle;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * This is a ground type where magic circle teleports worker to a random magic
  * circle on the same map and spawns a Flask on arrival.
  *
  * @author Victoria Tay Wen Xie
- * @version 1.0
+ * @version 2.0
  */
-public class MagicCircleStrategy implements TeleportStrategy {
-    /** Radius for adjacent tile search */
-    private final static int ADJACENT_TILE = 1;
-
-    /** Random destination selector*/
-    private final Random random = new Random();
+public class MagicCircleStrategy extends BaseTeleportStrategy {
 
     /**
-     * This will find and return a random destination magic circle.
-     * @param actor the actor teleporting
-     * @param map the current game map
-     * @return random magic circle location or current location if none exist
+     * Constructs a MagicCircleStrategy with the default destination name
+     * "Magic Circle".
+     */
+    public MagicCircleStrategy() {
+        super("Magic Circle");
+    }
+
+    /**
+     * Determines the destination of the teleportation.
+     * Searches the current map for all unoccupied Magic Circles other than
+     * the source Magic Circle and randomly selects one as the destination.
+     * If no valid destination exists, the source location is returned.
+     *
+     * @param target the Magic Circle being used as the source location
+     * @return a randomly selected valid Magic Circle destination, or the
+     *         source location if no valid destination exists
      */
     @Override
-    public Location getDestination(Actor actor, GameMap map) {
-        List<Location> otherCircles = new ArrayList<>();
-        Location currentLocation = map.locationOf(actor);
+    protected Location determineActualDestination(Location target) {
+        GameMap map = target.map();
+        List<Location> validCircles = new ArrayList<>();
 
         for (int x : map.getXRange()) {
             for (int y : map.getYRange()) {
                 Location loc = map.at(x, y);
-
-                boolean isMagicCircle = loc.getGround().getClass().equals(MagicCircle.class);
-
-                boolean isCurrentLocation =
-                        loc.x() == currentLocation.x() && loc.y() == currentLocation.y();
-
-                if (isMagicCircle && !isCurrentLocation) {
-                    otherCircles.add(loc);
+                if (loc.getGround().getDisplayChar() == '◎'
+                        && !loc.equals(target)
+                        && !loc.containsAnActor()) {
+                    validCircles.add(loc);
                 }
             }
         }
 
-        if (otherCircles.isEmpty()) {
-            return currentLocation;
-        }
-
-        return otherCircles.get(random.nextInt(otherCircles.size()));
+        if (validCircles.isEmpty()) return target;
+        return validCircles.get(RANDOM.nextInt(validCircles.size()));
     }
+
     /**
-     * This will spawn a flask on an empty adjacent tile at the destination
-     * @param actor the actor teleporting
-     * @param source the source location
-     * @param destination the destination location
-     * @param map the current game map
+     * Applies any effects at the source location before teleportation.
+     * Magic Circles do not produce any departure effects and leave the
+     * source location unchanged.
+     *
+     * @param source the location the actor is teleporting from
      */
     @Override
-    public void applySideEffects(Actor actor, Location source, Location destination, GameMap map) {
-        for (Location adjacent : destination.getNearbyLocations(ADJACENT_TILE)) {
-            if (!adjacent.containsAnActor()
-                    && adjacent.canActorEnter(actor)
-                    && adjacent.getItems().isEmpty()) {
+    public void applySourceEffects(Location source) {
+    }
+
+    /**
+     * Applies arrival effects at the destination location.
+     * Attempts to place a Flask in the first adjacent location that is
+     * unoccupied and can be entered. If no such location exists, no Flask
+     * is spawned.
+     *
+     * @param destination the location where the actor arrives
+     */
+    @Override
+    public void applyDestinationEffects(Location destination) {
+        for (Location adjacent : destination.getNearbyLocations(1)) {
+            if (!adjacent.equals(destination)
+                    && !adjacent.containsAnActor()
+                    && adjacent.getGround().canActorEnter(getTeleportingActor())) {
                 adjacent.addItem(new Flask());
-                return;
+                break;
             }
         }
     }
 
     /**
-     * Returns the menu description of magic circle teleportation.
-     * @param actor the actor teleporting
-     * @return menu description string
+     * Returns a description of the teleportation action.
+     *
+     * @param actor the actor performing the teleportation
+     * @return a string describing the teleportation action
      */
     @Override
-    public String menuDescription(Actor actor) {
-        return "Teleport through the Magic Circle.";
+    public String getActionDescription(Actor actor) {
+        return actor + " travels to another " + getDestinationName() + " using Magic Circle";
     }
-
 }

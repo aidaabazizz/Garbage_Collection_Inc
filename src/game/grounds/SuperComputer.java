@@ -3,22 +3,22 @@ package game.grounds;
 import edu.monash.fit2099.engine.actions.ActionList;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.items.Item;
-import edu.monash.fit2099.engine.positions.Exit;
-import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Ground;
+import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.PurchaseAction;
 import game.actions.SellAction;
 import game.actions.StabiliseDistortionAction;
-import game.enums.DistortionCapability;
 import game.capabilities.Purchasable;
 import game.capabilities.Sellable;
+import game.enums.Ability;
 import game.enums.AccessLevel;
+import game.enums.DistortionCapability;
 import game.items.AccessCard;
 import game.items.FirstAidKit;
 import game.items.SterilisationBox;
-import game.enums.Ability;
 import game.sanctuary.SanctuaryTool;
+import game.weather.WeatherSystemFactory;
 
 import java.util.List;
 
@@ -54,16 +54,15 @@ public class SuperComputer extends Ground implements SanctuaryTool {
             return actions;
         }
 
-        // --- REQ4: COMPLEX INTERACTION (Scanning for Distortions) ---
+        // --- REQ4: COMPLEX INTERACTION (Scanning for Distortions) --- [YOUR ADDITION]
         // Scan adjacent tiles for Corrupted grounds using Capabilities
         List<Location> corruptedSites = game.utils.SpatialSearch.getAdjacentLocationsWithCapability(
                 location,
-                game.enums.DistortionCapability.CORRUPTED
+                DistortionCapability.CORRUPTED
         );
         for (Location site : corruptedSites) {
-            actions.add(new game.actions.StabiliseDistortionAction(site));
+            actions.add(new StabiliseDistortionAction(site));
         }
-
 
         for (Item item : actor.getInventory().getItems()) {
             Sellable sellable = item.asCapability(Sellable.class).orElse(null);
@@ -77,6 +76,7 @@ public class SuperComputer extends Ground implements SanctuaryTool {
         addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_ONE));
         addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_TWO));
         addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_THREE));
+        actions.add(WeatherSystemFactory.createWeatherSyncAction()); // [MAIN]
 
         return actions;
     }
@@ -94,6 +94,14 @@ public class SuperComputer extends Ground implements SanctuaryTool {
         }
     }
 
+    /**
+     * Activates the sanctuary effect of the Supercomputer. [YOUR ADDITION]
+     *
+     * @param actor    the actor triggering the effect
+     * @param map      the current game map
+     * @param location the location of the Supercomputer
+     * @return a description of the sanctuary effect
+     */
     @Override
     public String activateSanctuaryEffect(Actor actor, GameMap map, Location location) {
         return "Supercomputer emits a low-frequency stabilization hum throughout the sector.";

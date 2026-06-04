@@ -1,7 +1,6 @@
 package game.items;
 
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import game.enums.ItemStatistics;
@@ -17,7 +16,7 @@ import java.util.Random;
  * @author Suchir
  * @version 1.0
  */
-public class FloppyDisk extends Item implements Sellable {
+public class FloppyDisk extends MagneticItem implements Sellable {
     private static final int SELL_PRICE = 1;
     private static final int GLITCH_CHANCE = 50;
     private static final int GLITCH_FEE = 50;
@@ -29,9 +28,8 @@ public class FloppyDisk extends Item implements Sellable {
      * Assigns a weight of one unit and makes the item portable.
      */
     public FloppyDisk() {
-        super("Floppy Disk", '⊟');
+        super("Floppy Disk", '⊟', true);
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(1));
-        this.makePortable();
     }
 
     /**

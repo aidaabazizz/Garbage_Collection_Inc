@@ -19,8 +19,8 @@ import game.inventory.WeightLimitedInventory;
 import game.items.*;
 import game.managers.CreatureSpawner;
 import game.managers.Spawner;
+import game.teleportstrategies.BaseTeleportStrategy;
 import game.teleportstrategies.TeleportTubeStrategy;
-import game.capabilities.TeleportStrategy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,8 +79,8 @@ public class EclipseNebula extends World {
 
         // 5. REQ 1: Spawn Scrap (Items the player SELLS to earn credits)
         // Spawned on both maps to provide income.
-        spawnCommonScrap(moonMap,globalSpawner);
-        spawnCommonScrap(overflowMap,globalSpawner);
+        spawnCommonScrap(moonMap, globalSpawner);
+        spawnCommonScrap(overflowMap, globalSpawner);
 
         // 6. REQ 2: Spawn Starting Card and Unique Items
         // "Starting Access Card spawned at the beginning" = Map 99
@@ -88,11 +88,11 @@ public class EclipseNebula extends World {
 
         // Alien Cubes are found scattered in 20-overflow
         spawnOverflowUniqueItems(overflowMap);
+        spawnOverflowActors(overflowMap);
 
         // 7. Setup players
         // Start them on Moon 99 so they pick up the starting card and use the Tube
         setupContractedWorkers(moonMap, globalSpawner);
-
     }
 
     /**
@@ -123,7 +123,13 @@ public class EclipseNebula extends World {
         // REQ5: Galaxy Portal for CrazyChicken and Elsa
         groundCreator.registerGround('P', GalaxyPortal::new);
 
-        //req4 - A3
+        // A3: REQ 3 Galvanic Environment
+        groundCreator.registerGround('⛈', AtmosphericChargeSource::new);
+        groundCreator.registerGround('Ꮺ', TeslaCoil::new);
+        groundCreator.registerGround('⚜', PoweredFloor::new);
+        groundCreator.registerGround('☠', ElectrifiedPuddle::new);
+
+        // REQ4 - A3 [YOUR ADDITION]
         groundCreator.registerGround('Ω', BlackHolePortal::new);
         groundCreator.registerGround('⌂', CorruptedSafeHouse::new);
         groundCreator.registerGround('╬', RageGround::new);
@@ -191,16 +197,16 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('V', () -> new Vent(spawner));
 
         List<String> overflowStrings = Arrays.asList(
-                "....V.y........Ω.....≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
+                "....V.y..............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
                 "...#####M_N....w.....≈≈≈≈≈≈≈≈≈≈≈≈≈≈##################≈≈≈≈≈≈≈",
                 "...#≡____#...........≈≈≈≈≈≈≈≈≈≈≈≈≈≈#___M____________#≈≈≈≈≈≈≈",
-                "...#__Φ__=....V......≈≈≈≈≈≈≈≈#######________╬_______#≈≈≈≈≈≈≈",
+                "...#__Φ__=....V......≈≈≈≈≈≈≈≈#######________________#≈≈≈≈≈≈≈",
                 "...#_____#.....y....=≈≈≈≈≈≈≈≈#_____=_____________N__#≈≈≈≈≈≈≈",
                 "...#######...≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_◎___###########=######≈≈≈≈≈≈≈",
-                ".............≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_____#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
+                "⛈.........Ꮺ..≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_____#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
                 "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#########=#####≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
-                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#_____________#≈≈≈≈≈≈≈≈≈#___◎__#≈≈≈≈≈≈≈",
-                "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#______o______#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
+                "~...≈≈≈≈≈≈.☠.≈≈≈≈≈≈≈≈#_____________#≈≈≈≈≈≈≈≈≈#___◎__#≈≈≈≈≈≈≈",
+                "..⚜.≈≈≈≈≈≈...≈≈≈≈≈≈≈≈#______o______#≈≈≈≈≈≈≈≈≈#______#≈≈≈≈≈≈≈",
                 ".............≈≈≈≈≈≈≈≈######=########≈≈≈≈≈≈≈≈≈####=###≈≈≈≈≈≈≈",
                 "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈#_#≈≈≈≈≈≈≈≈≈",
                 "...≈≈≈≈≈≈≈≈≈.≈≈≈≈≈≈V≈≈≈≈≈≈#_#≈≈≈≈≈###############_#######≈≈≈",
@@ -209,7 +215,7 @@ public class EclipseNebula extends World {
                 "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈#___◎___#_____________≈≈≈≈≈≈__≈≈≈≈",
                 "....≈≈≈≈≈≈...≈≈≈≈≈≈≈≈≈≈≈≈≈######################≈≈≈≈≈≈≈≈≈≈≈≈",
                 "......P......≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
-                "....⌂................≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
+                ".....................≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
                 ".....................≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈"
         );
         return new GameMap("20-overflow", groundCreator, overflowStrings);
@@ -227,16 +233,16 @@ public class EclipseNebula extends World {
             throw new IllegalStateException("Teleportation Tube placeholders (Φ) missing from maps!");
         }
 
-        // Configure Moon Tube
-        List<TeleportStrategy> moonStrategies = new ArrayList<>();
-        moonStrategies.add(new TeleportTubeStrategy(moonMap.at(5, 15)));
-        moonStrategies.add(new TeleportTubeStrategy(overflowTubeLoc));
+        // Configure Moon Tube destinations
+        List<BaseTeleportStrategy> moonStrategies = new ArrayList<>();
+        moonStrategies.add(new TeleportTubeStrategy(moonMap.at(5, 15), "Moon 99 Secure Safe-Zone"));
+        moonStrategies.add(new TeleportTubeStrategy(overflowTubeLoc, "20-Overflow Factory Entrance"));
         moonTubeLoc.setGround(new TeleportationTube(moonStrategies));
 
-        // Configure Overflow Tube
-        List<TeleportStrategy> overflowStrategies = new ArrayList<>();
-        overflowStrategies.add(new TeleportTubeStrategy(moonTubeLoc));
-        overflowStrategies.add(new TeleportTubeStrategy(overflowMap.at(10, 10)));
+        // Configure Overflow Tube destinations
+        List<BaseTeleportStrategy> overflowStrategies = new ArrayList<>();
+        overflowStrategies.add(new TeleportTubeStrategy(moonTubeLoc, "99-Deprecated Outpost"));
+        overflowStrategies.add(new TeleportTubeStrategy(overflowMap.at(10, 10), "20-Overflow Lower Catacombs"));
         overflowTubeLoc.setGround(new TeleportationTube(overflowStrategies));
     }
 
@@ -247,7 +253,8 @@ public class EclipseNebula extends World {
     private Location findLocationOfSymbol(GameMap map) {
         for (int x : map.getXRange()) {
             for (int y : map.getYRange()) {
-                if (map.at(x, y).getGround().hasAbility(Ability.IS_TELEPORTATION_TUBE)) {
+                // FIX: Check the display character of the ground tile directly!
+                if (map.at(x, y).getGround().getDisplayChar() == 'Φ') {
                     return map.at(x, y);
                 }
             }
@@ -271,7 +278,7 @@ public class EclipseNebula extends World {
      *
      * @param map the GameMap where common scrap items will be deployed
      */
-    private void spawnCommonScrap(GameMap map,Spawner spawner) {
+    private void spawnCommonScrap(GameMap map, Spawner spawner) {
         // Items to SELL for credits. No high-value items here!
         map.at(16, 3).addItem(new Apple());
         map.at(17, 4).addItem(new Cookies(spawner));
@@ -281,7 +288,7 @@ public class EclipseNebula extends World {
     }
 
     /**
-     * Spawns Requirement 2 items and markers onto the overflow factory moon.
+     * Spawns Requirement 2 and A3 REQ3 magnetic items and markers onto the overflow factory moon.
      *
      * @param map the GameMap to populate
      * @throws Exception if item placement logic encounters an error
@@ -290,6 +297,24 @@ public class EclipseNebula extends World {
         // REQ 2: Alien Cubes spawned as portable items in factory moon
         map.at(45, 3).addItem(new AlienCube());
         map.at(45, 14).addItem(new AlienCube());
+        map.at(8, 3).addItem(new PortableBattery());
+        map.at(8, 7).addItem(new PortableBattery());
+        map.at(4, 6).addItem(new CRTMonitor());
+        map.at(5, 6).addItem(new FloppyDisk());
+        map.at(6, 6).addItem(new Lantern());
+    }
+
+    /**
+     * Spawns A3 requirement 3 new actor which is the DormantStaticCreature 'O' into the overflow map.
+     *
+     * @param map the GameMap to populate
+     */
+    private void spawnOverflowActors(GameMap map) {
+        try {
+            map.at(6, 7).addActor(new DormantStaticCreature());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -298,23 +323,17 @@ public class EclipseNebula extends World {
      * @param map the GameMap where the players will be added
      * @throws Exception if a player cannot be added to the game world
      */
-    private void setupContractedWorkers(GameMap map,Spawner globalSpawner) throws Exception {
+    private void setupContractedWorkers(GameMap map, Spawner globalSpawner) throws Exception {
         String[] names = {"#1 Bob", "#2 Tom", "#3 Sarah", "#4 Julie", "#5 Rick"};
-        int startX = 1;
+        int startX = 4;
 
         for (String name : names) {
             WeightLimitedInventory inventory = new WeightLimitedInventory(WORKER_INVENTORY_CAPACITY);
             inventory.add(new Flask());
             inventory.add(new Wallet()); // REQ 1: Required for purchases
 
-            ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory,globalSpawner);
+            ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory, globalSpawner);
             this.addPlayer(worker, map.at(startX++, 4));
         }
     }
-
-
 }
-
-
-
-

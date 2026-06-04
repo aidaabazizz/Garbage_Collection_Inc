@@ -1,7 +1,6 @@
 package game.items;
 
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Ground;
@@ -30,7 +29,7 @@ import java.util.Random;
  * @author Suchir
  * @version 1.0
  */
-public class Lantern extends Item implements UpdateNotifier, Sellable, Infectable {
+public class Lantern extends MagneticItem implements UpdateNotifier, Sellable, Infectable {
     /** The starting amount of oil in a new lantern. */
     private static final int INITIAL_OIL = 10;
     /** The base probability (5%) of an oil leak occurring during a turn. */
@@ -57,9 +56,8 @@ public class Lantern extends Item implements UpdateNotifier, Sellable, Infectabl
      * Assigns a weight of seven units and makes the item portable.
      */
     public Lantern() {
-        super("Lantern", '&');
+        super("Lantern", '&', true);
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(WEIGHT));
-        this.makePortable();
     }
 
     /**

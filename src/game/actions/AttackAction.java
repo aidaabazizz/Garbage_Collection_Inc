@@ -4,6 +4,8 @@ import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.weapons.Weapon;
+import game.enums.MaterialCapability;
+import game.highvoltage.ShockedStatus;
 
 /**
  * Special Action for performing an attack on another Actor.
@@ -17,12 +19,19 @@ public class AttackAction extends Action {
     private Actor target;
     private String direction;
     private Weapon weapon;
+    private static final int REFLECTIVE_DAMAGE = 1;
+    private static final int REFLECTIVE_SHOCK_DURATION = 2;
+    /** ANSI escape code for red text (used for high-voltage danger warnings). */
+    private static final String RED_TEXT = "\u001B[31m";
+    /** ANSI escape code to reset terminal text color. */
+    private static final String RESET_COLOR = "\u001B[0m";
 
     /**
      * Constructor to create an AttackAction.
      *
      * @param target    The Actor to be attacked.
      * @param direction The direction of the target.
+     * @param weapon The weapon used for the attack.
      */
     public AttackAction(Actor target, String direction, Weapon weapon) {
         this.target = target;
@@ -43,10 +52,37 @@ public class AttackAction extends Action {
     @Override
     public String execute(Actor actor, GameMap map) {
         String result = weapon.attack(actor, target, map);
+
+        // If the target is paralyzed, they act as a "Reflective Surface".
+        // The attacker takes damage from the "Thorns" effect of the target's suit.
+        // The kinetic energy of the hit triggers a secondary status on the attacker.
+        if (target.hasAbility(MaterialCapability.REFLECTIVE)) {
+            result += processReflectiveFeedback(actor, target);
+        }
+
+
         if (!target.isConscious()) {
             result += "\n" + target.unconscious(actor, map);
         }
         return result;
+    }
+
+    /**
+     * Handles the specific Requirement 3 logic for electrical "Arc Back."
+     *
+     * This method applies damage and a debilitating status to the attacker.
+     * EXTENSIBILITY NOTE: Teammates can add similar helper methods for
+     * other capabilities (e.g., Fire, Ice) to keep execute() clean.
+     *
+     * @param attacker The actor who hit the reflective surface.
+     * @param victim   The actor wearing the reflective suit.
+     * @return A formatted string describing the electrical arc.
+     */
+    private String processReflectiveFeedback(Actor attacker, Actor victim) {
+        attacker.hurt(REFLECTIVE_DAMAGE);
+        attacker.addStatus(new ShockedStatus(REFLECTIVE_SHOCK_DURATION));
+        return String.format("\n%s⚡ Electricity arcs back from %s's suit! %s takes %d damage and is SHOCKED!%s",
+                RED_TEXT, victim, attacker, REFLECTIVE_DAMAGE, RESET_COLOR);
     }
 
     /**

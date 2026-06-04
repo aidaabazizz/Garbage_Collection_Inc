@@ -12,7 +12,11 @@ import game.capabilities.CreditHolder;
 import game.capabilities.Sellable;
 import game.enums.ItemStatistics;
 import game.teleportstrategies.AlienCubeStrategy;
+import game.teleportstrategies.BaseTeleportStrategy;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Alien Cube warp space-time, it is an item and can be used as a teleportation device.
@@ -45,21 +49,32 @@ public class AlienCube extends Item implements Sellable {
     }
 
     /**
-     * Provides 3 random teleport destination options
-     * @param owner the actor that owns the item
-     * @param map the map where the actor is performing the action on
-     * @return actions for each random destination
+     * Generates a list of allowable teleport actions for this item.
+     * Random valid map locations are generated and presented as teleport options.
+     * Duplicate or invalid locations are ignored. A maximum of 3
+     * destinations options are shown.
+     * @param owner the actor carrying the item
+     * @param map the current game map
+     * @return a list of teleport actions available to the actor
      */
     @Override
     public ActionList allowableActions(Actor owner, GameMap map) {
         ActionList actions = new ActionList();
+        List<Location> chosen = new ArrayList<>();
+        int attempts = 0;
 
-        AlienCubeStrategy strategy = new AlienCubeStrategy(map.at(0, 0), this);
+        while (chosen.size() < NUM_OPTIONS && attempts < 200) {
+            attempts++;
+            Location randomLocation = BaseTeleportStrategy.findRandomValidLocation(map, owner);
+            if (randomLocation == null) break;
+            if (chosen.contains(randomLocation)) continue;
 
-        List<Location> targets = strategy.getRandomDestinations(map, owner, NUM_OPTIONS);
-        for (Location loc : targets) {
-            actions.add(new TeleportAction(new AlienCubeStrategy(loc, this)));
+            chosen.add(randomLocation);
+            String menuDescription = "Scattered Coordinates at ("
+                    + randomLocation.x() + ", " + randomLocation.y() + ")";
+            actions.add(new TeleportAction(new AlienCubeStrategy(randomLocation, menuDescription)));
         }
+
         return actions;
     }
 
