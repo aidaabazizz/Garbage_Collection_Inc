@@ -86,7 +86,7 @@ public class StaticStalker extends NonPlayerCharacter{
      */
     private void processStaticAura(Location here, Display display) {
         // every turn, the stalker's body acts as a temporary ChargeSource.
-        GalvanicCharge auraCharge = new GalvanicCharge(this.name + "'s static aura", display, DAMAGE);
+        ChargeContext auraCharge = new GalvanicCharge(this.name + "'s static aura", display, DAMAGE);
 
         // mark current position as visited so electricity flows AWAY from the stalker.
         auraCharge.visit(here);

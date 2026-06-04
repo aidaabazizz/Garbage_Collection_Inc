@@ -9,8 +9,8 @@ import game.actions.ConsumeAction;
 import game.enums.Ability;
 import game.capabilities.Consumable;
 import game.capabilities.PoisonStatus;
+import game.highvoltage.ChargeContext;
 import game.highvoltage.ChargeReactive;
-import game.highvoltage.GalvanicCharge;
 
 /**
  * A body of liquid on the ground that can be consumed by actors.
@@ -57,10 +57,10 @@ public class Puddle extends Ground implements Consumable, ChargeReactive {
      *    with a new {@link ElectrifiedPuddle}.
      *
      * @param location The coordinate of the puddle being hit.
-     * @param charge   The GalvanicCharge context representing the incoming surge.
+     * @param charge   The ChargeContext representing the incoming surge.
      */
     @Override
-    public void reactToCharge(Location location, GalvanicCharge charge) {
+    public void reactToCharge(Location location, ChargeContext charge) {
         // physically replaces this ground instance with the ElectrifiedPuddle hazard.
         charge.getDisplay().println("\u001B[36m" + "The puddle is hit by " + charge.getSourceName() +
                 " and becomes electrified!" + "\u001B[0m");
