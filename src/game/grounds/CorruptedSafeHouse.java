@@ -2,6 +2,7 @@ package game.grounds;
 
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.*;
+import game.capabilities.FireStackable;
 import game.capabilities.SanctuaryStatus;
 import game.enums.Ability;
 import game.enums.DistortionCapability;
@@ -62,20 +63,19 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
             Location dest = exit.getDestination();
             Ground existing = dest.getGround();
 
-            // Skip DistortionSources (portals, rage ground, this safe house)
-            if (existing.hasAbility(DistortionCapability.CORRUPTED)) {
-                continue;
+            // Rule 2: Complex Interaction (Using an interface to modify existing ground)
+            // Check if the tile is ALREADY fire using the interface
+            FireStackable fire = dest.getGroundAs(FireStackable.class);
+
+            if (fire != null) {
+                // If fire is already there, make it stronger!
+                fire.addStack();
+            } else {
+                // If no fire, spawn new fire (if the tile is flammable)
+                if (existing.canActorEnter(null) && !existing.hasAbility(DistortionCapability.CORRUPTED)) {
+                    dest.setGround(new BlueFire(3, existing));
+                }
             }
-
-            // Skip impassable grounds (walls, doors)
-            if (!existing.canActorEnter(null)) continue;
-
-            // Skip existing hazards (already burning)
-            if (existing.hasAbility(DistortionCapability.ACTIVE_HAZARD)) {
-                continue;
-            }
-
-            dest.setGround(new BlueFire(3, existing));
         }
     }
 
