@@ -2,7 +2,6 @@ package game.items;
 
 import edu.monash.fit2099.engine.actions.ActionList;
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
@@ -11,28 +10,26 @@ import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import game.actions.GalvanicSurgeAction;
 import game.enums.ItemStatistics;
+import game.enums.MaterialCapability;
 import game.grounds.IonizedBarrier;
 import game.grounds.PoweredFloor;
-import game.highvoltage.ChargeReactive;
-import game.highvoltage.ChargeSource;
-import game.highvoltage.MaterialCapability;
-import game.highvoltage.ShockedStatus;
-
-import java.util.List;
+import game.highvoltage.*;
 
 /**
  * A mobile high-voltage energy source that serves as a catalyst for map transformations.
  *
- * The PortableBattery is a cornerstone of Requirement 3. It is designed to be a
- * "Strategic Trigger" that allows the player to manually manipulate the facility environment.
+ * The PortableBattery is a cornerstone of the High-Voltage Galvanic System (Requirement 3).
+ * It is designed as a "Strategic Trigger" that allows actors to manually manipulate
+ * the facility's environment through controlled electrical surges.
  *
- * Complexity Proof (Rule 2 + HD Criteria):
- * 1. Structural Terrain Morphing: Converts standard floors into permanent power outlets.
- * 2. Dynamic Structural Engineering: Spawns temporary blocking barriers (IonizedBarrier).
- * 3. Indiscriminate Area Effect: Simultaneously triggers evolution in NPCs, damage
- *    in enemies, and state changes in inventory items.
- * 4. Branching Logic: Uses a high-level conduction hierarchy to decide between
- *    transforming grounds or triggering existing hazards.
+ * Complexity Proof (Requirement 3):
+ * 1. Structural Terrain Morphing: Converts standard floors into permanent {@link PoweredFloor} outlets.
+ * 2. Dynamic Structural Engineering: Spawns temporary blocking {@link IonizedBarrier} tiles
+ *    around the user to create defensive perimeters.
+ * 3. Indiscriminate Area Effect: Simultaneously triggers metabolic evolution in NPCs,
+ *    combat damage in enemies, and state changes in items within the blast radius.
+ * 4. Branching Conduction Logic: Evaluates ground types at the center and periphery
+ *    to decide whether to transform the map or simply propagate the charge.
  *
  * @author Jewell Gomes
  */
@@ -49,93 +46,43 @@ public class PortableBattery extends Item implements ChargeSource {
     }
 
     /**
-     * Executes a massive galvanic surge originating from the battery's current location.
+     * Executes a massive galvanic surge originating from the battery's location.
      *
      * This method implements a 3-stage "Indiscriminate Surge" pattern:
-     * 1. Ground Morphing: The tile beneath the user is permanently transformed.
-     * 2. Environmental Propagation: Surrounding tiles are either morphed into
-     *    barriers, evolved into predators, or shocked as enemies.
-     * 3. Inventory Conduction: Reactive items in the user's pocket are remotely powered.
+     * 1. Ground Morphing (Center): If the floor beneath the user is not already energized
+     *    or reactive, it is permanently transformed into a {@link PoweredFloor}.
+     * 2. Local Impact (Center): Zaps the actor and items at the origin point.
+     * 3. Environmental Propagation (AOE): Surrounding tiles are transformed into
+     *    {@link IonizedBarrier} walls (if clear), and all occupants in the 8-neighbor
+     *    radius receive a high-voltage strike.
      *
-     * @param location   The origin coordinate of the surge.
-     * @param display    The terminal interface for outputting surge events.
-     * @param sourceName The display name of this source ("Portable Battery").
+     * @param location The origin coordinate where the battery is activated.
+     * @param charge   The GalvanicCharge context containing source metadata and damage payload.
      */
     @Override
-    public void releaseCharge(Location location, Display display, String sourceName) {
-        /*
-         * TARGET GROUND MORPHING
-         * We use getGroundAs to prioritize triggering existing hazards (like Puddles).
-         * If the ground is not reactive, we structurally replace it with a PoweredFloor.
-         */
-        ChargeReactive groundReactive = location.getGroundAs(ChargeReactive.class);
-        if (groundReactive != null) {
-            groundReactive.reactToCharge(location, display, sourceName);
-        } else {
-            // only morph if it's not already powered to prevent redundant object creation.
+    public void releaseCharge(Location location, GalvanicCharge charge) {
+        if (location.getGroundAs(ChargeReactive.class) == null) {
             if (!location.getGround().hasAbility(MaterialCapability.ENERGIZED)) {
                 location.setGround(new PoweredFloor());
-                display.println("The ground beneath " + location + " has been permanently electrified!");
+                charge.getDisplay().println("The ground beneath " + location + " has been permanently electrified!");
             }
         }
+        // 1. CENTER TILE LOGIC (Unique to Battery)
+        // Always zap the center tile first
+        ChargeUtils.zapTile(location, charge, true);
 
-        display.println("Static energy solidifies into a protective Ionized Barrier around Bob!");
+        charge.getDisplay().println("\u001B[36m⚡ Static energy solidifies into protective Ionized Barriers around the user!\u001B[0m");
 
-        /*
-         * AOE PROPAGATION (Neighbors)
-         * We iterate through the 8 exits to simulate a kinetic blast radius.
-         */
+        // 2. AOE PROPAGATION (Neighbors)
         for (Exit exit : location.getExits()) {
             Location adj = exit.getDestination();
 
-            // ground interaction (Morphing into Hazards or Barriers)
-            ChargeReactive adjGround = adj.getGroundAs(ChargeReactive.class);
-            if (adjGround != null) {
-                adjGround.reactToCharge(adj, display, sourceName);
-            }
-            else if (adj.getGround().canActorEnter(null)) {
-                /*
-                 * Dynamic Barrier Spawning.
-                 * If the neighbor is a standard passable floor, we replace it
-                 * with an IonizedBarrier to create a temporary defensive cage.
-                 */
+            if (adj.getGroundAs(ChargeReactive.class) == null && adj.getGround().canActorEnter(null)) {
                 adj.setGround(new IonizedBarrier());
             }
 
-            // actor interaction (Metamorphosis vs. Combat)
-            if (adj.containsAnActor()) {
-                Actor victim = adj.getActor();
-
-                /*
-                 * we use ifPresentOrElse to ensure an actor
-                 * either evolves (Reactive path) OR takes damage (Standard path).
-                 * This prevents the "Double-Zap" bug.
-                 */
-                victim.asCapability(ChargeReactive.class).ifPresentOrElse(
-                        // biological transformation (e.g. Egg -> Stalker)
-                        reactive -> reactive.reactToCharge(adj, display, sourceName),
-
-                        // environmental damage (e.g. Undead/Human)
-                        () -> {
-                            victim.hurt(3);
-                            victim.addStatus(new ShockedStatus(2));
-                            display.println(victim + " is zapped by the battery surge!");
-                        }
-                );
-            }
-        }
-
-        /*
-         * inventory zap (pocket conduction)
-         * Bob acts as a bridge. The electricity travels from the battery
-         * through his suit and powers his other tools (like the Wallet).
-         */
-        if (location.containsAnActor()) {
-            Actor worker = location.getActor();
-            List<ChargeReactive> reactives = worker.getInventory().getItemsAs(ChargeReactive.class);
-            for (ChargeReactive r : reactives) {
-                r.reactToCharge(location, display, sourceName);
-            }
+            // C. Universal Impact (Zaps anyone standing on the neighbor tiles)
+            ChargeUtils.zapTile(adj, charge, true);
         }
     }
 
@@ -182,12 +129,15 @@ public class PortableBattery extends Item implements ChargeSource {
     }
 
     /**
-     * Helper to centralize manual surge action generation.
-     * @return An ActionList containing the GalvanicSurgeAction.
+     * Helper to centralize the creation of the manual surge action.
+     * The action is created with a specialized description:
+     * "Smashes the Portable Battery to release a surge!"
+     *
+     * @return An ActionList containing a new GalvanicSurgeAction.
      */
     private ActionList getSurge() {
         ActionList actions = new ActionList();
-        actions.add(new GalvanicSurgeAction(this, "Portable Battery"));
+        actions.add(new GalvanicSurgeAction(this, "Portable Battery", "Smashes the Portable Battery to release a surge!"));
         return actions;
     }
 }
