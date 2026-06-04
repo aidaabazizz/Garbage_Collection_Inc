@@ -3,9 +3,9 @@ package game.grounds;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
+import game.highvoltage.ChargeContext;
 import game.highvoltage.ChargeReactive;
 import game.highvoltage.ChargeUtils;
-import game.highvoltage.GalvanicCharge;
 import game.enums.MaterialCapability;
 
 /**
@@ -55,10 +55,10 @@ public class PoweredFloor extends Ground implements ChargeReactive {
      * engine through stack overflow.
      *
      * @param location The coordinate of the PoweredFloor receiving the charge.
-     * @param charge   The GalvanicCharge context containing source info and propagation memory.
+     * @param charge   The ChargeContext containing source info and propagation memory.
      */
     @Override
-    public void reactToCharge(Location location, GalvanicCharge charge) {
+    public void reactToCharge(Location location, ChargeContext charge) {
         if (charge.getVisited().contains(location)) {
             return;
         }
@@ -73,8 +73,9 @@ public class PoweredFloor extends Ground implements ChargeReactive {
 
             // Ground wave (Puddles stack, Floors continue)
             ChargeReactive neighbor = adj.getGroundAs(ChargeReactive.class);
-            if (neighbor != null) {
-                charge.getDisplay().println(" The " + this + " conducts energy to the " + neighbor + "!");
+            // ONLY print and call if the neighbor hasn't been visited yet!
+            if (neighbor != null && !charge.getVisited().contains(adj)) {
+                charge.getDisplay().println(" The " + this + " conducts to the " + neighbor + "!");
                 neighbor.reactToCharge(adj, charge);
             }
 
