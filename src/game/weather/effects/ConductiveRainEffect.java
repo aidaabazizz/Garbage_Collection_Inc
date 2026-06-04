@@ -6,7 +6,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.grounds.Puddle;
 import game.highvoltage.ChargeReactive;
-import game.highvoltage.MaterialCapability;
+import game.enums.MaterialCapability;
 import game.weather.WeatherSnapshot;
 
 import java.util.ArrayList;
