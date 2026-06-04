@@ -75,7 +75,7 @@ public class PoweredFloor extends Ground implements ChargeReactive {
             ChargeReactive neighbor = adj.getGroundAs(ChargeReactive.class);
             // ONLY print and call if the neighbor hasn't been visited yet!
             if (neighbor != null && !charge.getVisited().contains(adj)) {
-                charge.getDisplay().println(" The " + this + " conducts to the " + neighbor + "!");
+                charge.getDisplay().println("The " + this + " at " + location + " conducts energy to the " + neighbor + "!");
                 neighbor.reactToCharge(adj, charge);
             }
 
