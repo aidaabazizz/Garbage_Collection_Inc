@@ -31,7 +31,7 @@ public interface ChargeSource {
      * @param charge   The GalvanicCharge context containing source details, display
      *                 interface, and damage payload.
      */
-    void releaseCharge(Location location, GalvanicCharge charge);
+    void releaseCharge(Location location, ChargeContext charge);
 
     /**
      * Handles the cleanup, depletion, or consumption of the energy source after a discharge.
