@@ -5,8 +5,8 @@ import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
+import game.highvoltage.ChargeContext;
 import game.highvoltage.ChargeReactive;
-import game.highvoltage.GalvanicCharge;
 import game.enums.MaterialCapability;
 
 /**
@@ -30,13 +30,16 @@ public class IonizedBarrier extends Ground implements ChargeReactive {
     /** The number of turns the barrier remains solid before dissipating. */
     private int lifeSpan = INITIAL_LIFESPAN; // Lasts for 3 turns
     private static final int INITIAL_LIFESPAN = 3;
+    private final Ground previousGround;
 
     /**
      * Constructor for the IonizedBarrier.
-     * Initializes the ground with the high-voltage energy icon ('☵').
+     *
+     * @param previousGround The ground instance to be restored when this barrier expires.
      */
-    public IonizedBarrier() {
+    public IonizedBarrier(Ground previousGround) {
         super('☵', "Ionized Barrier");
+        this.previousGround = previousGround;
     }
 
     /**
@@ -68,7 +71,7 @@ public class IonizedBarrier extends Ground implements ChargeReactive {
         lifeSpan--;
         if (lifeSpan <= 0) {
             updateNearbyLockState(location, false);
-            location.setGround(new Floor());
+            location.setGround(previousGround);
             return;
         }
 
@@ -82,10 +85,10 @@ public class IonizedBarrier extends Ground implements ChargeReactive {
      * by stacking the incoming charge onto its current lifespan.
      *
      * @param location The coordinate of the barrier.
-     * @param charge   The GalvanicCharge context representing the reinforcing surge.
+     * @param charge   The ChargeContext representing the reinforcing surge.
      */
     @Override
-    public void reactToCharge(Location location, GalvanicCharge charge) {
+    public void reactToCharge(Location location, ChargeContext charge) {
         // Add 3 more turns to the barrier.
         this.lifeSpan += INITIAL_LIFESPAN;
         charge.getDisplay().println(" The " + charge.getSourceName() +
