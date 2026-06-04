@@ -30,5 +30,5 @@ public interface ChargeReactive {
      *                 the terminal display for logging, the damage payload, and
      *                 the visited set for recursion prevention.
      */
-    void reactToCharge(Location location, GalvanicCharge charge);
+    void reactToCharge(Location location, ChargeContext charge);
 }
