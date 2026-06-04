@@ -11,7 +11,6 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.StatisticOperations;
 import game.actors.*;
-import game.capabilities.DisorientedStatus;
 import game.enums.Ability;
 import game.utils.SpatialSearch;
 
@@ -192,16 +191,6 @@ public class CreatureSpawner implements Spawner {
         try {
             spot.addActor(new CrazyChicken());
             display.println("A CrazyChicken has emerged at " + spot + "! BUK BUK BUK!");
-
-            // Adjacent workers become disoriented (matches the Slime/Parasite pattern)
-            for (Exit exit : spot.getExits()) {
-                Location adj = exit.getDestination();
-                if (adj.containsAnActor() && adj.getActor().hasAbility(Ability.WORKER)) {
-                    Actor worker = adj.getActor();
-                    worker.addStatus(new DisorientedStatus(3));
-                    display.println(">>> " + worker + " is disoriented by the CrazyChicken!");
-                }
-            }
             return true;
         } catch (GameEngineException e) {
             return false;
