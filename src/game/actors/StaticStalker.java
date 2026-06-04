@@ -11,10 +11,8 @@ import edu.monash.fit2099.engine.weapons.IntrinsicWeapon;
 import game.behaviours.AttackBehaviour;
 import game.behaviours.HuntBehaviour;
 import game.behaviours.WanderBehaviour;
-import game.enums.Ability;
-import game.highvoltage.ChargeReactive;
-import game.highvoltage.MaterialCapability;
-import game.highvoltage.ParalyzedStatus;
+import game.enums.MaterialCapability;
+import game.highvoltage.*;
 import game.inventory.BasicInventory;
 import game.weapons.GalvanicStrike;
 
@@ -41,6 +39,7 @@ public class StaticStalker extends NonPlayerCharacter{
     private static final int ATTACK_PRIORITY = 1;
     private static final int HUNT_PRIORITY = 2;
     private static final double STUN_CHANCE = 0.20;
+    private static final int DAMAGE = 1;
 
     /**
      * Constructor for the StaticStalker.
@@ -54,16 +53,9 @@ public class StaticStalker extends NonPlayerCharacter{
     }
 
     /**
-     * Processes the Static Stalker's turn by executing its "Static Aura" logic before
-     * delegating to the standard behavior tree.
-     *
-     * Logic Sequence:
-     * 1. Ground Synergy: Checks if the current tile is ENERGIZED. If true, the stalker
-     *    heals 1 HP and doubles its paralysis chance (Overcharge Mode).
-     * 2. Proximity Scan: Iterates through all 8 adjacent tiles to:
-     *    a) Trigger Ground Reactions (Morphing Puddles into Electrified Hazards).
-     *    b) Apply Status Effects (Attempting to stun nearby workers).
-     *    c) Trigger Inventory Reactions (Remotely powering items like the Wallet).
+     * Processes the Static Stalker's turn.
+     * Before executing standard behaviors (moving/attacking), the stalker triggers its
+     * passive "Static Aura," affecting the environment and nearby actors.
      *
      * @param actions    A collection of available actions.
      * @param lastAction The action performed in the previous turn.
@@ -73,8 +65,31 @@ public class StaticStalker extends NonPlayerCharacter{
      */
     @Override
     public Action playTurn(ActionList actions, Action lastAction, GameMap map, Display display) {
-        Location here = map.locationOf(this);
+        processStaticAura(map.locationOf(this), display);
+        return super.playTurn(actions, lastAction, map, display);
+    }
 
+    /**
+     * Executes the "Static Aura" environmental effect.
+     *
+     * Logic Sequence:
+     * 1. Ground Synergy: If standing on an ENERGIZED tile, the stalker heals 1 HP and
+     *    doubles its paralysis chance (Overcharge Mode).
+     * 2. Proximity Scan: Iterates through all 8 adjacent tiles to:
+     *    a) Trigger Ground Reactions: Morphs Puddles into Electrified Puddles.
+     *    b) Actor Interaction: Attempts to stun nearby Workers with a ParalyzedStatus.
+     *    c) Inventory Interaction: Remotely triggers any ChargeReactive items held
+     *       by adjacent actors.
+     *
+     * @param here    The current location of the Static Stalker.
+     * @param display The terminal interface for outputting event logs.
+     */
+    private void processStaticAura(Location here, Display display) {
+        // every turn, the stalker's body acts as a temporary ChargeSource.
+        GalvanicCharge auraCharge = new GalvanicCharge(this.name + "'s static aura", display, DAMAGE);
+
+        // mark current position as visited so electricity flows AWAY from the stalker.
+        auraCharge.visit(here);
         boolean isOvercharged = here.getGround().hasAbility(MaterialCapability.ENERGIZED);
 
         if (isOvercharged) {
@@ -90,28 +105,24 @@ public class StaticStalker extends NonPlayerCharacter{
             // trigger Ground (Morph OR Refresh)
             // if it's a Puddle -> Morphs.
             // if it's ElectrifiedPuddle -> Refreshes lifespan.
-            ChargeReactive groundReactive = adj.getGroundAs(ChargeReactive.class);
-            if (groundReactive != null) {
-                groundReactive.reactToCharge(adj, display, this.toString());
-            }
+            ChargeUtils.triggerGroundReaction(adj, auraCharge);
 
             // Actor -> Actor
             if (adj.containsAnActor()) {
                 Actor target = adj.getActor();
-                if (target.hasAbility(Ability.WORKER) && Math.random() < currentStunChance) {
+                if (target != this && Math.random() < currentStunChance) {
                     target.addStatus(new ParalyzedStatus(1));
+                    target.enableAbility(MaterialCapability.PARALYZED);
+                    target.enableAbility(MaterialCapability.REFLECTIVE);
                     display.println("\u001B[35m" + this + " arced a spark into " + target + "!\u001B[0m");
                 }
 
                 // Actor -> Item
                 target.getInventory().getItemsAs(ChargeReactive.class)
-                        .forEach(item -> item.reactToCharge(adj, display, this.toString()));
+                        .forEach(item -> item.reactToCharge(adj, auraCharge));
             }
         }
-
-        return super.playTurn(actions, lastAction, map, display);
     }
-
     /**
      * Returns the stalker's natural weapon, a GalvanicStrike.
      * This represents high-voltage arcs being discharged from the stalker's limbs.
