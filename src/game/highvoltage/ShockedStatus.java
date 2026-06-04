@@ -1,20 +1,20 @@
 package game.highvoltage;
 
 import edu.monash.fit2099.engine.GameEntity;
-import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Location;
 import game.capabilities.DamageOverTimeStatus;
+import game.enums.MaterialCapability;
 
 /**
  * A complex status effect representing an actor being supercharged with galvanic energy.
  *
- * The ShockedStatus is the "Conduit" component of Requirement 3. It utilizes inheritance
- * from {@link DamageOverTimeStatus} to handle host health attrition, while adding
- * unique "Emitter" logic that turns the affected Actor into a mobile power source.
+ * The ShockedStatus is the "Conduit" component of the High-Voltage Galvanic System (Requirement 3).
+ * It utilizes inheritance from {@link DamageOverTimeStatus} to handle host health attrition,
+ * while adding unique "Emitter" logic that turns the affected Actor into a mobile power source.
  *
- * Complexity Proof (Rule 2):
+ * Complexity Proof (Requirement 3):
  * This class demonstrates "Actor-to-Environment Conduction." Every turn the status is active,
  * the host releases a 1-tile energy pulse that triggers cascading reactions in Grounds,
  * neighboring Actors, and Items on the floor simultaneously.
@@ -22,6 +22,8 @@ import game.capabilities.DamageOverTimeStatus;
  * @author Jewell Gomes
  */
 public class ShockedStatus extends DamageOverTimeStatus {
+    private final Display display = new Display();
+    private static final int DAMAGE = 1;
     /**
      * Constructor for ShockedStatus.
      *
@@ -35,19 +37,32 @@ public class ShockedStatus extends DamageOverTimeStatus {
     /**
      * Executes the status logic during the host's tick cycle.
      *
-     * This method first invokes the superclass to handle the damage-over-time
-     * calculation on the host. It then performs an 8-neighbor scan to propagate
-     * electricity into the surrounding environment.
+     * This method manages a multiphase electrical discharge:
+     * 1. Material State Change: Enables {@link MaterialCapability#CONDUCTIVE} on the host
+     *    so they act as a reflective hazard in combat.
+     * 2. Host Damage: Invokes the superclass to apply standard damage-over-time to the host.
+     * 3. Lifecycle Cleanup: Disables the {@code CONDUCTIVE} capability once the turns expire.
+     * 4. Environmental Arcing: Creates a "Human Lightning Bolt" effect, scanning all 8
+     *    neighboring tiles and using {@link ChargeUtils} to trigger grounds, zap actors,
+     *    and power items.
      *
-     * @param entity   The actor currently acting as the conduit.
+     * @param entity   The actor currently acting as the electric conduit.
      * @param location The coordinate of the conduit.
      */
     @Override
     public void tickStatus(GameEntity entity, Location location) {
-        super.tickStatus(entity, location);
-        Display display = new Display();
-        String conduitName = entity.toString() + "'s electric conduit";
+        if (isStatusActive()) {
+            entity.enableAbility(MaterialCapability.CONDUCTIVE);
+        }
 
+        super.tickStatus(entity, location);
+        if (remainingTurns <= 0) {
+            entity.disableAbility(MaterialCapability.CONDUCTIVE);
+        }
+        String conduitName = entity+ "'s electric conduit";
+        GalvanicCharge pulse = new GalvanicCharge(conduitName, display, DAMAGE);
+
+        pulse.visit(location);
         /*
          * the "Human Lightning Bolt" AoE Pulse.
          * Bob's body becomes a ChargeSource. We iterate through
@@ -56,38 +71,10 @@ public class ShockedStatus extends DamageOverTimeStatus {
         for (Exit exit : location.getExits()) {
             Location adj = exit.getDestination();
 
-            /*
-             * infinite Loop Prevention.
-             * We only zap the ground if it isn't already ENERGIZED.
-             * This prevents Bob from standing on a Powered Floor and zapping it,
-             * which would zap Bob back, creating a StackOverflow crash.
-             */
-            if (!adj.getGround().hasAbility(MaterialCapability.ENERGIZED)) {
-                ChargeReactive groundReactive = adj.getGroundAs(ChargeReactive.class);
-                if (groundReactive != null) {
-                    groundReactive.reactToCharge(adj, display, conduitName);
-                }
-            }
+            ChargeUtils.triggerGroundReaction(adj, pulse);
 
-            // zap the actor (PDF Page 4: "He zaps them")
-            if (adj.containsAnActor()) {
-                Actor neighbor = adj.getActor();
 
-                // damage (the "shock" effect)
-                neighbor.hurt(1);
-
-                // trigger specific reactions (bob zapping npc's wallet) in future scenarios
-                neighbor.asCapability(ChargeReactive.class)
-                        .ifPresent(actorReactive -> actorReactive.reactToCharge(adj, display, conduitName));
-            }
-
-            /*
-             * ZAP ITEMS ON THE GROUND (The "Magnetic Induction" Pulse)
-             * If Bob stands next to a dropped Wallet or scrap metal, his body
-             * generates enough flux to trigger their reactive properties.
-             */
-            adj.getItemsAs(ChargeReactive.class)
-                    .forEach(item -> item.reactToCharge(adj, display, conduitName));
+            ChargeUtils.zapTile(adj, pulse, false);
         }
     }
 }
