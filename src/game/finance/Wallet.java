@@ -215,7 +215,7 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
 
             // if we reached the item, we are done
             if (currX == targetX && currY == targetY) break;
-            Location step = start.map().at(currX, currY);
+
             // if any tile in the path is a Wall, the magnetic flux is blocked
             if (!start.map().at(currX, currY).getGround().canActorEnter(null)) {
                 return true;
