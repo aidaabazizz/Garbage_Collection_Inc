@@ -13,9 +13,5 @@ public enum Ability {
     /** Ability to interact with facility security systems (REQ3/REQ4). */
     WORKER,
     /** Ability for items that should not be removed by random effects. */
-    ESSENTIAL,
-    /** For the teleportation tube ability. **/
-    IS_TELEPORTATION_TUBE,
-    /** For the magic circle teleportation ability **/
-    IS_MAGIC_CIRCLE
+    ESSENTIAL
 }

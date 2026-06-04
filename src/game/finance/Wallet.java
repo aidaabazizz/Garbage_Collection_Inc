@@ -8,6 +8,7 @@ import game.capabilities.CreditHolder;
 import game.enums.Ability;
 import game.enums.ItemStatistics;
 import edu.monash.fit2099.engine.items.Item;
+import game.highvoltage.ChargeContext;
 import game.highvoltage.ChargeReactive;
 import game.highvoltage.GalvanicCharge;
 import game.enums.MaterialCapability;
@@ -48,7 +49,7 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
     public Wallet() {
         super("Wallet", '$');
         this.credits = 0;
-        this.makePortable();
+        this.makeNonPortable();
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(0));
         this.enableAbility(Ability.ESSENTIAL);
         this.enableAbility(MaterialCapability.MAGNETIC);
@@ -137,7 +138,7 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
     public void tick(Location currentLocation, Actor actor) {
         // This allows the wallet to draw power from PoweredFloors, ElectrifiedPuddle, AtmosphericChargeSource, TeslaCoil
         if (currentLocation.getGround().hasAbility(MaterialCapability.ENERGIZED)) {
-            GalvanicCharge passiveWave = new GalvanicCharge("the energized ground", new Display(), DAMAGE);
+            ChargeContext passiveWave = new GalvanicCharge("the energized ground", new Display(), DAMAGE);
             this.reactToCharge(currentLocation, passiveWave);
         }
     }
@@ -155,10 +156,11 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
      * @param charge   The context of the galvanic charge triggering the reaction.
      */
     @Override
-    public void reactToCharge(Location location, GalvanicCharge charge) {
+    public void reactToCharge(Location location, ChargeContext charge) {
         if (!location.containsAnActor()) return;
         Actor worker = location.getActor();
-        charge.getDisplay().println("\u001B[36m⚡ The wallet's magnetic coils are powered by " + charge.getSourceName() + "! \u001B[0m");
+        Display display = charge.getDisplay();
+        display.println("\u001B[36m The wallet's magnetic coils are powered by " + charge.getSourceName() + "! \u001B[0m");
 
         pullItemsFromLocation(location, location, worker, charge.getDisplay());
 
@@ -177,11 +179,9 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
                     Location targetLoc = location.map().at(targetX, targetY);
 
                     // we check if there is a wall between Bob and the target tile
-                    if (isPathBlocked(location, targetLoc)) {
-                        continue;
+                    if (!isPathBlocked(location, targetLoc)) {
+                        pullItemsFromLocation(targetLoc, location, worker, display);
                     }
-
-                    pullItemsFromLocation(targetLoc, location, worker, charge.getDisplay());
                 }
             }
         }
@@ -214,13 +214,13 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
             currX += Integer.compare(targetX, currX);
             currY += Integer.compare(targetY, currY);
 
-            Location step = start.map().at(currX, currY);
-            // if any tile in the path is a Wall, the magnetic flux is blocked
-            if (!step.getGround().canActorEnter(null)) {
-                return true;
-            }
             // if we reached the item, we are done
             if (currX == targetX && currY == targetY) break;
+
+            // if any tile in the path is a Wall, the magnetic flux is blocked
+            if (!start.map().at(currX, currY).getGround().canActorEnter(null)) {
+                return true;
+            }
         }
         return false;
     }

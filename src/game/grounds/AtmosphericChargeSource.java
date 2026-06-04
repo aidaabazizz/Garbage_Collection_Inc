@@ -66,7 +66,7 @@ public class AtmosphericChargeSource extends Ground implements ChargeSource {
             int strikeX = rand.nextInt(maxX + 1);
             int strikeY = rand.nextInt(maxY + 1);
             Location strikePoint = location.map().at(strikeX,  strikeY);
-            GalvanicCharge bolt = new GalvanicCharge("a massive Lightning Bolt", display, DAMAGE);
+            ChargeContext bolt = new GalvanicCharge("a massive Lightning Bolt", display, DAMAGE);
             String yellow = "\u001B[33m";
             String reset = "\u001B[0m";
             display.println(yellow + "⛈ A bolt strikes the facility at (" + strikeX + ", " + strikeY + ")!" + reset);
@@ -86,10 +86,10 @@ public class AtmosphericChargeSource extends Ground implements ChargeSource {
      *    in reactive creatures, and powers reactive items in inventories or on the floor.
      *
      * @param location The location being struck by the lightning bolt.
-     * @param charge   The GalvanicCharge context containing source info and damage values.
+     * @param charge   The ChargeContext containing source info and damage values.
      */
     @Override
-    public void releaseCharge(Location location, GalvanicCharge charge) {
+    public void releaseCharge(Location location, ChargeContext charge) {
         ChargeUtils.triggerGroundReaction(location, charge);
 
         ChargeUtils.zapTile(location, charge, true);

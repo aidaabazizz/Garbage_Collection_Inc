@@ -52,15 +52,15 @@ public class ElectrifiedPuddle extends Ground  implements ChargeReactive {
      * indefinitely if repeatedly struck by lightning or tesla coils.
      *
      * @param location The coordinate of the puddle receiving the charge.
-     * @param charge   The GalvanicCharge context representing the incoming surge.
+     * @param charge   The ChargeContext representing the incoming surge.
      */
     @Override
-    public void reactToCharge(Location location, GalvanicCharge charge) {
+    public void reactToCharge(Location location, ChargeContext charge) {
         // use += to stack the lifespan
         this.lifeSpan = Math.min(this.lifeSpan + INITIAL_LIFESPAN, INITIAL_LIFESPAN * 3);
 
         // show the new total so the player knows it stacked
-        charge.getDisplay().println(String.format("\u001B[33m⚡ %s absorbs energy from %s! (+%d turns)\u001B[0m",
+        charge.getDisplay().println(String.format("\u001B[33m %s absorbs energy from %s! (+%d turns)\u001B[0m",
                 this, charge.getSourceName(), INITIAL_LIFESPAN));
     }
 
@@ -100,7 +100,7 @@ public class ElectrifiedPuddle extends Ground  implements ChargeReactive {
                     neighbor.addStatus(new ParalyzedStatus(1));
                     neighbor.enableAbility(MaterialCapability.PARALYZED);
                     neighbor.enableAbility(MaterialCapability.REFLECTIVE);
-                    display.println("\u001B[33m" + "⚡ Arcs of electricity jump from the puddle and paralyze " + neighbor + "!" + "\u001B[0m");
+                    display.println("\u001B[33m" + " Arcs of electricity jump from the puddle and paralyze " + neighbor + "!" + "\u001B[0m");
                 }
             }
         }

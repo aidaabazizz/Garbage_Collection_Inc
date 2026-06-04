@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.actions.DoNothingAction;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
+import game.highvoltage.ChargeContext;
 import game.highvoltage.ChargeReactive;
 import game.highvoltage.GalvanicCharge;
 import game.enums.MaterialCapability;
@@ -63,7 +64,7 @@ public class DormantStaticCreature extends NonPlayerCharacter implements ChargeR
         if (here.getGround().hasAbility(MaterialCapability.ENERGIZED)) {
             display.println(this + " absorbs charge from the ground!");
             String sourceName = "the " + here.getGround() + " beneath its feet";
-            GalvanicCharge passiveWave = new GalvanicCharge(sourceName, display, DAMAGE);
+            ChargeContext passiveWave = new GalvanicCharge(sourceName, display, DAMAGE);
             this.reactToCharge(here, passiveWave);
         }
         return new DoNothingAction();
@@ -84,10 +85,10 @@ public class DormantStaticCreature extends NonPlayerCharacter implements ChargeR
      * @param charge   The GalvanicCharge object containing source details and display logic.
      */
     @Override
-    public void reactToCharge(Location location, GalvanicCharge charge) {
+    public void reactToCharge(Location location, ChargeContext charge) {
         Display display = charge.getDisplay();
-        display.println("\u001B[33m!!! The " + this + " is stimulated by " + charge.getSourceName() + " and shatters !!!\u001B[0m");
-        display.println("\u001B[33m>>> A Static Stalker has been born!\u001B[0m");
+        display.println("\u001B[33m The " + this + " is stimulated by " + charge.getSourceName() + " and shatters!\u001B[0m");
+        display.println("\u001B[33m A Static Stalker has been born!\u001B[0m");
         location.map().removeActor(this);
         try {
             location.map().addActor(new StaticStalker(), location);
