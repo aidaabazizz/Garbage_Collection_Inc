@@ -74,7 +74,7 @@ public class PoweredFloor extends Ground implements ChargeReactive {
             // Ground wave (Puddles stack, Floors continue)
             ChargeReactive neighbor = adj.getGroundAs(ChargeReactive.class);
             if (neighbor != null) {
-                charge.getDisplay().println("⚡ The " + this + " conducts energy to the " + neighbor + "!");
+                charge.getDisplay().println(" The " + this + " conducts energy to the " + neighbor + "!");
                 neighbor.reactToCharge(adj, charge);
             }
 

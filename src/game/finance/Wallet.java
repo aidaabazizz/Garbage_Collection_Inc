@@ -159,7 +159,7 @@ public class Wallet extends Item implements CreditHolder, ChargeReactive {
         if (!location.containsAnActor()) return;
         Actor worker = location.getActor();
         Display display = charge.getDisplay();
-        display.println("\u001B[36m⚡ The wallet's magnetic coils are powered by " + charge.getSourceName() + "! \u001B[0m");
+        display.println("\u001B[36m The wallet's magnetic coils are powered by " + charge.getSourceName() + "! \u001B[0m");
 
         pullItemsFromLocation(location, location, worker, charge.getDisplay());
 

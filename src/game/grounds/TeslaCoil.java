@@ -108,7 +108,7 @@ public class TeslaCoil extends Ground implements ChargeSource, ChargeReactive {
         if (!charge.visit(location)) {
             return;
         }
-        charge.getDisplay().println("\u001B[35m!!! The Tesla Coil is overloaded by " + charge.getSourceName() + " and discharges !!!\u001B[0m");
+        charge.getDisplay().println("\u001B[35m The Tesla Coil is overloaded by " + charge.getSourceName() + " and discharges!\u001B[0m");
         this.releaseCharge(location, charge);
     }
 

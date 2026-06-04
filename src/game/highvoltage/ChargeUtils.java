@@ -58,7 +58,7 @@ public class ChargeUtils {
             if (applyStatus) {
                 victim.addStatus(new ShockedStatus(SHOCK_DURATION));
             }
-            charge.getDisplay().println(String.format("\u001B[35m⚡ %s is caught in %s!\u001B[0m",
+            charge.getDisplay().println(String.format("\u001B[35m %s is caught in %s!\u001B[0m",
                     victim, charge.getSourceName()));
 
             // metamorphosis: Egg -> Stalker

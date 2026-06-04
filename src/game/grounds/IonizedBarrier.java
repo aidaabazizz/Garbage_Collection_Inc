@@ -88,7 +88,7 @@ public class IonizedBarrier extends Ground implements ChargeReactive {
     public void reactToCharge(Location location, GalvanicCharge charge) {
         // Add 3 more turns to the barrier.
         this.lifeSpan += INITIAL_LIFESPAN;
-        charge.getDisplay().println("⚡ The " + charge.getSourceName() +
+        charge.getDisplay().println(" The " + charge.getSourceName() +
                 " reinforces the Ionized Barrier! (Intensity: " + this.lifeSpan + ")");
     }
 
