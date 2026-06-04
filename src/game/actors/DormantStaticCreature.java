@@ -86,8 +86,8 @@ public class DormantStaticCreature extends NonPlayerCharacter implements ChargeR
     @Override
     public void reactToCharge(Location location, GalvanicCharge charge) {
         Display display = charge.getDisplay();
-        display.println("\u001B[33m!!! The " + this + " is stimulated by " + charge.getSourceName() + " and shatters !!!\u001B[0m");
-        display.println("\u001B[33m>>> A Static Stalker has been born!\u001B[0m");
+        display.println("\u001B[33m The " + this + " is stimulated by " + charge.getSourceName() + " and shatters!\u001B[0m");
+        display.println("\u001B[33m A Static Stalker has been born!\u001B[0m");
         location.map().removeActor(this);
         try {
             location.map().addActor(new StaticStalker(), location);

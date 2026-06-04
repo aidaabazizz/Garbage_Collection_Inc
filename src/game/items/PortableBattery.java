@@ -71,7 +71,7 @@ public class PortableBattery extends Item implements ChargeSource {
         // Always zap the center tile first
         ChargeUtils.zapTile(location, charge, true);
 
-        charge.getDisplay().println("\u001B[36m⚡ Static energy solidifies into protective Ionized Barriers around the user!\u001B[0m");
+        charge.getDisplay().println("\u001B[36m Static energy solidifies into protective Ionized Barriers around the user!\u001B[0m");
 
         // 2. AOE PROPAGATION (Neighbors)
         for (Exit exit : location.getExits()) {
