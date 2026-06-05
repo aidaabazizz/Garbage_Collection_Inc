@@ -8,11 +8,14 @@ import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import game.actions.ActivateHeavenTokenAction;
+import game.capabilities.CreditHolder;
+import game.capabilities.Purchasable;
+import game.capabilities.Sellable;
 import game.effects.SanctuaryField;
 import game.enums.ItemStatistics;
 import game.sanctuary.SanctuaryTool;
 
-public class HeavenToken extends Item implements SanctuaryTool {
+public class HeavenToken extends Item implements SanctuaryTool, Purchasable {
     public HeavenToken() {
         super("Heaven Token", 'ε');
         this.makePortable(); // FIX: Allows you to pick it up
@@ -44,6 +47,19 @@ public class HeavenToken extends Item implements SanctuaryTool {
         actor.getInventory().remove(this);
 
         return "\u001B[35m" + actor + " activates the Heaven Token! A protective field manifests!\u001B[0m";
+    }
+
+    // --- Purchasable Implementation ---
+    @Override
+    public int getPurchasePrice() {
+        return 50; // Rare item price
+    }
+
+    @Override
+    public String purchasedBy(Actor buyer, GameMap map, CreditHolder wallet) {
+        wallet.deductCredits(this.getPurchasePrice());
+        buyer.getInventory().add(this);
+        return buyer + " bought a Command Whistle for 50 credits.";
     }
 
 }
