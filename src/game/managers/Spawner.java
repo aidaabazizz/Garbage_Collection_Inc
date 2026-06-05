@@ -39,6 +39,15 @@ public interface Spawner {
     boolean spawnCrazyChicken(Location center);
     
     boolean spawnElsa(Location center);
+
+
+/**
+ * Spawns a ScrapSnatcher and triggers loot explosion on adjacent tiles.
+ *
+ * @param location The map location where the ScrapSnatcher emerges
+ * @return true if spawn was successful, false otherwise
+ */
+boolean spawnScrapSnatcher(Location location);
 }
 
 
