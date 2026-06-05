@@ -6,13 +6,16 @@ import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.*;
 import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import game.actions.UseCommandWhistleAction;
+import game.capabilities.CreditHolder;
 import game.capabilities.MotivationStatus;
+import game.capabilities.Purchasable;
+import game.capabilities.Sellable;
 import game.enums.Ability;
 import game.enums.ItemStatistics;
 import game.sanctuary.SanctuaryTool;
 import game.utils.SpatialSearch;
 
-public class CommandWhistle extends Item implements SanctuaryTool {
+public class CommandWhistle extends Item implements SanctuaryTool, Purchasable {
 
     public CommandWhistle() {
         super("Command Whistle", 'f');
@@ -44,5 +47,17 @@ public class CommandWhistle extends Item implements SanctuaryTool {
                 actor, pulseOriginActor);
     }
 
+    // --- Purchasable Implementation ---
+    @Override
+    public int getPurchasePrice() {
+        return 100; // Rare item price
+    }
+
+    @Override
+    public String purchasedBy(Actor buyer, GameMap map, CreditHolder wallet) {
+        wallet.deductCredits(this.getPurchasePrice());
+        buyer.getInventory().add(this);
+        return buyer + " bought a Heaven Token for 100 credits.";
+    }
 
 }
