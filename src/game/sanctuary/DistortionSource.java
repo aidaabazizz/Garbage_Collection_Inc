@@ -8,4 +8,6 @@ public interface DistortionSource {
     String releaseDistortion(Actor actor, GameMap map, Location location);
 
     String stabilise(Location location);
+
+    String audit(QuotaManager quotaManager, Location location);
 }
