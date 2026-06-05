@@ -22,29 +22,64 @@ import java.util.Random;
  * @version 1.0
  */
 public class AlienArtifact extends Item implements Sellable, Depositable {
-    /** Weight of the alien cube in inventory units. */
+    /**
+     * Weight of the alien cube.
+     */
     private static final int WEIGHT = 1;
-    /** Selling price to the Super Computer. */
+    /**
+     * Selling price to the Super Computer.
+     */
     private static final int SELL_PRICE = 200;
-    /** Company credits that can be earned after depositing this to the Super Computer. */
+    /**
+     * Company credits that can be earned after depositing this to the Super Computer.
+     */
     private static final int COMPANY_CREDITS = 100;
-
+    /**
+     * Initial number of teleportation attempts.
+     */
     private static final int TELEPORT_STARTING_ATTEMPTS = 0;
+    /**
+     * Maximum number of teleportation attempts.
+     */
     private static final int MAX_ATTEMPTS = 100;
+    /**
+     * Random number generator used for artifact effects.
+     */
     private final Random rand = new Random();
 
+    /**
+     * Creates an Alien Artifact.
+     */
     public AlienArtifact() {
         super("Alien Artifact", '?');
         this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(WEIGHT));
         this.makePortable();
     }
 
+    /**
+     * Returns the selling price of the artifact.
+     * @return the selling price
+     */
     @Override
     public int getSellPrice() { return SELL_PRICE; }
 
+    /**
+     * Returns the Company Credit value of the artifact.
+     * @return the Company Credit value
+     */
     @Override
     public int getCompanyCreditValue() {return COMPANY_CREDITS;}
 
+    /**
+     * Sells the artifact.
+     * The artifact is removed from the seller's inventory. There is a 50%
+     * chance that the seller becomes poisoned for 5 turns.
+     *
+     * @param seller the actor selling the artifact
+     * @param map the map the actor is on
+     * @param wallet the wallet receiving the credits
+     * @return the result of the sale
+     */
     @Override
     public String soldBy(Actor seller, GameMap map, CreditHolder wallet) {
         seller.getInventory().remove(this);
@@ -55,6 +90,15 @@ public class AlienArtifact extends Item implements Sellable, Depositable {
         return "Item safely handled, no side effect.";
     }
 
+    /**
+     * Deposits the artifact into the Super Computer.
+     * The depositor is teleported to a random valid location on the map.
+     *
+     * @param depositor the actor depositing the artifact
+     * @param map the map the actor is on
+     * @param quotaManager the quota manager handling Company Credits
+     * @return the result of the deposit
+     */
     @Override
     public String depositBy(Actor depositor, GameMap map, QuotaManager quotaManager) {
         Location destination = null;
