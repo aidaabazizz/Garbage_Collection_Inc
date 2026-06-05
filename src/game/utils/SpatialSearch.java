@@ -321,5 +321,21 @@ public class SpatialSearch {
         }
         return matches;
     }
+
+    /**
+     * Returns all locations within a specified radius from the center.
+     * Used by DistortionAuditAction to scan for anomaly tiles.
+     *
+     * @param center the origin location
+     * @param radius the maximum Manhattan distance to include
+     * @return list of all locations within the radius
+     */
+    public static List<Location> getLocationsWithinDistance(Location center, int radius) {
+        List<Location> locations = new ArrayList<>();
+        for (Location loc : center.getNearbyLocations(radius)) {
+            locations.add(loc);
+        }
+        return locations;
+    }
 }
 
