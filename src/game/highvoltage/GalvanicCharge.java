@@ -21,7 +21,7 @@ import java.util.Set;
  *
  * @author Jewell Gomes
  */
-public class GalvanicCharge {
+public class GalvanicCharge implements ChargeContext {
     /** The descriptive name of the energy source (e.g., "a massive Lightning Bolt"). */
     private final String sourceName;
     /** The terminal interface used for logging wave-related events to the player. */

@@ -12,10 +12,15 @@ import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.statistics.StatisticOperations;
 import game.actors.*;
 import game.enums.Ability;
+import game.items.AlienArtifact;
+import game.items.AluminiumScrap;
+import game.items.IndustrialFan;
 import game.utils.SpatialSearch;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * A manager class responsible for spawning creatures on the moon maps.
@@ -174,7 +179,7 @@ public class CreatureSpawner implements Spawner {
     }
 
     /**
-     * REQ5: Spawns a CrazyChicken at the specified location.
+     * Spawns a CrazyChicken at the specified location.
      * The CrazyChicken is a stateful creature with four distinct states:
      * WANDER, MIMICKING, FRENZY, and HUNGRY.
      * Environmental Reaction: When a CrazyChicken spawns, all adjacent workers
@@ -217,6 +222,103 @@ public class CreatureSpawner implements Spawner {
             return false;
         }
     }
+
+    /** List of depositable item classes for random loot explosion generation. */
+    private static final List<Class<? extends Item>> DEPOSITABLE_CLASSES = Arrays.asList(
+            AluminiumScrap.class,
+            IndustrialFan.class,
+            AlienArtifact.class
+    );
+
+    /** Random number generator for loot explosion item selection. */
+    private final Random random = new Random();
+
+
+
+    /**
+     * REQ2: Spawns a ScrapSnatcher at the specified location.
+     *
+     * The ScrapSnatcher is a resource-hoarding creature that steals depositable
+     * items from the ground. When spawned, it triggers a "loot explosion" where
+     * one random depositable resource appears on every valid, empty tile
+     * immediately adjacent to the newly spawned Snatcher.
+     *
+     * @param center The map location where the ScrapSnatcher should be created.
+     * @return true if the ScrapSnatcher was successfully added to the map and
+     *         loot explosion completed; false if spawning failed (e.g., no valid
+     *         spawn location found)
+     */
+    @Override
+    public boolean spawnScrapSnatcher(Location center) {
+        // Find a valid spawn location (center or adjacent tile)
+        Location spot = getSpawnLocation(center);
+        if (spot == null) {
+            return false;
+        }
+
+        try {
+            // Create and add the ScrapSnatcher actor
+            ScrapSnatcher snatcher = new ScrapSnatcher();
+            spot.addActor(snatcher);
+            display.println("!!! A Scrap Snatcher has emerged at " + spot + " !!!");
+
+            // TRIGGER LOOT EXPLOSION: Spawn depositable items on adjacent empty tiles
+            spawnLootExplosion(spot);
+
+            return true;
+        } catch (GameEngineException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Spawns a loot explosion around the specified center location.
+     * This method iterates through all 8 adjacent tiles (North, South, East, West,
+     * and the four diagonal directions). For each tile that is empty (no actor
+     * present) and traversable (actors can enter), it spawns one random depositable
+     * item from the DEPOSITABLE_CLASSES list.
+     *
+     * @param center The center location around which to spawn loot items
+     */
+    private void spawnLootExplosion(Location center) {
+        // Iterate through all 8 adjacent tiles (cardinal + diagonal directions)
+        for (Exit exit : center.getExits()) {
+            Location adjacent = exit.getDestination();
+
+            // Only spawn on tiles that are:
+            // 1. Empty (no actor standing on them)
+            // 2. Traversable (actors can enter - e.g., not walls)
+            if (!adjacent.containsAnActor() && adjacent.canActorEnter(null)) {
+                Item item = getRandomDepositableItem();
+                adjacent.addItem(item);
+                display.println("A " + item + " appears at " + adjacent + "!");
+            }
+        }
+    }
+
+    /**
+     * Creates and returns a random depositable item instance.
+     * Randomly selects an item class from the DEPOSITABLE_CLASSES list and
+     * instantiates it using reflection. This approach follows the Open/Closed
+     * Principle, allowing new depositable items to be added by simply updating
+     * the DEPOSITABLE_CLASSES list without modifying this method.
+     *
+     * @return A new instance of a depositable item (AluminiumScrap, IndustrialFan,
+     *         or AlienArtifact), or AluminiumScrap as fallback if instantiation fails
+     */
+    private Item getRandomDepositableItem() {
+        // Randomly select an item class from the list of depositable resources
+        Class<? extends Item> itemClass = DEPOSITABLE_CLASSES.get(random.nextInt(DEPOSITABLE_CLASSES.size()));
+
+        try {
+            // Use reflection to create a new instance (requires no-arg constructor)
+            return itemClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            // Fallback to AluminiumScrap if reflection fails (defensive programming)
+            return new AluminiumScrap();
+        }
+    }
 }
+
 
 

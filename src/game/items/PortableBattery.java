@@ -57,10 +57,10 @@ public class PortableBattery extends Item implements ChargeSource {
      *    radius receive a high-voltage strike.
      *
      * @param location The origin coordinate where the battery is activated.
-     * @param charge   The GalvanicCharge context containing source metadata and damage payload.
+     * @param charge   The ChargeContext context containing source metadata and damage payload.
      */
     @Override
-    public void releaseCharge(Location location, GalvanicCharge charge) {
+    public void releaseCharge(Location location, ChargeContext charge) {
         if (location.getGroundAs(ChargeReactive.class) == null) {
             if (!location.getGround().hasAbility(MaterialCapability.ENERGIZED)) {
                 location.setGround(new PoweredFloor());
@@ -71,14 +71,14 @@ public class PortableBattery extends Item implements ChargeSource {
         // Always zap the center tile first
         ChargeUtils.zapTile(location, charge, true);
 
-        charge.getDisplay().println("\u001B[36m⚡ Static energy solidifies into protective Ionized Barriers around the user!\u001B[0m");
+        charge.getDisplay().println("\u001B[36m Static energy solidifies into protective Ionized Barriers around the user!\u001B[0m");
 
         // 2. AOE PROPAGATION (Neighbors)
         for (Exit exit : location.getExits()) {
             Location adj = exit.getDestination();
 
             if (adj.getGroundAs(ChargeReactive.class) == null && adj.getGround().canActorEnter(null)) {
-                adj.setGround(new IonizedBarrier());
+                adj.setGround(new IonizedBarrier(adj.getGround()));
             }
 
             // C. Universal Impact (Zaps anyone standing on the neighbor tiles)

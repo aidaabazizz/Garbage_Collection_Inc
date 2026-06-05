@@ -68,7 +68,7 @@ public class TeslaCoil extends Ground implements ChargeSource, ChargeReactive {
         if (this.turnsToCharge > 0) {
             display.println(PURPLE + "Tesla Coil is humming... (Charge level: " + (MAX_CAPACITOR - this.turnsToCharge) + "/" + MAX_CAPACITOR+ ")" + RESET);
         } else {
-            GalvanicCharge autoBlast = new GalvanicCharge("the Tesla Coil Pulse", display, DAMAGE);
+            ChargeContext autoBlast = new GalvanicCharge("the Tesla Coil Pulse", display, DAMAGE);
             this.releaseCharge(location, autoBlast);
         }
     }
@@ -102,13 +102,13 @@ public class TeslaCoil extends Ground implements ChargeSource, ChargeReactive {
      * @param charge   The context of the incoming galvanic charge.
      */
     @Override
-    public void reactToCharge(Location location, GalvanicCharge charge) {
+    public void reactToCharge(Location location, ChargeContext charge) {
         // if this Coil was already triggered in this wave, stop to prevent
         // coil-to-Coil infinite loops.
         if (!charge.visit(location)) {
             return;
         }
-        charge.getDisplay().println("\u001B[35m!!! The Tesla Coil is overloaded by " + charge.getSourceName() + " and discharges !!!\u001B[0m");
+        charge.getDisplay().println("\u001B[35m The Tesla Coil is overloaded by " + charge.getSourceName() + " and discharges!\u001B[0m");
         this.releaseCharge(location, charge);
     }
 
@@ -122,10 +122,10 @@ public class TeslaCoil extends Ground implements ChargeSource, ChargeReactive {
      * 4. Propagates the surge to all tiles within this strike zone.
      *
      * @param location The origin of the discharge.
-     * @param charge   The GalvanicCharge context defining the wave's properties.
+     * @param charge   The ChargeContext defining the wave's properties.
      */
     @Override
-    public void releaseCharge(Location location, GalvanicCharge charge) {
+    public void releaseCharge(Location location, ChargeContext charge) {
         this.turnsToCharge = MAX_CAPACITOR; // Reset the capacitor
 
         // 2. MARK ORIGIN AS VISITED (Safety Anchor)
@@ -146,7 +146,9 @@ public class TeslaCoil extends Ground implements ChargeSource, ChargeReactive {
                             location.map().getYRange().contains(targetY)) {
 
                         Location targetLoc = location.map().at(targetX, targetY);
-                        propagateToTile(targetLoc, charge);
+                        if (!charge.getVisited().contains(targetLoc)) {
+                            propagateToTile(targetLoc, charge);
+                        }
                     }
                 }
             }
@@ -164,7 +166,7 @@ public class TeslaCoil extends Ground implements ChargeSource, ChargeReactive {
      * @param target The location to receive the charge.
      * @param charge The current charge context.
      */
-    private void propagateToTile(Location target, GalvanicCharge charge) {
+    private void propagateToTile(Location target, ChargeContext charge) {
         // morph Puddles / Overload other Coils
         ChargeReactive reactiveGround = target.getGroundAs(ChargeReactive.class);
         if (reactiveGround != null) {

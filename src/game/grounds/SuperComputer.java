@@ -6,16 +6,19 @@ import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
+import game.actions.DepositAction;
 import game.actions.DistortionAuditAction;
 import game.actions.PurchaseAction;
 import game.actions.SellAction;
 import game.actions.StabiliseDistortionAction;
+import game.capabilities.Depositable;
 import game.capabilities.Purchasable;
 import game.capabilities.Sellable;
 import game.enums.Ability;
 import game.enums.AccessLevel;
 import game.enums.DistortionCapability;
 import game.items.*;
+import game.managers.QuotaManager;
 import game.sanctuary.SanctuaryTool;
 import game.weather.WeatherSystemFactory;
 
@@ -25,16 +28,11 @@ import java.util.List;
  * A Supercomputer terminal that allows workers to buy and sell items.
  *
  * @author Suchir
- * @author Chathya Attanayake (modified by)
- * @version 2.0
+ * @author Victoria Tay (modified by)
+ * @version 1.0
  */
 public class SuperComputer extends Ground implements SanctuaryTool {
 
-    /**
-     * The shared quota system — injected at construction, never retrieved as singleton.
-     * This is the professional DIP pattern: SuperComputer depends on QuotaManager
-     * as an abstraction passed in, not a global instance fetched internally.
-     */
     private final QuotaManager quotaManager;
 
     /**
@@ -47,6 +45,7 @@ public class SuperComputer extends Ground implements SanctuaryTool {
 
     /**
      * Returns economy actions available to workers.
+     * It will revoke all the facility access towards SuperComputer when the quota is not met.
      *
      * @param actor the actor interacting with the Supercomputer
      * @param location the location of the Supercomputer
@@ -61,14 +60,14 @@ public class SuperComputer extends Ground implements SanctuaryTool {
             return actions;
         }
 
-        // --- REQ4 + REQ1: DISTORTION AUDIT PROTOCOL ---
-        // Only available when facility access is active (ties into quota failure state)
-        if (quotaManager.isFacilityAccessActive()) {
-            actions.add(new DistortionAuditAction(location, quotaManager));
+        if (!quotaManager.isFacilityAccessActive()) {
+            return actions;
         }
 
-        // --- REQ4: COMPLEX INTERACTION (Scanning for Distortions) --- [YOUR ADDITION]
-        // Scan adjacent tiles for Corrupted grounds using Capabilities
+        // --- REQ4: DISTORTION AUDIT PROTOCOL ---
+        actions.add(new DistortionAuditAction(location, quotaManager));
+
+        // --- REQ4: COMPLEX INTERACTION (Scanning for Distortions) ---
         List<Location> corruptedSites = game.utils.SpatialSearch.getAdjacentLocationsWithCapability(
                 location,
                 DistortionCapability.CORRUPTED
@@ -82,6 +81,11 @@ public class SuperComputer extends Ground implements SanctuaryTool {
             if (sellable != null) {
                 actions.add(new SellAction(item, sellable));
             }
+            // This is to check for deposit features
+            Depositable depositable = item.asCapability(Depositable.class).orElse(null);
+            if (depositable != null) {
+                actions.add(new DepositAction(item, depositable, this.quotaManager));
+            }
         }
 
         addPurchaseOption(actions, new FirstAidKit());
@@ -89,10 +93,14 @@ public class SuperComputer extends Ground implements SanctuaryTool {
         addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_ONE));
         addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_TWO));
         addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_THREE));
-        actions.add(WeatherSystemFactory.createWeatherSyncAction()); // [MAIN]
+
+        PlasmaCutter plasmaCutter = new PlasmaCutter(quotaManager);
+        addPurchaseOption(actions, plasmaCutter);
 
         addPurchaseOption(actions, new CommandWhistle());
         addPurchaseOption(actions, new HeavenToken());
+
+        actions.add(WeatherSystemFactory.createWeatherSyncAction());
 
         return actions;
     }
@@ -111,7 +119,7 @@ public class SuperComputer extends Ground implements SanctuaryTool {
     }
 
     /**
-     * Activates the sanctuary effect of the Supercomputer. [YOUR ADDITION]
+     * Activates the sanctuary effect of the Supercomputer.
      *
      * @param actor    the actor triggering the effect
      * @param map      the current game map

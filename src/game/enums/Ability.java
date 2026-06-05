@@ -6,6 +6,7 @@ package game.enums;
  * such as security clearance or material processing.
  *
  * @author Jewell Gomes
+ * @author Victoria Tay Wen Xie (modified by)
  */
 public enum Ability {
     /** Ability to purify contaminated substances (REQ1/REQ2). */
@@ -17,5 +18,9 @@ public enum Ability {
     /** For the teleportation tube ability. **/
     IS_TELEPORTATION_TUBE,
     /** For the magic circle teleportation ability **/
-    IS_MAGIC_CIRCLE
+    IS_MAGIC_CIRCLE,
+    /** Able to be cut by Plasma Cutter **/
+    CUTTABLE,
+    /** Actor has plasma cutter in their inventory **/
+    HAS_PLASMA_CUTTER
 }

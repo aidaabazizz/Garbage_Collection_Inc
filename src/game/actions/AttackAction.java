@@ -81,7 +81,7 @@ public class AttackAction extends Action {
     private String processReflectiveFeedback(Actor attacker, Actor victim) {
         attacker.hurt(REFLECTIVE_DAMAGE);
         attacker.addStatus(new ShockedStatus(REFLECTIVE_SHOCK_DURATION));
-        return String.format("\n%s⚡ Electricity arcs back from %s's suit! %s takes %d damage and is SHOCKED!%s",
+        return String.format("\n%s Electricity arcs back from %s's suit! %s takes %d damage and is SHOCKED!%s",
                 RED_TEXT, victim, attacker, REFLECTIVE_DAMAGE, RESET_COLOR);
     }
 
