@@ -50,6 +50,11 @@ public class CutAction extends Action {
         return target.executeCut(actor, map, targetLocation);
     }
 
+    /**
+     * This is to return the description of the cut action in the menu.
+     * @param actor The actor performing the action.
+     * @return description of the cut action in the menu.
+     */
     @Override
     public String menuDescription(Actor actor) {
         return actor + " cuts open the " + targetName + " with the Plasma Cutter";
