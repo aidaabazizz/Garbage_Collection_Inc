@@ -2,7 +2,6 @@ package game.actors;
 
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actions.ActionList;
-import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
@@ -12,18 +11,15 @@ import game.behaviours.StealResourceBehaviour;
 import game.behaviours.WanderBehaviour;
 import game.capabilities.Infectable;
 import game.capabilities.InfectionStatus;
-import game.enums.Ability;
 import game.inventory.BasicInventory;
-import game.weapons.ScrapSnatcherBareFist;
+import game.weapons.UndeadFist;
 
 /**
  * A resource-hoarding creature that steals depositable items from the ground.
  * When infected, loses hoarding ability and becomes aggressive toward workers.
- *
  * Behaviours:
  * - StealResourceBehaviour (priority 1): steals Sellable items from ground
  * - WanderBehaviour (priority 999): moves randomly when nothing to steal
- *
  * When infected:
  * - Removes StealResourceBehaviour
  * - Adds AttackBehaviour (priority 10)
@@ -40,6 +36,10 @@ public class ScrapSnatcher extends NonPlayerCharacter implements Infectable {
 
     private static final int INFECTED_DAMAGE_PER_TURN = 1;
 
+    private static final int PUNCH_DAMAGE = 1;
+    private static final int PUNCH_HIT_RATE = 10;
+
+
     private boolean isInfected = false;
     private int infectionDamageCounter = 0;
 
@@ -51,7 +51,7 @@ public class ScrapSnatcher extends NonPlayerCharacter implements Infectable {
 
     @Override
     public IntrinsicWeapon getIntrinsicWeapon() {
-        return new ScrapSnatcherBareFist();
+        return new UndeadFist(PUNCH_DAMAGE, PUNCH_HIT_RATE);
     }
 
     @Override
@@ -90,9 +90,5 @@ public class ScrapSnatcher extends NonPlayerCharacter implements Infectable {
     @Override
     public void updateInfection(Location location) {
         // Infection damage handled in playTurn
-    }
-
-    public boolean isInfected() {
-        return isInfected;
     }
 }
