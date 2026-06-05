@@ -12,7 +12,7 @@ import java.util.Random;
  * pool from the general Hole logic.
  *
  * @author Chathya Attanayake
- * @version 1.0
+ * @author Aida (modified by)
  */
 public class StandardHoleStrategy implements HoleSpawnStrategy {
     /** Random number generator used to determine the next spawn result. */
@@ -22,19 +22,27 @@ public class StandardHoleStrategy implements HoleSpawnStrategy {
      * Executes the spawn logic for the 99-deprecated moon facility.
      * Requirement 4: There is a 50% chance to spawn an Undead and a 50% chance
      * to spawn a Slime.
-     *
+     * NEW A3 REQ2: 33% chance for Undead, 33% for Slime, 33% for ScrapSnatcher.
      * @param location The map location where the creature will be created.
      * @param spawner  The spawning service used to handle creation and environmental side effects.
      * @return true if a creature was successfully added to the map; false otherwise.
      */
     @Override
     public boolean spawn(Location location, Spawner spawner) {
-        // Spawns Undead and Slimes
-        if (random.nextBoolean()) {
+        // Generate a random integer from 0 to 2 (inclusive) for 33% distribution
+        int roll = random.nextInt(3);
+
+        // Spawns Undead, Slime, or ScrapSnatcher with equal probability
+        if (roll == 0) {
             return spawner.spawnUndead(location);
-        } else {
+
+        } else if (roll == 1) {
             return spawner.spawnSlime(location);
+
+        } else {
+            return spawner.spawnScrapSnatcher(location);
         }
+
     }
 
     /**

@@ -11,7 +11,7 @@ import java.util.Random;
  * It provides a deterministic way to handle creature generation while allowing for cloning when the hole expands.
  *
  * @author Chathya Attanayake
- * @version 1.0
+ * @author Aida
  */
 public class ParasiticHoleStrategy implements HoleSpawnStrategy {
     /** Random number generator used to decide between spawning targets. */
@@ -19,7 +19,7 @@ public class ParasiticHoleStrategy implements HoleSpawnStrategy {
 
     /**
      * Executes the spawn logic for the 20-overflow moon.
-     * There is a 50% chance to spawn an Undead and a 50% chance to spawn a Parasite.
+     * There is a 33% chance to spawn Undead, Parasite, and ScrapSnatcher respectively.
      *
      * @param location The map location where the spawn attempt occurs.
      * @param spawner  The spawning service used to handle creation and environmental side effects.
@@ -27,11 +27,18 @@ public class ParasiticHoleStrategy implements HoleSpawnStrategy {
      */
     @Override
     public boolean spawn(Location location, Spawner spawner) {
-        // Spawns Undead and Parasites
-        if (random.nextBoolean()) {
+        // Generate a random integer from 0 to 2 (inclusive) for 33% distribution
+        int roll = random.nextInt(3);
+
+        // Spawns Undead, Parasite, or ScrapSnatcher with equal probability
+        if (roll == 0) {
             return spawner.spawnUndead(location);
-        } else {
+
+        } else if (roll == 1) {
             return spawner.spawnParasite(location);
+
+        } else {
+            return spawner.spawnScrapSnatcher(location);
         }
     }
 
