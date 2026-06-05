@@ -1,6 +1,7 @@
 package game.grounds;
 
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.actors.ActorStatistics;
 import edu.monash.fit2099.engine.positions.*;
 import game.capabilities.FireStackable;
 import game.capabilities.SanctuaryStatus;
@@ -23,6 +24,9 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
 
     private boolean isStabilised = false;
 
+    /** Cooldown turns after being audited. */
+    private int auditCooldown = 0;
+
     public CorruptedSafeHouse() {
         super('⌂', "Corrupted Safe House");
         this.enableAbility(DistortionCapability.CORRUPTED);
@@ -30,6 +34,11 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
 
     @Override
     public void tick(Location location) {
+        if (auditCooldown > 0) {
+            auditCooldown--;
+            return;
+        }
+
         if (!location.containsAnActor() || !location.getActor().hasAbility(Ability.WORKER)) {
             return;
         }
@@ -51,6 +60,8 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
             if (status.isProtectionActive()) {
                 spawnBlueFire(location);
             }
+
+
         }
         // If stabilised: no new status, no BlueFire, but existing status continues ticking naturally
     }
@@ -91,5 +102,46 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
         return "Blue Fire spread has been suppressed!";
     }
 
-//
+
+    /**
+     * Distortion Audit Protocol: The safe house vents its sanctuary energy in a
+     * final burst — healing any actor inside to full, spawning a ring of BlueFire
+     * with double lifespan, then entering a 5-turn cooldown (no new status granted,
+     * no BlueFire spawned).
+     *
+     * @param quotaManager the shared quota system
+     * @param location     this tile's location
+     * @return audit result description
+     */
+    @Override
+    public String audit(QuotaManager quotaManager, Location location) {
+        // 1. Contribute credits to REQ1
+        String creditMsg = quotaManager.addCompanyCredits(20);
+
+        // 2. Final unstable effect — burst heal + double-lifespan BlueFire ring
+        StringBuilder effectMsg = new StringBuilder();
+        if (location.containsAnActor()) {
+            Actor actor = location.getActor();
+            actor.heal(actor.getMaximumStatistic(ActorStatistics.HEALTH)); // Full heal burst
+            effectMsg.append(actor).append(" is bathed in a sanctuary energy burst — fully healed!\n");
+        }
+
+        // Spawn double-lifespan BlueFire on all exits (the "violent reaction")
+        for (Exit exit : location.getExits()) {
+            Location dest = exit.getDestination();
+            Ground existing = dest.getGround();
+            if (existing.canActorEnter(null)
+                    && !existing.hasAbility(DistortionCapability.CORRUPTED)
+                    && !existing.hasAbility(DistortionCapability.ACTIVE_HAZARD)) {
+                dest.setGround(new BlueFire(6, existing)); // Double lifespan
+            }
+        }
+        effectMsg.append("The safe house vents in a violent burst — intensified BlueFire erupts around it!");
+
+        // 3. Enter cooldown
+        auditCooldown = 5;
+        isStabilised = true; // Treat as stabilised during cooldown
+
+        return creditMsg + "\n" + effectMsg + "\nSafe house entering cooldown for 5 turns.";
+    }
 }
