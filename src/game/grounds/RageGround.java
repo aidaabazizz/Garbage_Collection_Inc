@@ -87,4 +87,39 @@ public class RageGround extends Ground implements DistortionSource {
 
         return "The Rage Ground has been neutralized — Killer Instinct suppressed!";
     }
+
+    /**
+     * Distortion Audit Protocol: The rage ground discharges all its aggression in
+     * one final burst — granting KillerInstinct to ALL actors within radius 1,
+     * then immediately relocating (its natural lifecycle but triggered early).
+     *
+     * @param quotaManager the shared quota system
+     * @param location     this tile's location
+     * @return audit result description
+     */
+    @Override
+    public String audit(QuotaManager quotaManager, Location location) {
+        // 1. Contribute credits to REQ1
+        String creditMsg = quotaManager.addCompanyCredits(25);
+
+        // 2. Final unstable effect — grant KillerInstinct to all adjacent actors
+        StringBuilder effectMsg = new StringBuilder();
+        effectMsg.append("The Rage Ground discharges in a violent burst!\n");
+
+        for (Exit exit : location.getExits()) {
+            Location adj = exit.getDestination();
+            if (adj.containsAnActor()) {
+                Actor target = adj.getActor();
+                target.addStatus(new KillerInstinctStatus(3));
+                effectMsg.append(target).append(" is consumed by rage energy!\n");
+            }
+        }
+
+        // 3. Trigger immediate relocation (its natural "weakened" state is gone)
+        relocate(location);
+        effectMsg.append("The Rage Ground's energy is spent — it has relocated!");
+
+        return creditMsg + "\n" + effectMsg;
+    }
+
 }
