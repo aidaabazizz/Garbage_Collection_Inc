@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
+import game.actions.DistortionAuditAction;
 import game.actions.PurchaseAction;
 import game.actions.SellAction;
 import game.actions.StabiliseDistortionAction;
@@ -14,9 +15,7 @@ import game.capabilities.Sellable;
 import game.enums.Ability;
 import game.enums.AccessLevel;
 import game.enums.DistortionCapability;
-import game.items.AccessCard;
-import game.items.FirstAidKit;
-import game.items.SterilisationBox;
+import game.items.*;
 import game.sanctuary.SanctuaryTool;
 import game.weather.WeatherSystemFactory;
 
@@ -32,10 +31,18 @@ import java.util.List;
 public class SuperComputer extends Ground implements SanctuaryTool {
 
     /**
+     * The shared quota system — injected at construction, never retrieved as singleton.
+     * This is the professional DIP pattern: SuperComputer depends on QuotaManager
+     * as an abstraction passed in, not a global instance fetched internally.
+     */
+    private final QuotaManager quotaManager;
+
+    /**
      * Constructor for Supercomputer.
      */
-    public SuperComputer() {
+    public SuperComputer(QuotaManager quotaManager) {
         super('≡', "Supercomputer");
+        this.quotaManager = quotaManager;
     }
 
     /**
@@ -52,6 +59,12 @@ public class SuperComputer extends Ground implements SanctuaryTool {
 
         if (!actor.hasAbility(Ability.WORKER)) {
             return actions;
+        }
+
+        // --- REQ4 + REQ1: DISTORTION AUDIT PROTOCOL ---
+        // Only available when facility access is active (ties into quota failure state)
+        if (quotaManager.isFacilityAccessActive()) {
+            actions.add(new DistortionAuditAction(location, quotaManager));
         }
 
         // --- REQ4: COMPLEX INTERACTION (Scanning for Distortions) --- [YOUR ADDITION]
@@ -77,6 +90,9 @@ public class SuperComputer extends Ground implements SanctuaryTool {
         addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_TWO));
         addPurchaseOption(actions, new AccessCard(AccessLevel.LEVEL_THREE));
         actions.add(WeatherSystemFactory.createWeatherSyncAction()); // [MAIN]
+
+        addPurchaseOption(actions, new CommandWhistle());
+        addPurchaseOption(actions, new HeavenToken());
 
         return actions;
     }
