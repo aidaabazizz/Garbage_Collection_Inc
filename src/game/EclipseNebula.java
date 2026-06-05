@@ -17,10 +17,10 @@ import game.holestrategies.StandardHoleStrategy;
 import game.inventory.WeightLimitedInventory;
 import game.items.*;
 import game.managers.CreatureSpawner;
+import game.managers.QuotaManager;
 import game.managers.Spawner;
 import game.teleportstrategies.BaseTeleportStrategy;
 import game.teleportstrategies.TeleportTubeStrategy;
-import game.grounds.FleshyTree99;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ import java.util.List;
  * @author Aida
  */
 public class EclipseNebula extends World {
-
+    private final QuotaManager quotaManager = new QuotaManager();
     /** The maximum weight a contracted worker can carry. */
     private static final int WORKER_INVENTORY_CAPACITY = 50;
 
@@ -109,7 +109,7 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('_', Floor::new);
 
         // REQ 1: The Supercomputer (≡)
-        groundCreator.registerGround('≡', SuperComputer::new);
+        groundCreator.registerGround('≡', () -> new SuperComputer(quotaManager));
 
         // REQ 2: Security Doors and Environmental Mutation
         groundCreator.registerGround('=', AluminiumDoor::new);
@@ -142,14 +142,11 @@ public class EclipseNebula extends World {
         DefaultGroundCreator groundCreator = new DefaultGroundCreator();
         registerCommonGrounds(groundCreator);
 
-        // REQ4 and A3REQ2: Hole in 99-Deprecated spawns Undead, Slimes and Scrap Snatcher.
+        // REQ4: Hole in 99-Deprecated spawns Undead and Slimes.
         groundCreator.registerGround('o', () -> new Hole(new StandardHoleStrategy(), spawner));
 
         // REQ4: Vents should be on both maps.
         groundCreator.registerGround('V', () -> new Vent(spawner));
-
-        // A3: REQ2: Fleshy Tree for 99-deprecated map (different behavior)
-        groundCreator.registerGround('y', () -> new FleshyTree99(spawner));
 
         List<String> moonStrings = Arrays.asList(
                 ".....V..............########################################",
@@ -161,7 +158,7 @@ public class EclipseNebula extends World {
                 ".........~~~~....o..#______#_#_________#####___________#####",
                 "....................#______=_#_________#_______V___________#",
                 "..o...~.............#______#_#_________#___________________#",
-                ".....~~~.......y....#______#_###########___#############___#",
+                ".....~~~............#______#_###########___#############___#",
                 ".....~........V.....#______#___________#___#___________#___#",
                 "....................=______#___________=___=_____o_____=___#",
                 "....................#______#############___#############___#",
