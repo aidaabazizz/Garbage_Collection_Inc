@@ -53,6 +53,14 @@ public class AluminiumDoor extends Door implements Cuttable {
         return actor + " is shocked for " + SHOCK_DAMAGE + " damage from faulty electrical short-circuit!";
     }
 
+    /**
+     * Handles cutting the door using a Plasma Cutter.
+     * The door is replaced with floor and drops Aluminium Scrap.
+     * @param actor the actor performing the cut
+     * @param map the game map
+     * @param targetLocation the location of the door being cut
+     * @return a message describing the cutting action
+     */
     @Override
     public String executeCut(Actor actor, GameMap map, Location targetLocation) {
         targetLocation.setGround(new Floor());
@@ -62,6 +70,13 @@ public class AluminiumDoor extends Door implements Cuttable {
                 "The door collapses into Aluminium Scraps.";
     }
 
+    /**
+     * Provides cut action if the actor has the required ability.
+     * @param actor the actor attempting the action
+     * @param location the location of the door
+     * @param direction direction from the actor to the door
+     * @return list of possible actions
+     */
     @Override
     public ActionList allowableActions(Actor actor, Location location, String direction) {
         ActionList actions = super.allowableActions(actor, location, direction);
@@ -73,6 +88,10 @@ public class AluminiumDoor extends Door implements Cuttable {
         return actions;
     }
 
+    /**
+     * Returns a string representation of the door.
+     * @return "Aluminium Door"
+     */
     @Override
     public String toString() {
         return "Aluminium Door";
