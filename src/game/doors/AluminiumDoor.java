@@ -71,7 +71,7 @@ public class AluminiumDoor extends Door implements Cuttable {
     }
 
     /**
-     * Provides cut action if the actor has the required ability.
+     * Provides cut action if the actor has the plasma cutter.
      * @param actor the actor attempting the action
      * @param location the location of the door
      * @param direction direction from the actor to the door
