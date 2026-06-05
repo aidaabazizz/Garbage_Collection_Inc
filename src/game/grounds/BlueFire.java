@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.enums.Ability;
 import game.enums.DistortionCapability;
+import game.sanctuary.DistortionSource;
 import game.sanctuary.Extinguishable;
 
 /**
@@ -14,7 +15,7 @@ import game.sanctuary.Extinguishable;
  * Workers are immune — BlueFire is meant to deter enemies, not harm the worker it protects.
  * Restores the original ground when extinguished.
  */
-public class BlueFire extends Ground implements Extinguishable {
+public class BlueFire extends Ground implements Extinguishable, DistortionSource {
 
     private int lifespan;
     private final Ground originalGround;
@@ -64,6 +65,19 @@ public class BlueFire extends Ground implements Extinguishable {
             }
         }
         return false;
+    }
+
+    @Override
+    public String audit(QuotaManager manager, Location location) {
+        manager.addCompanyCredits(10);
+
+        // Final Effect: Flare damage
+        for (Location adj : location.getNearbyLocations(1)) {
+            if (adj.containsAnActor()) adj.getActor().hurt(3);
+        }
+
+        this.extinguish(location); // Burns out immediately
+        return "The Blue Fire flares violently and is consumed by the audit scan. [Quota +10]";
     }
 
     @Override
