@@ -43,6 +43,10 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     private static final int SPAWN_THRESHOLD = 5;
     /** The spawning service used to handle creature creation and side effects. */
     private final Spawner spawner;
+    /** Radius used to scan for targets when Killer Instinct is active. */
+    private static final int RAGE_STRIKE_RADIUS = 3;
+    private static final int RAGE_STRIKE_HIT_RATE = 100;
+    private static final int RAGE_STRIKE_DAMAGE = 2;
 
     /**
      * Constructor to initialize the worker with their starting statistics.
@@ -57,7 +61,7 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         super(name, displayChar, hitPoints, inventory);
         this.spawner = spawner;
         this.enableAbility(Ability.WORKER);
-        this.setIntrinsicWeapon(new WorkerFists()); // [YOUR ADDITION]
+        this.setIntrinsicWeapon(new WorkerFists(RAGE_STRIKE_DAMAGE,RAGE_STRIKE_HIT_RATE));
     }
 
     /**
@@ -115,8 +119,8 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
 
         display.endLine();
 
-        // Reset protection flag every turn (KISS Reset Pattern) [YOUR ADDITION]
-        this.disableAbility(DamageInterceptor.PROTECTED);
+//        // Reset protection flag every turn (KISS Reset Pattern) [YOUR ADDITION]
+//        this.disableAbility(DamageInterceptor.PROTECTED);
 
         // Check global facility state
         if (AlarmManager.getInstance().isActive()) {
@@ -205,9 +209,11 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
      */
     private void injectRageStrikeActions(ActionList actions, GameMap map) {
         Location here = map.locationOf(this);
-        for (Actor target : SpatialSearch.getActorsWithinDistance(here, 3)) {
-            if (target != this) {
+        Set<Actor> targetsFound = new HashSet<>();
+        for (Actor target : SpatialSearch.getActorsWithinDistance(here, RAGE_STRIKE_RADIUS)) {
+            if (target != this  && !targetsFound.contains(target)) {
                 actions.add(new RageStrikeAction(target, "range", getIntrinsicWeapon()));
+                targetsFound.add(target);
             }
         }
     }
@@ -221,7 +227,7 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     @Override
     public void hurt(int points) {
         if (this.hasAbility(DamageInterceptor.PROTECTED)) {
-            points = Math.max(1, points / 2);
+           return;
         }
         super.hurt(points);
     }
