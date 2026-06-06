@@ -2,6 +2,7 @@ package game.capabilities;
 
 import edu.monash.fit2099.engine.GameEntity;
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import java.util.Random;
@@ -12,6 +13,9 @@ import java.util.Random;
  */
 public class BlackHoleStatus extends DamageOverTimeStatus {
     private final Random random = new Random();
+    /** Maximum number of attempts to find a safe warp destination. */
+    private static final int MAX_WARP_ATTEMPTS = 20;
+    private final Display display = new Display();
 
     public BlackHoleStatus(int turns) {
         super("Event Horizon Warp", turns);
@@ -29,7 +33,7 @@ public class BlackHoleStatus extends DamageOverTimeStatus {
 
             if (randomDest != null) {
                 map.moveActor(actor, randomDest);
-                System.out.println("\u001B[35m>>> " + actor + " is warped by the black hole's gravity!\u001B[0m");
+                display.println("\u001B[35m>>> " + actor + " is warped by the black hole's gravity!\u001B[0m");
             }
         });
     }
@@ -38,7 +42,7 @@ public class BlackHoleStatus extends DamageOverTimeStatus {
         int x, y;
         Location loc;
         // Try to find a safe spot (not a wall, no other actor)
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i <MAX_WARP_ATTEMPTS ; i++) {
             x = random.nextInt(map.getXRange().max());
             y = random.nextInt(map.getYRange().max());
             loc = map.at(x, y);
