@@ -6,7 +6,6 @@ import edu.monash.fit2099.engine.positions.Ground;
 import game.capabilities.AlarmListener;
 import game.capabilities.Unlockable;
 import game.enums.AccessLevel;
-import game.managers.AlarmManager;
 
 /**
  * A security barrier that restricts movement within the facility.
@@ -38,7 +37,6 @@ public abstract class Door extends Ground implements Unlockable, AlarmListener {
     public Door(AccessLevel requiredAccessLevel) {
         super('=', "Door");
         this.requiredAccessLevel = requiredAccessLevel;
-        AlarmManager.getInstance().subscribe(this);
     }
 
     /**

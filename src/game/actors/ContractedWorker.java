@@ -15,7 +15,6 @@ import game.actions.RageStrikeAction;
 import game.capabilities.*;
 import game.enums.Ability;
 import game.enums.MaterialCapability;
-import game.managers.AlarmManager;
 import game.managers.Spawner;
 import game.sanctuary.DamageInterceptor;
 import game.utils.SpatialSearch;
@@ -121,11 +120,6 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
 
 //        // Reset protection flag every turn (KISS Reset Pattern) [YOUR ADDITION]
 //        this.disableAbility(DamageInterceptor.PROTECTED);
-
-        // Check global facility state
-        if (AlarmManager.getInstance().isActive()) {
-            display.println("\u001B[31m" + "!!! RED ALERT: FACILITY LOCKED DOWN !!!" + "\u001B[0m");
-        }
 
         // Validate consciousness
         if (!this.isConscious()) {

@@ -97,7 +97,7 @@ public class GalvanicSurgeAction extends Action {
 
         // Execute the surge using the new signature
         source.releaseCharge(locationToTrigger, charge);
-        source.consumeSource(actor);
+        source.consumeSource(actor, map);
         return actor + " manually triggers the " + name + " pulse!";
     }
 

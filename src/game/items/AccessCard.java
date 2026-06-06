@@ -13,7 +13,6 @@ import game.capabilities.Purchasable;
 import game.capabilities.Unlockable;
 import game.enums.AccessLevel;
 import game.enums.ItemStatistics;
-import game.managers.AlarmManager;
 
 import java.util.Random;
 
@@ -131,10 +130,6 @@ public class AccessCard extends Item implements Purchasable {
     @Override
     public ActionList allowableActions(Actor owner, GameMap map) {
         ActionList actions = new ActionList();
-
-        if (AlarmManager.getInstance().isActive()) {
-            return actions;
-        }
 
         Location currentLocation = map.locationOf(owner);
 
