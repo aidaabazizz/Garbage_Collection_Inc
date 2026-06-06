@@ -67,14 +67,6 @@ public class SuperComputer extends Ground implements SanctuaryTool {
         // --- REQ4: DISTORTION AUDIT PROTOCOL ---
         actions.add(new DistortionAuditAction(location, quotaManager));
 
-        // --- REQ4: COMPLEX INTERACTION (Scanning for Distortions) ---
-        List<Location> corruptedSites = game.utils.SpatialSearch.getAdjacentLocationsWithCapability(
-                location,
-                DistortionCapability.CORRUPTED
-        );
-        for (Location site : corruptedSites) {
-            actions.add(new StabiliseDistortionAction(site));
-        }
 
         for (Item item : actor.getInventory().getItems()) {
             Sellable sellable = item.asCapability(Sellable.class).orElse(null);
