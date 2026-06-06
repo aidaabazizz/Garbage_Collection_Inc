@@ -2,6 +2,7 @@ package game.highvoltage;
 
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.displays.Display;
+import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 
 /**
@@ -42,8 +43,9 @@ public interface ChargeSource {
      * 2. Item objects: Override this to handle removal from the Actor's inventory or
      *    reducing a charge counter upon use.
      *
-     * @param actor The Actor who triggered the source (may be null for autonomous
+     * @param actor The Actor who triggered the source (would be null for autonomous
      *              sources like lightning).
+     * @param map The current game map.
      */
-    default void consumeSource(Actor actor) {}
+    default void consumeSource(Actor actor, GameMap map) {}
 }

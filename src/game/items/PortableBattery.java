@@ -93,8 +93,15 @@ public class PortableBattery extends Item implements ChargeSource {
      * @param actor The actor whose inventory the battery should be removed from.
      */
     @Override
-    public void consumeSource(Actor actor) {
-        actor.getInventory().remove(this);
+    public void consumeSource(Actor actor, GameMap map) {
+        // try to remove it from the actor's backpack
+        boolean wasInBackpack = actor.getInventory().remove(this);
+
+        // if it wasn't in the backpack, remove it from the ground
+        if (!wasInBackpack) {
+            // use the map provided in the parameter to find Bob's location
+            map.locationOf(actor).removeItem(this);
+        }
     }
     /**
      * Overrides the ground-based interaction logic to provide the manual surge action.
