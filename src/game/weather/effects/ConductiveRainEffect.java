@@ -83,8 +83,8 @@ public class ConductiveRainEffect implements AnomalyWorldEffect {
         ChargeContext charge = createMoistureCharge();
 
         int hazardsSuppressed = suppressExtinguishableHazards(nearbyLocations);
-        int reactionsTriggered = triggerReactiveGrounds(nearbyLocations, charge);
         int puddlesCreated = formPuddles(nearbyLocations, actor);
+        int reactionsTriggered = triggerReactiveGrounds(nearbyLocations, charge);
 
         return buildResultMessage(puddlesCreated, reactionsTriggered, hazardsSuppressed);
     }

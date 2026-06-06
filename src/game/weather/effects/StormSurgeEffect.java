@@ -4,12 +4,14 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.grounds.AtmosphericChargeSource;
+import game.enums.DistortionCapability;
+import game.enums.FacilityCapability;
 import game.enums.MaterialCapability;
+import game.grounds.AtmosphericChargeSource;
+import game.grounds.RageGround;
 import game.highvoltage.ChargeContext;
 import game.highvoltage.GalvanicCharge;
 import game.weather.WeatherSnapshot;
-import game.enums.FacilityCapability;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,12 +20,11 @@ import java.util.Random;
 
 /**
  * Weather effect that turns storm and wind API data into stronger atmospheric
- * charge in the game world.
+ * charge and distortion in the game world.
  * <p>
- * This effect connects REQ5 to the REQ3 atmospheric charge system. Instead of
- * modifying private constants inside AtmosphericChargeSource, it increases storm
- * pressure by forcing an immediate charge release and optionally placing an
- * additional charge source on a nearby safe tile.
+ * This effect connects REQ5 to both REQ3 and REQ4. Storm weather triggers
+ * atmospheric charge through the REQ3 high-voltage system and may also spread
+ * RageGround from the REQ4 distorted sanctuary system.
  * </p>
  *
  * @author Suchir
@@ -34,6 +35,8 @@ public class StormSurgeEffect implements AnomalyWorldEffect {
     private static final int RADIUS = 2;
     private static final double WIND_THRESHOLD = 8.0;
     private static final double EXTRA_SOURCE_CHANCE = 0.50;
+    private static final double RAGE_SPREAD_CHANCE = 0.50;
+    private static final int STORM_CHARGE_DAMAGE = 3;
 
     private final Random random;
 
@@ -69,9 +72,9 @@ public class StormSurgeEffect implements AnomalyWorldEffect {
     /**
      * Applies storm surge effects to the current game world.
      * <p>
-     * A weather-amplified atmospheric charge is released immediately at the
-     * actor's location. There is also a chance to place an extra
-     * AtmosphericChargeSource nearby, increasing future lightning activity.
+     * The storm releases an immediate atmospheric charge, may place an additional
+     * charge source nearby, and may spread RageGround to represent distortion
+     * instability caused by the storm.
      * </p>
      *
      * @param actor the actor triggering the weather sync
@@ -82,28 +85,47 @@ public class StormSurgeEffect implements AnomalyWorldEffect {
      */
     @Override
     public String applyEffect(Actor actor, GameMap map, Location location, WeatherSnapshot snapshot) {
-        Display display = new Display();
-        ChargeContext charge = new GalvanicCharge(
-                "a weather-amplified storm surge",
-                display,
-                3
-        );
-
-        AtmosphericChargeSource surgeSource = new AtmosphericChargeSource();
-        surgeSource.releaseCharge(location, charge);
+        ChargeContext charge = createStormCharge();
+        releaseAtmosphericCharge(location, charge);
 
         boolean sourcePlaced = false;
+        boolean rageSpread = false;
 
         if (random.nextDouble() < EXTRA_SOURCE_CHANCE) {
             sourcePlaced = placeExtraSource(map, location, actor);
         }
 
-        if (sourcePlaced) {
-            return "Storm surge intensifies the facility: atmospheric charge erupts and a new charge source forms nearby.";
+        if (random.nextDouble() < RAGE_SPREAD_CHANCE) {
+            rageSpread = spreadRageGround(map, location, actor);
         }
 
-        return "Storm surge intensifies the facility: atmospheric charge erupts around " + actor + ".";
+        return buildResultMessage(actor, sourcePlaced, rageSpread);
     }
+
+    /**
+     * Creates the charge context used by the storm surge.
+     *
+     * @return the storm charge context
+     */
+    private ChargeContext createStormCharge() {
+        return new GalvanicCharge(
+                "a weather-amplified storm surge",
+                new Display(),
+                STORM_CHARGE_DAMAGE
+        );
+    }
+
+    /**
+     * Releases atmospheric charge at the actor's location.
+     *
+     * @param location the charge release location
+     * @param charge the storm charge context
+     */
+    private void releaseAtmosphericCharge(Location location, ChargeContext charge) {
+        AtmosphericChargeSource surgeSource = new AtmosphericChargeSource();
+        surgeSource.releaseCharge(location, charge);
+    }
+
     /**
      * Attempts to place an extra AtmosphericChargeSource on a nearby valid tile.
      *
@@ -124,6 +146,54 @@ public class StormSurgeEffect implements AnomalyWorldEffect {
         }
 
         return false;
+    }
+
+    /**
+     * Attempts to spread RageGround on a nearby valid tile.
+     *
+     * @param map the current game map
+     * @param centre the centre location
+     * @param actor the actor used to test passability
+     * @return true if RageGround was spread
+     */
+    private boolean spreadRageGround(GameMap map, Location centre, Actor actor) {
+        List<Location> candidates = nearbyLocations(map, centre);
+        Collections.shuffle(candidates, random);
+
+        for (Location candidate : candidates) {
+            if (canPlaceRageGround(candidate, actor)) {
+                candidate.setGround(new RageGround());
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Builds the storm surge result message.
+     *
+     * @param actor the actor triggering the effect
+     * @param sourcePlaced whether an atmospheric charge source was placed
+     * @param rageSpread whether RageGround was spread
+     * @return the result message
+     */
+    private String buildResultMessage(Actor actor, boolean sourcePlaced, boolean rageSpread) {
+        StringBuilder result = new StringBuilder();
+
+        result.append("Storm surge intensifies the facility: atmospheric charge erupts around ")
+                .append(actor)
+                .append(".");
+
+        if (sourcePlaced) {
+            result.append(" A new atmospheric charge source forms nearby.");
+        }
+
+        if (rageSpread) {
+            result.append(" RageGround spreads as the distortion field destabilises.");
+        }
+
+        return result.toString();
     }
 
     /**
@@ -173,6 +243,26 @@ public class StormSurgeEffect implements AnomalyWorldEffect {
         return !location.containsAnActor()
                 && location.getGround().canActorEnter(actor)
                 && !location.getGround().hasAbility(MaterialCapability.ENERGIZED)
+                && !location.getGround().hasAbility(DistortionCapability.CORRUPTED)
+                && !location.getGround().hasAbility(DistortionCapability.SANCTUARY)
+                && !location.getGround().hasAbility(DistortionCapability.ACTIVE_HAZARD)
+                && !location.getGround().hasAbility(FacilityCapability.FACILITY_TERMINAL);
+    }
+
+    /**
+     * Checks whether RageGround can be placed on a tile.
+     *
+     * @param location the target location
+     * @param actor the actor used to test passability
+     * @return true if RageGround can be placed
+     */
+    private boolean canPlaceRageGround(Location location, Actor actor) {
+        return !location.containsAnActor()
+                && location.getGround().canActorEnter(actor)
+                && !location.getGround().hasAbility(MaterialCapability.ENERGIZED)
+                && !location.getGround().hasAbility(DistortionCapability.CORRUPTED)
+                && !location.getGround().hasAbility(DistortionCapability.SANCTUARY)
+                && !location.getGround().hasAbility(DistortionCapability.ACTIVE_HAZARD)
                 && !location.getGround().hasAbility(FacilityCapability.FACILITY_TERMINAL);
     }
 }
