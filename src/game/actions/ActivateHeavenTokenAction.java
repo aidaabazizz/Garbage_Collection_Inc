@@ -4,7 +4,7 @@ import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import game.effects.SanctuaryField;
+import game.grounds.SanctuaryField;
 import game.items.HeavenToken;
 import game.sanctuary.DamageInterceptor;
 
@@ -42,9 +42,12 @@ public class ActivateHeavenTokenAction extends Action {
 
         // Set protection immediately — tick already ran this turn
         actor.enableAbility(DamageInterceptor.PROTECTED);
+
+        // FIX: Ensure both 'actor' and 'FIELD_DURATION' are passed to match %s and %d
         return String.format(
-                "%s uses the Heaven Token! A holy sanctuary field manifests for %d turns.\n"+
-                actor, FIELD_DURATION
+                "%s uses the Heaven Token! A holy sanctuary field manifests for %d turns.\n",
+                        actor, FIELD_DURATION
+
         );
 
     }
