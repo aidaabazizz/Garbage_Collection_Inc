@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.grounds.AtmosphericChargeSource;
 import game.enums.MaterialCapability;
+import game.highvoltage.ChargeContext;
 import game.highvoltage.GalvanicCharge;
 import game.weather.WeatherSnapshot;
 
@@ -22,15 +23,6 @@ import java.util.Random;
  * modifying private constants inside AtmosphericChargeSource, it increases storm
  * pressure by forcing an immediate charge release and optionally placing an
  * additional charge source on a nearby safe tile.
- * </p>
- *
- * <p>
- * Design notes:
- * <ul>
- *     <li>No switch statements are used.</li>
- *     <li>No instanceof checks are used.</li>
- *     <li>The class depends on the existing AtmosphericChargeSource behaviour.</li>
- * </ul>
  * </p>
  *
  * @author Suchir
@@ -90,7 +82,7 @@ public class StormSurgeEffect implements AnomalyWorldEffect {
     @Override
     public String applyEffect(Actor actor, GameMap map, Location location, WeatherSnapshot snapshot) {
         Display display = new Display();
-        GalvanicCharge charge = new GalvanicCharge(
+        ChargeContext charge = new GalvanicCharge(
                 "a weather-amplified storm surge",
                 display,
                 3
