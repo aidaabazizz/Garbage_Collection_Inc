@@ -10,16 +10,20 @@ import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import game.actions.ActivateHeavenTokenAction;
 import game.capabilities.CreditHolder;
 import game.capabilities.Purchasable;
-import game.capabilities.Sellable;
-import game.effects.SanctuaryField;
+import game.grounds.SanctuaryField;
 import game.enums.ItemStatistics;
 import game.sanctuary.SanctuaryTool;
 
 public class HeavenToken extends Item implements SanctuaryTool, Purchasable {
+
+    private static final int WEIGHT = 1;
+    private static final int FIELD_DURATION = 10;
+    private static final int PURCHASE_PRICE = 50;
+
     public HeavenToken() {
         super("Heaven Token", 'ε');
         this.makePortable(); // FIX: Allows you to pick it up
-        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(1));
+        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(WEIGHT));
     }
 
     /**
@@ -41,7 +45,7 @@ public class HeavenToken extends Item implements SanctuaryTool, Purchasable {
         Ground previousGround = location.getGround();
 
         // Replace the floor Bob is standing on with a Sanctuary Field
-        location.setGround(new SanctuaryField(10, previousGround));
+        location.setGround(new SanctuaryField(FIELD_DURATION, previousGround));
 
         // Remove from inventory
         actor.getInventory().remove(this);
@@ -52,14 +56,14 @@ public class HeavenToken extends Item implements SanctuaryTool, Purchasable {
     // --- Purchasable Implementation ---
     @Override
     public int getPurchasePrice() {
-        return 50; // Rare item price
+        return PURCHASE_PRICE; // Rare item price
     }
 
     @Override
     public String purchasedBy(Actor buyer, GameMap map, CreditHolder wallet) {
         wallet.deductCredits(this.getPurchasePrice());
         buyer.getInventory().add(this);
-        return buyer + " bought a Command Whistle for 50 credits.";
+        return buyer + " bought a Heaven Token for " + PURCHASE_PRICE + " credits.";
     }
 
 }
