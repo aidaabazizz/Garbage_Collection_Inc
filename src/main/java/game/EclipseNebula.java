@@ -1,5 +1,6 @@
 package game;
 
+import edu.monash.fit2099.engine.GameEngineException;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.DefaultGroundCreator;
 import edu.monash.fit2099.engine.positions.GameMap;
@@ -131,6 +132,24 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('Ω', BlackHolePortal::new);
         groundCreator.registerGround('⌂', CorruptedSafeHouse::new);
         groundCreator.registerGround('╬', RageGround::new);
+    }
+
+    /**
+     * Runs the main game loop cycle.
+     * Overrides the base engine lifecycle to execute the global corporate quota
+     * evaluation logic exactly once per game turn, passing the primary map
+     * context to process countdown rules and print deadline updates.
+     *
+     * @throws GameEngineException if the underlying game engine encounters an unrecoverable structural loop error
+     */
+    @Override
+    protected void gameLoop() throws GameEngineException {
+        super.gameLoop();
+
+        String quotaMessage = quotaManager.tickTurnCycle(gameMaps.get(0));
+        if (!quotaMessage.isEmpty()) {
+            display.println(quotaMessage);
+        }
     }
 
     /**
