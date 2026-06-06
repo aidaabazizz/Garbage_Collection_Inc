@@ -3,6 +3,7 @@ package game.capabilities;
 import edu.monash.fit2099.engine.GameEntity;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.capabilities.Status;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Location;
 import game.enums.Ability;
@@ -39,6 +40,8 @@ public class MotivationStatus implements Status {
      */
     private final Location origin;
 
+    private final Display display = new Display();
+
     /**
      * Creates a MotivationStatus anchored to the whistle-user's location.
      *
@@ -71,10 +74,10 @@ public class MotivationStatus implements Status {
 
                 if (dest != null && dest.canActorEnter(enemy)) {
                     origin.map().moveActor(enemy, dest);
-                    System.out.println(">>> " + enemy + " is blasted away!");
+                    display.println(">>> " + enemy + " is blasted away!");
                 } else {
-                    enemy.hurt(5);
-                    System.out.println(">>> " + enemy + " slams into a wall!");
+                    enemy.hurt(IMPACT_DAMAGE);
+                    display.println(">>> " + enemy + " slams into a wall!");
                 }
             }
         }
@@ -110,6 +113,11 @@ public class MotivationStatus implements Status {
     @Override
     public boolean isStatusActive() {
         return !hasPulsed;
+    }
+
+    @Override
+    public String toString() {
+        return "Motivation (AoE pulse pending)";
     }
 
 }
