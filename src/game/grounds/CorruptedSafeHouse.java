@@ -2,11 +2,13 @@ package game.grounds;
 
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.actors.ActorStatistics;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.*;
 import game.capabilities.FireStackable;
 import game.capabilities.SanctuaryStatus;
 import game.enums.Ability;
 import game.enums.DistortionCapability;
+import game.managers.QuotaManager;
 import game.sanctuary.DamageInterceptor;
 import game.sanctuary.DistortionSource;
 
@@ -24,8 +26,18 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
 
     private boolean isStabilised = false;
 
+    private static final double HEAL_CHANCE = 0.30;
+    private static final int HEAL_AMOUNT = 1;
+    private static final int BLUE_FIRE_LIFESPAN = 3;
+    private static final int BLUE_FIRE_BURST_LIFESPAN = 6;
+    private static final int AUDIT_CREDITS = 20;
+    private static final int AUDIT_COOLDOWN = 5;
+
+
+    private final Display display = new Display();
     /** Cooldown turns after being audited. */
     private int auditCooldown = 0;
+
 
     public CorruptedSafeHouse() {
         super('⌂', "Corrupted Safe House");
@@ -36,6 +48,9 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
     public void tick(Location location) {
         if (auditCooldown > 0) {
             auditCooldown--;
+            if (auditCooldown == 0) {
+                isStabilised = false; // cooldown over — safe house works normally again
+            }
             return;
         }
 
@@ -50,8 +65,8 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
             if (!actor.hasStatus(SanctuaryStatus.class)) {
                 actor.addStatus(new SanctuaryStatus());
                 actor.enableAbility(DamageInterceptor.PROTECTED);
-                if (Math.random() <= 0.30) {
-                    actor.heal(1);
+                if (Math.random() <= HEAL_CHANCE) {
+                    actor.heal(HEAL_AMOUNT);
                     System.out.println(">>> " + actor + " is healed by the sanctuary energy.");
                 }
             }
@@ -78,13 +93,19 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
             // Check if the tile is ALREADY fire using the interface
             FireStackable fire = dest.getGroundAs(FireStackable.class);
 
+            // Skip existing hazards (already burning)
+
+
+            if (existing.hasAbility(DistortionCapability.ACTIVE_HAZARD)) {
+                continue;
+            }
             if (fire != null) {
                 // If fire is already there, make it stronger!
                 fire.addStack();
             } else {
                 // If no fire, spawn new fire (if the tile is flammable)
                 if (existing.canActorEnter(null) && !existing.hasAbility(DistortionCapability.CORRUPTED)) {
-                    dest.setGround(new BlueFire(3, existing));
+                    dest.setGround(new BlueFire(BLUE_FIRE_LIFESPAN, existing));
                 }
             }
         }
@@ -116,7 +137,7 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
     @Override
     public String audit(QuotaManager quotaManager, Location location) {
         // 1. Contribute credits to REQ1
-        String creditMsg = quotaManager.addCompanyCredits(20);
+        String creditMsg = quotaManager.addCompanyCredits(AUDIT_CREDITS);
 
         // 2. Final unstable effect — burst heal + double-lifespan BlueFire ring
         StringBuilder effectMsg = new StringBuilder();
@@ -133,13 +154,13 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
             if (existing.canActorEnter(null)
                     && !existing.hasAbility(DistortionCapability.CORRUPTED)
                     && !existing.hasAbility(DistortionCapability.ACTIVE_HAZARD)) {
-                dest.setGround(new BlueFire(6, existing)); // Double lifespan
+                dest.setGround(new BlueFire(BLUE_FIRE_BURST_LIFESPAN, existing)); // Double lifespan
             }
         }
         effectMsg.append("The safe house vents in a violent burst — intensified BlueFire erupts around it!");
 
         // 3. Enter cooldown
-        auditCooldown = 5;
+        auditCooldown = AUDIT_COOLDOWN;
         isStabilised = true; // Treat as stabilised during cooldown
 
         return creditMsg + "\n" + effectMsg + "\nSafe house entering cooldown for 5 turns.";
