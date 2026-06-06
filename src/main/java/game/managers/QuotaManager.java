@@ -32,7 +32,7 @@ public class QuotaManager {
     /**
      * Initial maximum time limit (in turns) for completing the quota cycle.
      */
-    private static final int STARTING_MAX_TIME_LIMIT = 200;
+    private static final int STARTING_MAX_TIME_LIMIT = 3;
 
     /**
      * Current company rank in the quota system.
@@ -74,13 +74,6 @@ public class QuotaManager {
         this.currentMaxTimeLimit = STARTING_MAX_TIME_LIMIT;
         this.remainingTurns = STARTING_MAX_TIME_LIMIT;
         this.isFacilityAccessActive = true;
-    }
-
-    /**
-     * Returns the current company rank.
-     */
-    public int getCompanyRank() {
-        return companyRank;
     }
 
     /**
@@ -152,7 +145,7 @@ public class QuotaManager {
                         .append(currentQuotaTarget)
                         .append(" Credits. Remaining Turns: ")
                         .append(remainingTurns);
-            } else {
+            } else if (isFacilityAccessActive) {
                 message.append("[QUOTA FAILURE] The quota of ")
                         .append(currentQuotaTarget)
                         .append(" Company Credits was not reached before the deadline. ")
