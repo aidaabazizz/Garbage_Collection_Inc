@@ -57,7 +57,7 @@ public class DormantStaticCreature extends NonPlayerCharacter implements ChargeR
      */
     public DormantStaticCreature() {
         super("Dormant Static Creature", 'O', INITIAL_HEALTH, new BasicInventory());
-        this.enableAbility(MaterialCapability.DORMANT_EGG);  // ADDED for identification
+        this.enableAbility(MaterialCapability.MAGNETIC_REPULSIVE);  // ADDED for identification
     }
 
     /**
