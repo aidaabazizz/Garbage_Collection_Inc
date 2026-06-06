@@ -124,3 +124,149 @@ powering magnetic tools to harvest scrap remotely, and paralysing workers caught
 >
 > *Please focus your assessment on these six classes when evaluating REQ3.*
 ---
+
+# Feature Proposal — REQ5: Real Weather Anomaly System
+
+---
+
+## REQ5: Real Weather Anomaly System
+
+### The Pitch
+
+The Real Weather Anomaly System connects the game world to the OpenWeather API and uses real-world weather data to create meaningful changes inside the moon facility. The API is not used only to display weather information to the player. Instead, the returned weather data is interpreted and used to trigger environmental anomalies that affect terrain, hazards, actors, and existing game systems.
+
+The worker can activate this feature through the `SuperComputer`. When the weather sync action is selected, the game sends a dynamic API request based on the current game state. The returned weather conditions may trigger one or more anomalies, such as Conductive Rain, Heat Distortion, or Storm Surge.
+
+This makes the game world feel less static because real-world weather conditions can influence what happens inside the facility.
+
+---
+
+### The Mechanics
+
+* The worker stands near the `SuperComputer` and selects the weather sync option.
+* `WeatherSyncAction` starts the weather system when the action is selected by the worker.
+* The system builds a weather request using the current game state instead of using one fixed static URL.
+* The current map and actor position help determine the real-world coordinates used in the API request.
+* `WeatherMapAnchor` links the in-game map context to base real-world latitude and longitude values.
+* `WeatherQuery` stores the request values such as latitude, longitude, API key, and metric units.
+* `WeatherConfig` reads the OpenWeather API key from the `OPENWEATHER_API_KEY` environment variable.
+* `WeatherApiClient` sends the HTTP request to OpenWeather.
+* The raw API response is parsed and stored inside a `WeatherSnapshot`.
+* `WeatherSnapshot` stores the useful weather values needed by the game, such as temperature, humidity, wind speed, weather condition, city name, and country code.
+* `WeatherAnomalyManager` receives the `WeatherSnapshot` and checks it using separate weather interpreter classes.
+* Each interpreter checks for one type of weather anomaly:
+
+  * `HumidityAnomalyInterpreter` checks for humid or rainy conditions.
+  * `TemperatureAnomalyInterpreter` checks for high-temperature conditions.
+  * `StormAnomalyInterpreter` checks for windy, stormy, or thunderstorm conditions.
+* If an anomaly is detected, the matching world effect is applied.
+* `ConductiveRainEffect` creates or modifies wet terrain such as `Puddle`, suppresses extinguishable hazards, and triggers charge-related behaviour.
+* `HeatDistortionEffect` applies heat-based world changes when the API reports high temperature.
+* `StormSurgeEffect` applies storm-based consequences such as actor damage, terrain disturbance, and atmospheric charge behaviour.
+* The effects avoid overwriting important facility terrain such as the `SuperComputer`.
+* Capability checks are used to decide whether a tile can safely be changed.
+* The system avoids `switch` statements and `instanceof` checks by using polymorphism, interfaces, and capability-based behaviour.
+
+---
+
+### The Architecture
+
+#### New Abstractions
+
+| Abstraction                 | Type      | Role                                                                                           |
+| --------------------------- | --------- | ---------------------------------------------------------------------------------------------- |
+| `WeatherAnomalyInterpreter` | Interface | Interprets a `WeatherSnapshot` and decides whether a specific weather anomaly should activate. |
+| `AnomalyWorldEffect`        | Interface | Represents a weather effect that changes the game world after an anomaly has been detected.    |
+
+`WeatherAnomalyInterpreter` and `AnomalyWorldEffect` are the two main abstractions for REQ5. They separate weather decision-making from world modification, which makes the system easier to extend and maintain.
+
+---
+
+#### Concrete Classes
+
+| Class                           | Status | Abstraction Implemented     | Complex Effect                                                                                                            |
+| ------------------------------- | ------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `HumidityAnomalyInterpreter`    | New    | `WeatherAnomalyInterpreter` | Checks humidity and weather condition values from `WeatherSnapshot` to determine whether Conductive Rain should activate. |
+| `TemperatureAnomalyInterpreter` | New    | `WeatherAnomalyInterpreter` | Checks temperature values from `WeatherSnapshot` to determine whether Heat Distortion should activate.                    |
+| `StormAnomalyInterpreter`       | New    | `WeatherAnomalyInterpreter` | Checks wind speed and weather condition values from `WeatherSnapshot` to determine whether Storm Surge should activate.   |
+| `ConductiveRainEffect`          | New    | `AnomalyWorldEffect`        | Creates or modifies wet terrain, suppresses extinguishable hazards, and triggers charge-related behaviour.                |
+| `HeatDistortionEffect`          | New    | `AnomalyWorldEffect`        | Applies high-temperature world effects and connects hot API weather to environmental hazard behaviour.                    |
+| `StormSurgeEffect`              | New    | `AnomalyWorldEffect`        | Applies storm-based world changes such as actor damage, terrain disturbance, and atmospheric charge behaviour.            |
+
+---
+
+### Supporting Classes
+
+| Class                   | Package         | Role                                                                                                                                                   |
+| ----------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `WeatherSyncAction`     | `game.actions`  | Action offered by the `SuperComputer`. It builds the weather query, calls the API client, receives the snapshot, and passes it to the anomaly manager. |
+| `WeatherAnomalyManager` | `game.managers` | Coordinates all weather interpreters and world effects using abstraction-based lists.                                                                  |
+| `WeatherApiClient`      | `game.weather`  | Sends the HTTP request to OpenWeather and converts the response into a `WeatherSnapshot`.                                                              |
+| `WeatherQuery`          | `game.weather`  | Stores query values such as latitude, longitude, API key, and units, then builds the final API URL.                                                    |
+| `WeatherSnapshot`       | `game.weather`  | Stores parsed weather values needed by the game.                                                                                                       |
+| `WeatherConfig`         | `game.weather`  | Reads the API key from the `OPENWEATHER_API_KEY` environment variable.                                                                                 |
+| `WeatherApiException`   | `game.weather`  | Represents API-related errors, such as a missing key, failed request, or parsing problem.                                                              |
+| `WeatherSystemFactory`  | `game.weather`  | Builds and connects the weather action, API client, manager, interpreters, and effects.                                                                |
+| `WeatherMapAnchor`      | `game.enums`    | Links in-game map context to real-world coordinates used in the API request.                                                                           |
+| `FacilityCapability`    | `game.enums`    | Protects important facility terrain such as the `SuperComputer` from being overwritten by weather effects.                                             |
+
+---
+
+### Existing Systems Integrated
+
+| Existing Class/Interface  | Package                   | How REQ5 Uses It                                                                    |
+| ------------------------- | ------------------------- | ----------------------------------------------------------------------------------- |
+| `SuperComputer`           | `game.grounds`            | Offers the weather sync action to the worker.                                       |
+| `Puddle`                  | `game.grounds`            | Created or modified during Conductive Rain.                                         |
+| `ChargeReactive`          | `game.highvoltage`        | Used when Conductive Rain interacts with charge-reactive terrain or objects.        |
+| `ChargeContext`           | `game.highvoltage`        | Provides context for applying charge-related behaviour during weather effects.      |
+| `GalvanicCharge`          | `game.highvoltage`        | Used to represent electrical charge during conductive rain or storm surge.          |
+| `AtmosphericChargeSource` | `game.grounds`            | Used during Storm Surge to connect storm weather with atmospheric charge behaviour. |
+| `Extinguishable`          | relevant existing package | Suppressed or reduced by Conductive Rain where applicable.                          |
+| `FacilityCapability`      | `game.enums`              | Prevents important facility terrain from being replaced by weather-created terrain. |
+
+---
+
+### Marker Note — Six Main Concrete Classes for REQ5
+
+The six main concrete classes that demonstrate the REQ5 abstraction design are:
+
+| # | Class                           | Status | Abstraction Implemented     | Complex Effect                                                                                                   |
+| - | ------------------------------- | ------ | --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| 1 | `HumidityAnomalyInterpreter`    | New    | `WeatherAnomalyInterpreter` | Reads humidity and condition values from `WeatherSnapshot` to determine whether Conductive Rain should activate. |
+| 2 | `TemperatureAnomalyInterpreter` | New    | `WeatherAnomalyInterpreter` | Reads temperature from `WeatherSnapshot` to determine whether Heat Distortion should activate.                   |
+| 3 | `StormAnomalyInterpreter`       | New    | `WeatherAnomalyInterpreter` | Reads wind speed and condition values from `WeatherSnapshot` to determine whether Storm Surge should activate.   |
+| 4 | `ConductiveRainEffect`          | New    | `AnomalyWorldEffect`        | Creates or modifies wet terrain, suppresses extinguishable hazards, and triggers charge-related behaviour.       |
+| 5 | `HeatDistortionEffect`          | New    | `AnomalyWorldEffect`        | Applies high-temperature environmental changes based on API weather data.                                        |
+| 6 | `StormSurgeEffect`              | New    | `AnomalyWorldEffect`        | Applies storm-based terrain changes, actor damage, and atmospheric charge behaviour.                             |
+
+---
+
+### API Request Design
+
+The OpenWeather request is built dynamically by `WeatherQuery`. This means the request changes based on the current game state instead of always using the same fixed URL.
+
+Example request format:
+
+```text
+https://api.openweathermap.org/data/2.5/weather?lat=-27.4705&lon=153.0260&appid=${OPENWEATHER_API_KEY}&units=metric
+```
+
+The actual latitude and longitude are determined using the current map context and actor position. This satisfies the REQ5 rule that the API request must be dynamically driven by the current game state.
+
+---
+
+### Why This Design Satisfies REQ5
+
+This design satisfies REQ5 because the system uses an external API in a way that directly affects the game world. The weather data is not only displayed to the player. It is interpreted and used to trigger terrain changes, actor effects, hazard changes, and charge-related behaviours.
+
+The API request is also dynamic because it is built from the current game state. The system uses the actor’s current location and map context to influence the real-world coordinates sent to OpenWeather.
+
+The design includes two clear abstractions:
+
+1. `WeatherAnomalyInterpreter`
+2. `AnomalyWorldEffect`
+
+Each abstraction has three concrete implementations, giving the system a clear polymorphic structure. `WeatherAnomalyManager` depends on these abstractions rather than depending directly on the concrete classes. This supports DIP and OCP because new weather types can be added later without rewriting the manager.
+
+Overall, the design follows SRP, OCP, DIP, encapsulation, polymorphism, and secure API handling while still creating meaningful game-state impact.

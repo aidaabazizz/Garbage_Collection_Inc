@@ -10,7 +10,6 @@ import game.capabilities.Sellable;
 
 /**
  * Behaviour that causes an actor to steal any Sellable item from the ground.
- * Uses asCapability() - NO instanceof!
  *
  * @author Aida
  */

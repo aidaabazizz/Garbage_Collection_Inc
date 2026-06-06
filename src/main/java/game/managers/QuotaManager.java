@@ -77,13 +77,6 @@ public class QuotaManager {
     }
 
     /**
-     * Returns the current company rank.
-     */
-    public int getCompanyRank() {
-        return companyRank;
-    }
-
-    /**
      * Returns the current quota target for the cycle.
      */
     public int getCurrentQuotaTarget() {
@@ -152,7 +145,7 @@ public class QuotaManager {
                         .append(currentQuotaTarget)
                         .append(" Credits. Remaining Turns: ")
                         .append(remainingTurns);
-            } else {
+            } else if (isFacilityAccessActive) {
                 message.append("[QUOTA FAILURE] The quota of ")
                         .append(currentQuotaTarget)
                         .append(" Company Credits was not reached before the deadline. ")
