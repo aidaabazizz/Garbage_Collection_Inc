@@ -21,9 +21,11 @@ powering magnetic tools to harvest scrap remotely, and paralysing workers caught
 - **TeslaCoil** charges over 3 turns and auto-discharges a diamond-shaped (Manhattan Distance ≤ 2)
   AoE blast; it can also be manually triggered by an adjacent actor via `GalvanicSurgeAction`,
   or overloaded by an incoming charge from another source.
-- **PortableBattery** is a single-use item carried in inventory; on activation it permanently
-  converts the ground beneath the user to a `PoweredFloor`, spawns `IonizedBarrier` walls on
-  all 8 surrounding tiles (blocking NPC pathfinding), and zaps every actor in the radius.
+- **PortableBattery** is a single-use "Strategic Trigger" that can be activated either from the actor's 
+  inventory or while lying on a map tile. This allows the player to use it as a handheld tool for
+  exploration or plant it strategically as a remote-access environmental trap. On activation, it
+  permanently converts the ground to a `PoweredFloor`, spawns `IonizedBarrier` walls on all 8 surrounding tiles
+  to trap enemies, and zaps every actor in the radius.
 - **Resonators** (`Puddle`, `ElectrifiedPuddle`, `PoweredFloor`, `IonizedBarrier`,
   `DormantStaticCreature`, `Wallet`) implement `ChargeReactive.reactToCharge(location, charge)`
   to define their response:

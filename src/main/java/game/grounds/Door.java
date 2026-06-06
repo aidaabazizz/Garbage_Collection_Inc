@@ -3,7 +3,6 @@ package game.grounds;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Ground;
-import game.capabilities.AlarmListener;
 import game.capabilities.Unlockable;
 import game.enums.AccessLevel;
 
@@ -16,7 +15,7 @@ import game.enums.AccessLevel;
  * @author Suchir
  * @version 1.0
  */
-public abstract class Door extends Ground implements Unlockable, AlarmListener {
+public abstract class Door extends Ground implements Unlockable {
 
     private boolean isUnlocked = false;
     private boolean alarmLock = false;
@@ -65,24 +64,6 @@ public abstract class Door extends Ground implements Unlockable, AlarmListener {
     @Override
     public AccessLevel getRequiredAccessLevel() {
         return requiredAccessLevel;
-    }
-
-    /**
-     * Triggered when the facility alarm is activated.
-     * Forces the door into emergency locked state.
-     */
-    @Override
-    public void onAlarmActivated() {
-        this.alarmLock = true;
-    }
-
-    /**
-     * Triggered when the facility alarm is deactivated.
-     * Releases the emergency lock on the door.
-     */
-    @Override
-    public void onAlarmDeactivated() {
-        this.alarmLock = false;
     }
 
     /**
