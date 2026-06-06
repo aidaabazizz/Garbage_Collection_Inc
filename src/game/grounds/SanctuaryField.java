@@ -1,4 +1,4 @@
-package game.effects;
+package game.grounds;
 
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Exit;
@@ -53,29 +53,4 @@ public class SanctuaryField extends Ground {
         }
     }
 
-    private void applyProtectionAt(Location location) {
-        if (location.containsAnActor()) {
-            location.getActor().enableAbility(DamageInterceptor.PROTECTED);
-        }
-    }
 }
-
-//    /**
-//     * Sets PROTECTED flag immediately so hurt() works this same turn.
-//     * FieldProtectionStatus clears the flag next tick unless re-granted.
-//     * No instanceof — capability checks only (DIP).
-//     */
-//    private void applyProtectionAt(Location location) {
-//        if (!location.containsAnActor()) return;
-//
-//        Actor actor = location.getActor();
-//
-//        // Immediate flag — no tick delay
-//        actor.enableAbility(DamageInterceptor.PROTECTED);
-//
-//        // Status manages flag expiry — only add if not already present
-//        if (!actor.hasStatus(FieldProtectionStatus.class)) {
-//            actor.addStatus(new FieldProtectionStatus());
-//        }
-//    }
-//}
