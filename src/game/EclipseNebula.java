@@ -9,7 +9,6 @@ import game.actors.*;
 import game.doors.AluminiumDoor;
 import game.doors.IronDoor;
 import game.doors.TitaniumDoor;
-import game.enums.Ability;
 import game.enums.AccessLevel;
 import game.finance.Wallet;
 import game.grounds.*;
@@ -76,9 +75,6 @@ public class EclipseNebula extends World {
         // 3. REQ 2: Link Teleportation Tubes (Φ) between moons
         // This is necessary because strategies need Locations from both maps
         linkTeleportationTubes(moonMap, overflowMap);
-
-        // 4. Setup map-specific infrastructure (Alarms, Cameras)
-        setupMoonInfrastructure(moonMap);
 
         // 5. REQ 1: Spawn Scrap (Items the player SELLS to earn credits)
         // Spawned on both maps to provide income.
@@ -265,17 +261,6 @@ public class EclipseNebula extends World {
             }
         }
         return null;
-    }
-
-    /**
-     * Installs infrastructure on the 99-Deprecated moon.
-     *
-     * @param map the GameMap where infrastructure is being placed
-     * @throws Exception if an actor cannot be successfully added
-     */
-    private void setupMoonInfrastructure(GameMap map) throws Exception {
-        map.at(0, 0).addItem(new AlarmTimer());
-        map.at(10, 6).addActor(new SecurityCamera());
     }
 
     /**
