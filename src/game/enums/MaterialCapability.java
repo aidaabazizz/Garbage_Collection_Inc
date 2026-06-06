@@ -61,5 +61,18 @@ public enum MaterialCapability {
      * triggers the "Reflective Surge" logic, causing energy to arc back at the
      * attacker and dealing a portion of the incoming damage to them.
      */
-    REFLECTIVE
+    REFLECTIVE,
+    /**
+     * Identifies a specialized bioelectrical entity in a state of suspended animation.
+     *
+     * This capability marks an actor (e.g., DormantStaticCreature) as a "Resonator"
+     * within the galvanic ecosystem. Objects with this tag remain inert until they
+     * absorb energy from ENERGIZED terrain or direct electrical surges, triggering
+     * a metamorphosis into more complex hostile lifeforms (StaticStalkers).
+     *
+     * Additionally, it identifies the entity as a locus for magnetic anomalies,
+     * allowing it to accumulate potential energy and release repulsion pulses that
+     * physically displace MAGNETIC items across the map.
+     */
+    MAGNETIC_REPULSIVE
 }
