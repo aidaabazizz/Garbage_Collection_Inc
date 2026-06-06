@@ -3,6 +3,7 @@ package game.capabilities;
 import edu.monash.fit2099.engine.GameEntity;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.capabilities.Status;
+import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Location;
 import game.enums.Ability;
 import game.enums.DistortionCapability;
@@ -20,10 +21,12 @@ import game.sanctuary.DamageInterceptor;
 public class SanctuaryStatus implements Status {
 
     private static final int PROTECTION_DURATION = 5;
-    private static final double HEAL_CHANCE = 1; //change to 0.30
+    private static final double HEAL_CHANCE = 0.30;
+    private static final int HEAL_AMOUNT = 1;
 
     private int protectionTurns;
     private boolean isActive;
+    private final Display display = new Display();
 
     public SanctuaryStatus() {
         this.protectionTurns = PROTECTION_DURATION;
@@ -48,8 +51,8 @@ public class SanctuaryStatus implements Status {
 
             // Actor is still on the tile — apply healing
             if (Math.random() <= HEAL_CHANCE) {
-                actor.heal(1);
-                System.out.println(">>> " + actor + " is healed by the sanctuary energy.");
+                actor.heal(HEAL_AMOUNT);
+                display.println(">>> " + actor + " is healed by the sanctuary energy.");
             }
 
             // Manage protection flag
