@@ -11,6 +11,7 @@ import game.capabilities.Consumable;
 import game.capabilities.PoisonStatus;
 import game.highvoltage.ChargeContext;
 import game.highvoltage.ChargeReactive;
+import game.highvoltage.ChargeUtils;
 
 /**
  * A body of liquid on the ground that can be consumed by actors.
@@ -61,9 +62,15 @@ public class Puddle extends Ground implements Consumable, ChargeReactive {
      */
     @Override
     public void reactToCharge(Location location, ChargeContext charge) {
+        // recursion guard: claim this tile so the Emitter doesn't zap it again.
+        // this ensures the Puddle is the object responsible for the "Zap" on this coordinate.
+        if (charge.getVisited().contains(location)) {
+            return;
+        }
         // physically replaces this ground instance with the ElectrifiedPuddle hazard.
         charge.getDisplay().println("\u001B[36m" + "The puddle is hit by " + charge.getSourceName() +
                 " and becomes electrified!" + "\u001B[0m");
+        ChargeUtils.zapTile(location, charge, true);
         location.setGround(new ElectrifiedPuddle());
     }
 
