@@ -5,12 +5,13 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.grounds.SanctuaryField;
-import game.items.HeavenToken;
+
 import game.sanctuary.DamageInterceptor;
+import game.sanctuary.SanctuaryTool;
 
 public class ActivateHeavenTokenAction extends Action {
     /** The token to consume on use. */
-    private final HeavenToken token;
+    private final SanctuaryTool tool;
 
     /** How many turns the sanctuary field lasts. */
     private static final int FIELD_DURATION = 10;
@@ -18,10 +19,10 @@ public class ActivateHeavenTokenAction extends Action {
     /**
      * Creates an action to activate the given Heaven Token.
      *
-     * @param token the token being used
+     * @param tool the token being used
      */
-    public ActivateHeavenTokenAction(HeavenToken token) {
-        this.token = token;
+    public ActivateHeavenTokenAction(SanctuaryTool tool) {
+        this.tool = tool;
     }
 
     /**
@@ -35,22 +36,28 @@ public class ActivateHeavenTokenAction extends Action {
      */
     @Override
     public String execute(Actor actor, GameMap map) {
-        actor.getInventory().remove(token);
+        String result = tool.activateSanctuaryEffect(actor, map, map.locationOf(actor));
 
-        Location here = map.locationOf(actor);
-        here.setGround(new SanctuaryField(FIELD_DURATION, here.getGround()));
-
-        // Set protection immediately — tick already ran this turn
+        // Immediate turn-based flag
         actor.enableAbility(DamageInterceptor.PROTECTED);
 
-        // FIX: Ensure both 'actor' and 'FIELD_DURATION' are passed to match %s and %d
-        return String.format(
-                "%s uses the Heaven Token! A holy sanctuary field manifests for %d turns.\n",
-                        actor, FIELD_DURATION
-
-        );
-
+        return result;
     }
+//        actor.getInventory().remove(token);
+//
+//        Location here = map.locationOf(actor);
+//        here.setGround(new SanctuaryField(FIELD_DURATION, here.getGround()));
+//
+//        // Set protection immediately — tick already ran this turn
+//        actor.enableAbility(DamageInterceptor.PROTECTED);
+//
+//        // FIX: Ensure both 'actor' and 'FIELD_DURATION' are passed to match %s and %d
+//        return String.format(
+//                "%s uses the Heaven Token! A holy sanctuary field manifests for %d turns.\n",
+//                        actor, FIELD_DURATION
+//
+//        );
+
 
     /**
      * Returns the menu description shown to the player.
