@@ -17,47 +17,54 @@ import game.utils.SpatialSearch;
 
 public class CommandWhistle extends Item implements SanctuaryTool, Purchasable {
 
+    private static final int PURCHASE_PRICE = 100;
+    private static final int WEIGHT = 1;
+
+
     public CommandWhistle() {
         super("Command Whistle", 'f');
         this.makePortable();
-        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(1));
+        this.addNewStatistic(ItemStatistics.WEIGHT, new BaseStatistic(WEIGHT));
     }
 
+    /**
+     * Returns the activation action when this whistle is in the actor's inventory.
+     *
+     * @param actor    the actor holding the whistle
+     * @param map      the game map
+     * @return the list of available actions
+     */
     @Override
-    public ActionList allowableActions(Actor owner, GameMap map) {
+    public ActionList allowableActions(Actor actor, GameMap map) {
         ActionList actions = new ActionList();
         actions.add(new UseCommandWhistleAction(this));
         return actions;
     }
 
+    /**
+     * Implements SanctuaryTool interface. Delegates to UseCommandWhistleAction.
+     *
+     * @param actor    the actor
+     * @param map      the game map
+     * @param location the actor's location
+     * @return description string
+     */
     @Override
     public String activateSanctuaryEffect(Actor actor, GameMap map, Location location) {
-        // 1. SCAN: Use the utility to find WHO gets motivated
-        Actor pulseOriginActor = SpatialSearch.findNearestWorkerWithinDistance(map, location, 5);
-        if (pulseOriginActor == null) pulseOriginActor = actor;
-
-        // 2. APPLY: Give that worker the status.
-        // We pass 'location' (the user's spot) as the center of the blast.
-        pulseOriginActor.addStatus(new MotivationStatus(location));
-
-        // 3. CLEANUP
-        actor.getInventory().remove(this);
-
-        return String.format("%s blows the whistle! A pulse of leadership radiates from %s!",
-                actor, pulseOriginActor);
+        return new UseCommandWhistleAction(this).execute(actor, map);
     }
 
     // --- Purchasable Implementation ---
     @Override
     public int getPurchasePrice() {
-        return 100; // Rare item price
+        return PURCHASE_PRICE; // Rare item price
     }
 
     @Override
     public String purchasedBy(Actor buyer, GameMap map, CreditHolder wallet) {
         wallet.deductCredits(this.getPurchasePrice());
         buyer.getInventory().add(this);
-        return buyer + " bought a Heaven Token for 100 credits.";
+        return buyer + " bought a Command Whistle for " + PURCHASE_PRICE + " credits.";
     }
 
 }
