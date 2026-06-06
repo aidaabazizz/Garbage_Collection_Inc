@@ -7,13 +7,14 @@ import edu.monash.fit2099.engine.positions.*;
 import game.enums.Ability;
 import game.enums.DistortionCapability;
 import game.capabilities.KillerInstinctStatus;
+import game.managers.QuotaManager;
 import game.sanctuary.DistortionSource;
 import java.util.Random;
 
 public class RageGround extends Ground implements DistortionSource {
 
-    private int relocationTimer = -1;
     private final Random random = new Random();
+    private static final int KILLER_INSTINCT_SPAN = 3;
 
     public RageGround() {
         super('╬', "Rage Ground");
@@ -24,20 +25,12 @@ public class RageGround extends Ground implements DistortionSource {
     public void tick(Location location) {
         Display display = new Display();
         // 1. Trigger relocation only when a Worker steps on it
-        if (location.containsAnActor() && relocationTimer == -1) {
+        if (location.containsAnActor()) {
             Actor actor = location.getActor();
             // Only trigger if Bob doesn't already have the status (SOLID Entry Trigger)
-            if (!actor.hasStatus(KillerInstinctStatus.class)) {
-                actor.addStatus(new KillerInstinctStatus(3));
+            if (!actor.hasStatus(KillerInstinctStatus.class) && actor.hasAbility(Ability.WORKER)) {
+                actor.addStatus(new KillerInstinctStatus(KILLER_INSTINCT_SPAN));
                 display.println("\u001B[31m>>> " + actor + " triggers the Rage Ground! It will vanish soon...\u001B[0m");
-                relocationTimer = 4; // Start the 3-turn death clock
-            }
-        }
-
-        // 2. Handle Relocation Countdown
-        if (relocationTimer > 0) {
-            relocationTimer--;
-            if (relocationTimer == 0) {
                 relocate(location);
             }
         }
@@ -110,7 +103,7 @@ public class RageGround extends Ground implements DistortionSource {
             Location adj = exit.getDestination();
             if (adj.containsAnActor()) {
                 Actor target = adj.getActor();
-                target.addStatus(new KillerInstinctStatus(3));
+                target.addStatus(new KillerInstinctStatus(KILLER_INSTINCT_SPAN));
                 effectMsg.append(target).append(" is consumed by rage energy!\n");
             }
         }
