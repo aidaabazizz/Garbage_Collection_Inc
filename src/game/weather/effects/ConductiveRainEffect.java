@@ -12,6 +12,7 @@ import game.highvoltage.ChargeReactive;
 import game.highvoltage.GalvanicCharge;
 import game.sanctuary.Extinguishable;
 import game.weather.WeatherSnapshot;
+import game.enums.FacilityCapability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -232,6 +233,7 @@ public class ConductiveRainEffect implements AnomalyWorldEffect {
                 && !location.getGround().hasAbility(MaterialCapability.ENERGIZED)
                 && !location.getGround().hasAbility(DistortionCapability.CORRUPTED)
                 && !location.getGround().hasAbility(DistortionCapability.SANCTUARY)
-                && !location.getGround().hasAbility(DistortionCapability.ACTIVE_HAZARD);
+                && !location.getGround().hasAbility(DistortionCapability.ACTIVE_HAZARD)
+                && !location.getGround().hasAbility(FacilityCapability.FACILITY_TERMINAL);
     }
 }

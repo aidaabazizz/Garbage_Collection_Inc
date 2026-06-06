@@ -21,6 +21,7 @@ import game.items.*;
 import game.managers.QuotaManager;
 import game.sanctuary.SanctuaryTool;
 import game.weather.WeatherSystemFactory;
+import game.enums.FacilityCapability;
 
 import java.util.List;
 
@@ -41,6 +42,8 @@ public class SuperComputer extends Ground implements SanctuaryTool {
     public SuperComputer(QuotaManager quotaManager) {
         super('≡', "Supercomputer");
         this.quotaManager = quotaManager;
+        this.enableAbility(FacilityCapability.FACILITY_TERMINAL);
+
     }
 
     /**

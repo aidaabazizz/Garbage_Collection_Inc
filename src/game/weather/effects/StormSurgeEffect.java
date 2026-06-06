@@ -9,6 +9,7 @@ import game.enums.MaterialCapability;
 import game.highvoltage.ChargeContext;
 import game.highvoltage.GalvanicCharge;
 import game.weather.WeatherSnapshot;
+import game.enums.FacilityCapability;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -171,6 +172,7 @@ public class StormSurgeEffect implements AnomalyWorldEffect {
     private boolean canPlaceChargeSource(Location location, Actor actor) {
         return !location.containsAnActor()
                 && location.getGround().canActorEnter(actor)
-                && !location.getGround().hasAbility(MaterialCapability.ENERGIZED);
+                && !location.getGround().hasAbility(MaterialCapability.ENERGIZED)
+                && !location.getGround().hasAbility(FacilityCapability.FACILITY_TERMINAL);
     }
 }
