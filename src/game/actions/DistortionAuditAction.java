@@ -33,7 +33,7 @@ import game.utils.SpatialSearch;
  * <ul>
  *   <li>SRP: this action owns only the scan and dispatch logic.</li>
  *   <li>DIP: depends on {@link DistortionSource} interface and {@link QuotaManager},
- *       never on {@link game.grounds.RageGround} or {@link game.grounds.UpsideDownPortal}.</li>
+ *       never on {@link game.grounds.RageGround} or {@link game.grounds.BlackHolePortal}.</li>
  *   <li>No singletons: {@link QuotaManager} is injected via constructor.</li>
  * </ul>
  * </p>
