@@ -77,6 +77,13 @@ public class QuotaManager {
     }
 
     /**
+     * Returns the current company rank for the cycle.
+     */
+    public int getCompanyRank() {
+        return companyRank;
+    }
+
+    /**
      * Returns the current quota target for the cycle.
      */
     public int getCurrentQuotaTarget() {
