@@ -50,7 +50,10 @@ public class HeavenToken extends Item implements SanctuaryTool, Purchasable {
         // Remove from inventory
         actor.getInventory().remove(this);
 
-        return "\u001B[35m" + actor + " activates the Heaven Token! A protective field manifests!\u001B[0m";
+        // 4. Return the result string to be displayed in the console
+        return String.format("\u001B[35m%s activates the Heaven Token! A holy field manifests for %d turns!\u001B[0m",
+                actor, FIELD_DURATION);
+
     }
 
     // --- Purchasable Implementation ---
