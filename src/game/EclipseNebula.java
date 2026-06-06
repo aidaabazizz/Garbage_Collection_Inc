@@ -9,6 +9,7 @@ import game.actors.*;
 import game.doors.AluminiumDoor;
 import game.doors.IronDoor;
 import game.doors.TitaniumDoor;
+import game.enums.Ability;
 import game.enums.AccessLevel;
 import game.finance.Wallet;
 import game.grounds.*;
@@ -81,8 +82,8 @@ public class EclipseNebula extends World {
 
         // 5. REQ 1: Spawn Scrap (Items the player SELLS to earn credits)
         // Spawned on both maps to provide income.
-        spawnCommonScrap(moonMap,globalSpawner);
-        spawnCommonScrap(overflowMap,globalSpawner);
+        spawnCommonScrap(moonMap, globalSpawner);
+        spawnCommonScrap(overflowMap, globalSpawner);
 
         // 6. REQ 2: Spawn Starting Card and Unique Items
         // "Starting Access Card spawned at the beginning" = Map 99
@@ -95,7 +96,6 @@ public class EclipseNebula extends World {
         // 7. Setup players
         // Start them on Moon 99 so they pick up the starting card and use the Tube
         setupContractedWorkers(moonMap, globalSpawner);
-
     }
 
     /**
@@ -130,6 +130,11 @@ public class EclipseNebula extends World {
         groundCreator.registerGround('Ꮺ', TeslaCoil::new);
         groundCreator.registerGround('⚜', PoweredFloor::new);
         groundCreator.registerGround('☠', ElectrifiedPuddle::new);
+
+        // REQ4 - A3 [YOUR ADDITION]
+        groundCreator.registerGround('Ω', BlackHolePortal::new);
+        groundCreator.registerGround('⌂', CorruptedSafeHouse::new);
+        groundCreator.registerGround('╬', RageGround::new);
     }
 
     /**
@@ -155,16 +160,16 @@ public class EclipseNebula extends World {
         List<String> moonStrings = Arrays.asList(
                 ".....V..............########################################",
                 "...#######....o.....#__________________#________________o__#",
-                "...#_____#.....V....=__________V_______=___________________#",
-                "...#_____=...~......#_______Φ__________#___________________#",
+                "...#_⌂___#.....V....=__╬_______V_______=___________________#",
+                "...#__≡__=...~......#_______Φ__________#___________________#",
                 "...#_____#..~~~.....########=#####=#####___#############___#",
                 "...#######.~~~~.....#______#_#_________#___#___________#___#",
                 ".........~~~~....o..#______#_#_________#####___________#####",
-                "....................#______=_#_________#_______V___________#",
+                "....⌂................#______=_#_________#_______V___________#",
                 "..o...~.............#______#_#_________#___________________#",
                 ".....~~~.......y....#______#_###########___#############___#",
                 ".....~........V.....#______#___________#___#___________#___#",
-                "....................=______#___________=___=_____o_____=___#",
+                "........Ω...........=______#___________=___=_____o_____=___#",
                 "....................#______#############___#############___#",
                 ".........~~~~.......#______#___________#####################",
                 "...V....~~~~~~......#______#___________=___________________#",
@@ -278,7 +283,7 @@ public class EclipseNebula extends World {
      *
      * @param map the GameMap where common scrap items will be deployed
      */
-    private void spawnCommonScrap(GameMap map,Spawner spawner) {
+    private void spawnCommonScrap(GameMap map, Spawner spawner) {
         // Items to SELL for credits. No high-value items here!
         map.at(16, 3).addItem(new Apple());
         map.at(17, 4).addItem(new Cookies(spawner));
@@ -323,7 +328,7 @@ public class EclipseNebula extends World {
      * @param map the GameMap where the players will be added
      * @throws Exception if a player cannot be added to the game world
      */
-    private void setupContractedWorkers(GameMap map,Spawner globalSpawner) throws Exception {
+    private void setupContractedWorkers(GameMap map, Spawner globalSpawner) throws Exception {
         String[] names = {"#1 Bob", "#2 Tom", "#3 Sarah", "#4 Julie", "#5 Rick"};
         int startX = 4;
 
@@ -332,7 +337,7 @@ public class EclipseNebula extends World {
             inventory.add(new Flask());
             inventory.add(new Wallet()); // REQ 1: Required for purchases
 
-            ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory,globalSpawner);
+            ContractedWorker worker = new ContractedWorker(name, 'ඞ', WORKER_STARTING_HEALTH, inventory, globalSpawner);
             this.addPlayer(worker, map.at(startX++, 4));
         }
     }

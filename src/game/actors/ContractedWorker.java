@@ -10,12 +10,16 @@ import edu.monash.fit2099.engine.displays.Menu;
 import edu.monash.fit2099.engine.items.Inventory;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
+import game.actions.DisorientedMoveAction;
+import game.actions.RageStrikeAction;
 import game.capabilities.*;
 import game.enums.Ability;
 import game.enums.MaterialCapability;
 import game.managers.AlarmManager;
-import game.actions.DisorientedMoveAction;
 import game.managers.Spawner;
+import game.sanctuary.DamageInterceptor;
+import game.utils.SpatialSearch;
+import game.weapons.WorkerFists;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -39,6 +43,10 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     private static final int SPAWN_THRESHOLD = 5;
     /** The spawning service used to handle creature creation and side effects. */
     private final Spawner spawner;
+    /** Radius used to scan for targets when Killer Instinct is active. */
+    private static final int RAGE_STRIKE_RADIUS = 3;
+    private static final int RAGE_STRIKE_HIT_RATE = 100;
+    private static final int RAGE_STRIKE_DAMAGE = 2;
 
     /**
      * Constructor to initialize the worker with their starting statistics.
@@ -53,6 +61,7 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         super(name, displayChar, hitPoints, inventory);
         this.spawner = spawner;
         this.enableAbility(Ability.WORKER);
+        this.setIntrinsicWeapon(new WorkerFists(RAGE_STRIKE_DAMAGE,RAGE_STRIKE_HIT_RATE));
     }
 
     /**
@@ -90,12 +99,14 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     /**
      * Orchestrates the worker's turn by processing environmental status and user input.
      * The method executes the following sequence:
-     * 1. Notifies the user of global facility states such as active lockdowns.
-     * 2. Validates the consciousness of the actor to determine if a turn can be taken.
-     * 3. Displays all active status effects and inventory notifications to the user interface.
-     * 4. Checks for frozen status - if frozen, skips turn completely.
-     * 5. Resolves multi-turn actions or displays a selection menu for player interaction.
-     * 6. Wraps movement actions with disoriented versions if blizzard status is active.
+     * 1. Resets the damage protection flag (KISS Reset Pattern).
+     * 2. Notifies the user of global facility states such as active lockdowns.
+     * 3. Validates the consciousness of the actor to determine if a turn can be taken.
+     * 4. Displays all active status effects and inventory notifications to the user interface.
+     * 5. Checks for frozen status - if frozen, skips turn completely.
+     * 6. Resolves multi-turn actions or displays a selection menu for player interaction.
+     * 7. REQ4: Injects RageStrikeActions if KillerInstinct is active.
+     * 8. Wraps movement actions with disoriented versions if blizzard status is active.
      *
      * @param actions    A collection of available actions provided by the engine.
      * @param lastAction The action performed in the previous turn.
@@ -107,6 +118,10 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     public Action playTurn(ActionList actions, Action lastAction, GameMap map, Display display) {
 
         display.endLine();
+
+//        // Reset protection flag every turn (KISS Reset Pattern) [YOUR ADDITION]
+//        this.disableAbility(DamageInterceptor.PROTECTED);
+
         // Check global facility state
         if (AlarmManager.getInstance().isActive()) {
             display.println("\u001B[31m" + "!!! RED ALERT: FACILITY LOCKED DOWN !!!" + "\u001B[0m");
@@ -147,6 +162,11 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
             return new DoNothingAction();
         }
 
+        // REQ4: KILLER MODE — inject RageStrikeActions for actors within range [YOUR ADDITION]
+        if (this.hasStatus(KillerInstinctStatus.class)) {
+            injectRageStrikeActions(actions, map);
+        }
+
         if (isDisoriented()) {
             ActionList wrappedActions = new ActionList();
             Set<String> addedDirections = new HashSet<>();
@@ -178,6 +198,38 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
         // return/print the console menu with original actions
         Menu menu = new Menu(actions);
         return menu.showMenu(this, display);
+    }
+
+    /**
+     * REQ4 Helper: Scans a 3-tile radius and injects RageStrikeAction for each nearby actor.
+     * [YOUR ADDITION]
+     *
+     * @param actions The current action list to inject into.
+     * @param map     The game map used to locate this worker.
+     */
+    private void injectRageStrikeActions(ActionList actions, GameMap map) {
+        Location here = map.locationOf(this);
+        Set<Actor> targetsFound = new HashSet<>();
+        for (Actor target : SpatialSearch.getActorsWithinDistance(here, RAGE_STRIKE_RADIUS)) {
+            if (target != this  && !targetsFound.contains(target)) {
+                actions.add(new RageStrikeAction(target, "range", getIntrinsicWeapon()));
+                targetsFound.add(target);
+            }
+        }
+    }
+
+    /**
+     * REQ4: Applies damage mitigation if the PROTECTED ability is active.
+     * Halves incoming damage, with a minimum of 1. [YOUR ADDITION]
+     *
+     * @param points The raw incoming damage.
+     */
+    @Override
+    public void hurt(int points) {
+        if (this.hasAbility(DamageInterceptor.PROTECTED)) {
+           return;
+        }
+        super.hurt(points);
     }
 
     /**

@@ -40,6 +40,6 @@ public class HumidityAnomalyInterpreter implements WeatherAnomalyInterpreter {
      */
     @Override
     public String interpret(WeatherSnapshot snapshot, Actor actor, GameMap map) {
-        return "The air is heavy with moisture. Conductive rain strengthens electrical anomalies.";
+        return "The air is heavy with moisture. Conductive moisture strengthens electrical anomalies.";
     }
 }

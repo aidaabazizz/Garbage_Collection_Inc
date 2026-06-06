@@ -56,6 +56,11 @@ public abstract class NonPlayerCharacter extends Actor {
      */
     @Override
     public Action playTurn(ActionList actions, Action lastAction, GameMap map, Display display) {
+
+        if (!this.isConscious()) {
+            return new DoNothingAction();
+        }
+
         if (this.isParalyzed()) {
             display.println("\u001B[33m" + this + " is paralyzed by the electric charge and cannot move!\u001B[0m");
             return new DoNothingAction();

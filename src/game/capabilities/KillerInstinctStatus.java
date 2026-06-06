@@ -1,21 +1,14 @@
-// game.capabilities/DisorientedStatus.java
 package game.capabilities;
 
 import edu.monash.fit2099.engine.GameEntity;
-import edu.monash.fit2099.engine.actors.ActorStatistics;
 import edu.monash.fit2099.engine.capabilities.Status;
 import edu.monash.fit2099.engine.positions.Location;
-import edu.monash.fit2099.engine.statistics.StatisticOperations;
 
-/**
- * A status that reduces the actor's accuracy/hit rate.
- *
- * @author Aida
- */
-public class DisorientedStatus implements Status {
+public class KillerInstinctStatus implements Status {
+
     private int remainingTurns;
 
-    public DisorientedStatus(int turns) {
+    public KillerInstinctStatus(int turns) {
         this.remainingTurns = turns;
     }
 
@@ -31,6 +24,7 @@ public class DisorientedStatus implements Status {
 
     @Override
     public String toString() {
-        return "Disoriented (" + remainingTurns + " turns left)";
+        // FIX: This removes the @memoryAddress from your console
+        return "Killer Instinct (" + remainingTurns + " turns left)";
     }
 }

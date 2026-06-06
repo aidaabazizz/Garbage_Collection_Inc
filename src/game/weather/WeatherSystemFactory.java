@@ -4,7 +4,7 @@ import game.actions.WeatherSyncAction;
 import game.managers.WeatherAnomalyManager;
 import game.weather.effects.AnomalyWorldEffect;
 import game.weather.effects.ConductiveRainEffect;
-//import game.weather.effects.HeatDistortionEffect;
+import game.weather.effects.HeatDistortionEffect;
 import game.weather.effects.StormSurgeEffect;
 import game.weather.interpreters.HumidityAnomalyInterpreter;
 import game.weather.interpreters.StormAnomalyInterpreter;
@@ -49,7 +49,7 @@ public final class WeatherSystemFactory {
 
         List<AnomalyWorldEffect> effects = List.of(
                 new ConductiveRainEffect(),
-                //new HeatDistortionEffect(),
+                new HeatDistortionEffect(),
                 new StormSurgeEffect()
         );
 
