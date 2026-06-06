@@ -65,6 +65,7 @@ public class MotivationStatus implements Status {
         if (hasPulsed) return;
         hasPulsed = true;
 
+        display.println("\u001B[33m>>> A tactical pulse erupts from " + entity + "!\u001B[0m");
         // Move ALL the loop logic you had in the Whistle to HERE
         for (Exit exit : origin.getExits()) {
             Location adj = exit.getDestination();
@@ -77,7 +78,19 @@ public class MotivationStatus implements Status {
                     display.println(">>> " + enemy + " is blasted away!");
                 } else {
                     enemy.hurt(IMPACT_DAMAGE);
-                    display.println(">>> " + enemy + " slams into a wall!");
+                    // Rule 2: Complex Interaction (Environment-Aware Feedback)
+                    String obstacleName = "an obstacle";
+                    if (dest == null) {
+                        obstacleName = "the facility boundary";
+                    } else if (dest.containsAnActor()) {
+                        // FIX: This will now correctly name BOB or SARAH as the obstacle
+                        obstacleName = dest.getActor().toString();
+                    } else {
+                        obstacleName = dest.getGround().toString();
+                    }
+
+                    display.println(String.format(">>> %s slams into %s and takes %d impact damage!",
+                            enemy, obstacleName, IMPACT_DAMAGE));
                 }
             }
         }
