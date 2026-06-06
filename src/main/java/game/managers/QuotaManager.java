@@ -32,7 +32,7 @@ public class QuotaManager {
     /**
      * Initial maximum time limit (in turns) for completing the quota cycle.
      */
-    private static final int STARTING_MAX_TIME_LIMIT = 3;
+    private static final int STARTING_MAX_TIME_LIMIT = 200;
 
     /**
      * Current company rank in the quota system.
