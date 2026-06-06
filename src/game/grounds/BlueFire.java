@@ -1,11 +1,17 @@
 package game.grounds;
 
+import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.Exit;
+import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
+import game.capabilities.BurningStatus;
+import game.capabilities.FireStackable;
 import game.enums.Ability;
 import game.enums.DistortionCapability;
+import game.managers.QuotaManager;
+import game.sanctuary.DamageInterceptor;
 import game.sanctuary.DistortionSource;
 import game.sanctuary.Extinguishable;
 
@@ -15,10 +21,19 @@ import game.sanctuary.Extinguishable;
  * Workers are immune — BlueFire is meant to deter enemies, not harm the worker it protects.
  * Restores the original ground when extinguished.
  */
-public class BlueFire extends Ground implements Extinguishable, DistortionSource {
+public class BlueFire extends Ground implements Extinguishable, DistortionSource, FireStackable {
 
     private int lifespan;
     private final Ground originalGround;
+
+    private static final int MAX_LIFESPAN = 5;
+    private static final int BURN_DURATION = 3;
+    private static final int FLARE_DAMAGE = 3;
+    private static final int AUDIT_CREDITS = 10;
+    private static final int FLARE_RADIUS = 1;
+
+    private final Display display = new Display();
+
 
     public BlueFire(int lifespan, Ground originalGround) {
         super('^', "Blue Fire");
@@ -29,6 +44,7 @@ public class BlueFire extends Ground implements Extinguishable, DistortionSource
 
     @Override
     public void tick(Location location) {
+
         // Self-extinguish if the safe house that spawned us no longer has a worker
         if (!isSafeHouseOccupied(location)) {
             extinguish(location);
@@ -36,17 +52,18 @@ public class BlueFire extends Ground implements Extinguishable, DistortionSource
         }
 
         if (location.containsAnActor()) {
-            var actor = location.getActor();
-            if (!actor.hasAbility(Ability.WORKER)) {
-                actor.hurt(2);
-                System.out.println("\u001B[34m" + actor + " is scorched by the Blue Fire for 2 damage!\u001B[0m");
+            Actor actor = location.getActor();
+            if (!actor.hasAbility(DamageInterceptor.PROTECTED) && actor.isConscious()) {
+                actor.addStatus(new BurningStatus(BURN_DURATION));
+                actor.addStatus(new BurningStatus(BURN_DURATION));
+                display.println("\u001B[34m" + actor + " is scorched by the Blue Fire for 2 damage!\u001B[0m");
+
             }
         }
 
-        if (lifespan <= 1) {
+        lifespan--;
+        if (lifespan <= 0) {
             extinguish(location);
-        } else {
-            lifespan--;
         }
     }
 
@@ -69,11 +86,11 @@ public class BlueFire extends Ground implements Extinguishable, DistortionSource
 
     @Override
     public String audit(QuotaManager manager, Location location) {
-        manager.addCompanyCredits(10);
+        manager.addCompanyCredits(AUDIT_CREDITS);
 
         // Final Effect: Flare damage
-        for (Location adj : location.getNearbyLocations(1)) {
-            if (adj.containsAnActor()) adj.getActor().hurt(3);
+        for (Location adj : location.getNearbyLocations(FLARE_RADIUS)) {
+            if (adj.containsAnActor()) adj.getActor().hurt(FLARE_DAMAGE);
         }
 
         this.extinguish(location); // Burns out immediately
@@ -84,4 +101,16 @@ public class BlueFire extends Ground implements Extinguishable, DistortionSource
     public void extinguish(Location location) {
         location.setGround(originalGround);
     }
+
+    @Override
+    public void addStack() {
+        if (this.lifespan < MAX_LIFESPAN) {
+            this.lifespan = MAX_LIFESPAN; // refresh, don't stack infinitely
+        }
+    }
+
+    // DistortionSource required overrides
+    @Override public String releaseDistortion(Actor actor, GameMap map, Location location) { return ""; }
+
+    @Override public String stabilise(Location location) { extinguish(location); return "Extinguished"; }
 }
