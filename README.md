@@ -28,7 +28,7 @@
 https://docs.google.com/spreadsheets/d/1jF6rAykPxPmQ_06LkXPTXP32cgSiaoel0PHISt5tX1c/edit?usp=sharing
 
 ---
-### ASSIGNMENT 2
+# ASSIGNMENT 2
 
 **REQUIREMENT 5 DETAILS**
 
@@ -228,7 +228,7 @@ Example request format:
 https://api.openweathermap.org/data/2.5/weather?lat=-27.4705&lon=153.0260&appid=${OPENWEATHER_API_KEY}&units=metric
 ```
 
-### REQ5 Structure
+# REQ5 Structure
 
 Main abstractions:
 
@@ -266,22 +266,22 @@ API support classes:
 Conductive Rain:
 
 * creates `Puddle` terrain
-* suppresses `Extinguishable` hazards
-* triggers `ChargeReactive` grounds
+* suppresses `Extinguishable` hazards where applicable
+* triggers `ChargeReactive` grounds using charge-related weather logic
 
 Heat Distortion:
 
-* strengthens `FireStackable` hazards
-* creates `BlueFire` near distorted or sanctuary-related areas
+* applies high-temperature environmental effects
+* interacts with heat, fire, or distortion-related terrain where applicable
 
 Storm Surge:
 
-* applies `GalvanicCharge`
-* triggers or creates `AtmosphericChargeSource`
-* may damage actors
-* may spread `RageGround`
+* applies storm-based consequences
+* may apply `GalvanicCharge`
+* may interact with `AtmosphericChargeSource`
+* may damage actors or disturb terrain depending on the current map state
 
-Weather effects protect important terrain such as the SuperComputer using capability checks such as `FacilityCapability`, `MaterialCapability`, and `DistortionCapability`.
+Weather effects protect important terrain such as the SuperComputer using capability checks such as `FacilityCapability`.
 
 ### Testing
 
@@ -302,13 +302,6 @@ The tests cover:
 * heat anomaly detection
 * storm anomaly detection
 * mild weather not activating any interpreter
-
-Latest Maven test result:
-
-```text
-Tests run: 84, Failures: 0, Errors: 0, Skipped: 0
-BUILD SUCCESS
-```
 
 ### Security Notes
 
