@@ -95,7 +95,7 @@ public class EclipseNebula extends World {
 
         // 7. Setup players
         // Start them on Moon 99 so they pick up the starting card and use the Tube
-        setupContractedWorkers(moonMap, globalSpawner);
+        setupContractedWorkers(overflowMap, globalSpawner);
     }
 
     /**
@@ -164,12 +164,12 @@ public class EclipseNebula extends World {
                 "...#__≡__=...~......#_______Φ__________#___________________#",
                 "...#_____#..~~~.....########=#####=#####___#############___#",
                 "...#######.~~~~.....#______#_#_________#___#___________#___#",
-                ".........~~~~....o..#______#_#_________#####___________#####",
-                "....⌂................#______=_#_________#_______V___________#",
+                "⛈........~~~~....o..#______#_#_________#####___________#####",
+                "....⌂..........☠.....#______=_#_________#_______V___________#",
                 "..o...~.............#______#_#_________#___________________#",
-                ".....~~~.......y....#______#_###########___#############___#",
+                "....⚜~~~.......y....#______#_###########___#############___#",
                 ".....~........V.....#______#___________#___#___________#___#",
-                "........Ω...........=______#___________=___=_____o_____=___#",
+                "........Ω.......Ꮺ...=______#___________=___=_____o_____=___#",
                 "....................#______#############___#############___#",
                 ".........~~~~.......#______#___________#####################",
                 "...V....~~~~~~......#______#___________=___________________#",
@@ -290,6 +290,11 @@ public class EclipseNebula extends World {
         map.at(17, 5).addItem(new FloppyDisk());
         map.at(5, 8).addItem(new Lantern());
         map.at(16, 4).addItem(new CRTMonitor());
+        map.at(8, 3).addItem(new PortableBattery());
+        map.at(8, 7).addItem(new PortableBattery());
+        map.at(4, 6).addItem(new CRTMonitor());
+        map.at(6, 6).addItem(new FloppyDisk());
+        map.at(10, 7).addItem(new Lantern());
     }
 
     /**
@@ -302,11 +307,6 @@ public class EclipseNebula extends World {
         // REQ 2: Alien Cubes spawned as portable items in factory moon
         map.at(45, 3).addItem(new AlienCube());
         map.at(45, 14).addItem(new AlienCube());
-        map.at(8, 3).addItem(new PortableBattery());
-        map.at(8, 7).addItem(new PortableBattery());
-        map.at(4, 6).addItem(new CRTMonitor());
-        map.at(5, 6).addItem(new FloppyDisk());
-        map.at(6, 6).addItem(new Lantern());
     }
 
     /**
