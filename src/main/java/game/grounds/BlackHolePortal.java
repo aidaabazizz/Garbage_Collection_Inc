@@ -39,6 +39,13 @@ public class BlackHolePortal  extends Ground implements DistortionSource {
 
     @Override
     public void tick(Location location) {
+
+        // Respect audit cooldown — portal is weakened and won't apply warp
+        if (auditCooldown > 0) {
+            auditCooldown--;
+            return;
+        }
+
         if (location.containsAnActor()) {
             Actor actor = location.getActor();
             // RULE: If Bob enters, he starts warping for 10 turns
@@ -54,7 +61,7 @@ public class BlackHolePortal  extends Ground implements DistortionSource {
         this.auditCooldown = AUDIT_COOLDOWN; // Weakened for 5 turns
 
         // Final Effect: Warp one nearby actor instantly
-        List<Actor> nearby = SpatialSearch.getActorsWithinDistance(location, 2);
+        List<Actor> nearby = SpatialSearch.getActorsWithinDistance(location, AUDIT_SCAN_RADIUS);
         String effect = "The Black Hole flares! ";
         if (!nearby.isEmpty()) {
             Actor target = nearby.get(0);

@@ -67,7 +67,7 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
                 actor.enableAbility(DamageInterceptor.PROTECTED);
                 if (Math.random() <= HEAL_CHANCE) {
                     actor.heal(HEAL_AMOUNT);
-                    System.out.println(">>> " + actor + " is healed by the sanctuary energy.");
+                    display.println(">>> " + actor + " is healed by the sanctuary energy.");
                 }
             }
 

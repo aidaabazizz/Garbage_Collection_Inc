@@ -20,7 +20,7 @@ import game.sanctuary.DamageInterceptor;
  */
 public class SanctuaryStatus implements Status {
 
-    private static final int PROTECTION_DURATION = 5;
+    private static final int PROTECTION_DURATION = 6;
     private static final double HEAL_CHANCE = 0.30;
     private static final int HEAL_AMOUNT = 1;
 
@@ -55,9 +55,11 @@ public class SanctuaryStatus implements Status {
                 display.println(">>> " + actor + " is healed by the sanctuary energy.");
             }
 
-            // Manage protection flag
             if (protectionTurns > 0) {
                 protectionTurns--;
+            }
+
+            if (protectionTurns > 0) {
                 actor.enableAbility(DamageInterceptor.PROTECTED);
             } else {
                 // Protection expired but status stays active for healing

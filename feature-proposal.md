@@ -125,6 +125,88 @@ powering magnetic tools to harvest scrap remotely, and paralysing workers caught
 > *Please focus your assessment on these six classes when evaluating REQ3.*
 ---
 
+Here is your **REQ4: Distorted Sanctuary System** proposal, formatted exactly like your teammate's `.md` file to ensure consistency and professional presentation for your TA.
+
+***
+
+# Feature Proposal — REQ4: Distorted Sanctuary System
+
+---
+
+## REQ4: Distorted Sanctuary System
+
+### The Pitch
+
+The Distorted Sanctuary System introduces unstable spatial anomalies and high-tech protective zones to the moon facility. Spatiotemporal hazards (`DistortionSource`) release corruption that warps game physics, manipulates actor behavior, and forces random repositioning. To combat these threats, workers utilize specialized equipment (`SanctuaryTool`) and the facility’s `SuperComputer` to deploy holy protection fields, fire tactical remote knockback pulses, and perform corporate audits on anomalies to meet the company quota.
+
+### The Mechanics
+
+- **Distortion Sources** (`BlackHolePortal`, `CorruptedSafeHouse`, `RageGround`) implement `DistortionSource.releaseDistortion(actor, map, location)` to define their environmental impact:
+  - `BlackHolePortal` → Applies a crushing `BlackHoleStatus` (reusing A2 `DamageOverTimeStatus`) that deals 1 damage and executes a map-wide random safe-tile teleportation at the start of every turn.
+  - `CorruptedSafeHouse` → A presence-aware zone that grants `SanctuaryStatus` (healing + protection) to occupants while dynamically spawning a ring of hazardous `BlueFire` on all 8 adjacent tiles.
+  - `RageGround` → A behavioral anomaly that injects `RageStrikeAction` (a high-damage lifesteal mutation) into the worker’s menu. It features a state-synced relocation lifecycle where the ground vanishes and rematerializes at random coordinates once its 3-turn energy is spent.
+- **Sanctuary Tools** (`CommandWhistle`, `HeavenToken`, `SuperComputer`) implement `SanctuaryTool.activateSanctuaryEffect(actor, map, location)` to stabilize the environment:
+  - `CommandWhistle` → Acts as a remote tactical relay; it performs a Manhattan-distance scan to find the nearest ally and centers a physics-based knockback pulse on *them*, blasting enemies 2 tiles away and dealing impact damage upon collision with walls or other actors.
+  - `HeavenToken` → A consumable item that triggers immediate terrain mutation, replacing the floor with a 10-turn `SanctuaryField` that heals and protects everyone in its radius.
+  - `SuperComputer` → Modified to act as a corporate sensor terminal; it performs a Radius-3 AoE scan to execute the **Distortion Audit Protocol**, which harvests data from anomalies to update the `QuotaManager` (REQ1 integration) and forces them into weakened cooldown states.
+- **BlueFire** → A presence-aware timed hazard that implements the `FireStackable` interface. It intensifies in duration when refreshed by a SafeHouse and utilizes the **Memento Pattern** to restore the original terrain (Dirt, Floor, etc.) once the worker leaves the area or the fire burns out.
+- **SanctuaryStatus** → Manages a complex lifecycle of presence-aware healing and protection. It provides the `PROTECTED` capability (intercepted in `ContractedWorker.hurt`) only while the worker is on the tile, and automatically self-destructs upon departure to allow a full reset on re-entry.
+- **DistortionCapability** enum (`CORRUPTED`, `SANCTUARY`, `ACTIVE_HAZARD`) facilitates polymorphic interaction between the facility terminal and map hazards, strictly following the **Dependency Inversion Principle**.
+
+---
+
+### The Architecture
+
+#### New Abstractions
+
+| Abstraction | Type | Role |
+|---|---|---|
+| `DistortionSource` | Interface | Anomaly contract — `releaseDistortion` + `stabilise` + `audit` |
+| `SanctuaryTool` | Interface | Tactical contract — `activateSanctuaryEffect` |
+
+#### Concrete Classes (REQ4 — minimum 6 required)
+
+| Class | Status | Abstraction Implemented | Complex Effect |
+|---|---|---|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `BlackHolePortal` | **New** | `DistortionSource` | Spatiotemporal Warp: applies `BlackHoleStatus` for map-wide random teleportation + crushing damage. |
+| `CorruptedSafeHouse` | **New** | `DistortionSource` | Dual-Zone Lifecycle: manages a presence-aware healing status while spawning/cleaning up a ring of `BlueFire` hazards. |
+| `RageGround` | **New** | `DistortionSource` | Action Mutation: injects forbidden worker-vs-worker `RageStrikeAction` into the menu + executes Terrain Relocation once energy is spent. |
+| `CommandWhistle` | **New** | `SanctuaryTool`, `Purchasable` | Tactical Relay: remote Manhattan-distance scan to trigger a physics-based knockback pulse centered on a distant ally. |
+| `HeavenToken` | **New** | `SanctuaryTool`, `Purchasable` | Terrain Morphing: consumable item that replaces current ground with an AoE `SanctuaryField`. |
+| `SuperComputer` | **Retrofitted** (A1/A2) | `SanctuaryTool` | Corporate Audit Protocol: Radius-3 AoE scan to harvest anomaly data, update `QuotaManager` credits, and weaken terrain hazards. |
+
+> ## MARKER NOTE — Six Concrete Classes for REQ4 Assessment
+>
+> Per Rule 1 and Rule 2, the six concrete classes implementing the two abstractions (`DistortionSource` and `SanctuaryTool`) are:
+>
+> | # | Class | Status | Abstraction Implemented | Complex Effect |
+> |---|---|---|---|---|
+> | 1 | `BlackHolePortal` | **New** | `DistortionSource` | Ground → Status → Map-wide coordinate manipulation → Random repositioning + Crushing damage. |
+> | 2 | `CorruptedSafeHouse` | **New** | `DistortionSource` | Presence-aware logic: Ground → Status + Synchronized AoE ground spawning (`BlueFire`) → Instant hazard cleanup on leave. |
+> | 3 | `RageGround` | **New** | `DistortionSource` | Action Mutation: Ground → Status → Injected `RageStrikeAction` (Lifesteal) → Immediate terrain relocation to random safe coordinates. |
+> | 4 | `CommandWhistle` | **New** | `SanctuaryTool` | Remote Tactical Relay: Item → Action → Manhattan distance ally scan → Remote physics-based knockback pulse with collision damage. |
+> | 5 | `HeavenToken` | **New** | `SanctuaryTool` | Terrain Mutation: Item → Action → Physical replacement of floor with a 10-turn `SanctuaryField` (AoE heal/protect). |
+> | 6 | `SuperComputer` | **Retrofitted** (A1/A2) | `SanctuaryTool` | Facility System: Ground → Action → Radius-3 AoE scan → Anomaly reaction → `QuotaManager` credit update → Terrain weakening. |
+>
+> *Please focus your assessment on these six classes when evaluating REQ4.*
+
+---
+
+### Supporting Classes (Logic & Integration)
+
+| Class | Role |
+|---|---|
+| `BlackHoleStatus` | Logic handler for crushing damage and random map-wide teleportation (reusing A2 `DamageOverTimeStatus`). |
+| `SanctuaryStatus` | Presence-aware lifecycle manager for the 5-turn protection and forever-healing rules. |
+| `MotivationStatus` | Physics engine for the remote pulse: trajectory calculation and context-aware collision damage (Sarah/Walls/Boundaries). |
+| `RageStrikeAction` | Custom high-damage lifesteal combat mutation injected into the worker's menu via `KillerInstinctStatus`. |
+| `BlueFire` | Presence-aware timed hazard utilizing the Memento pattern for terrain restoration and `FireStackable` for damage intensification. |
+| `SanctuaryField` | Temporary AoE ground tile that provides healing and `PROTECTED` capability in a radius. |
+| `DistortionAuditAction` | Separate Action class provided by SuperComputer to execute the corporate scan and Quota integration. |
+| `SpatialSearch` | Centralized utility for Manhattan distance, radial queries, and nearest-actor detection (DRY implementation). |
+
+---
+
 # Feature Proposal — REQ5: Real Weather Anomaly System
 
 ---

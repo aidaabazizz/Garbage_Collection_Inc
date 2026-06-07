@@ -46,6 +46,7 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     private static final int RAGE_STRIKE_RADIUS = 3;
     private static final int RAGE_STRIKE_HIT_RATE = 100;
     private static final int RAGE_STRIKE_DAMAGE = 2;
+    private final Display display = new Display();
 
     /**
      * Constructor to initialize the worker with their starting statistics.
@@ -118,8 +119,11 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
 
         display.endLine();
 
+
 //        // Reset protection flag every turn (KISS Reset Pattern) [YOUR ADDITION]
 //        this.disableAbility(DamageInterceptor.PROTECTED);
+
+       
 
         // Validate consciousness
         if (!this.isConscious()) {
@@ -221,7 +225,8 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     @Override
     public void hurt(int points) {
         if (this.hasAbility(DamageInterceptor.PROTECTED)) {
-           return;
+            display.println("\u001B[35m>>> Sanctuary Field Deflection: The blow bounces off the holy shield! (0 damage taken)\u001B[0m");
+            return;
         }
         super.hurt(points);
     }
