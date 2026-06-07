@@ -5,6 +5,7 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.Ground;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.TeleportAction;
+import game.enums.Ability;
 import game.teleportstrategies.MagicCircleStrategy;
 
 /**
@@ -21,6 +22,7 @@ public class MagicCircle extends Ground {
      */
     public MagicCircle() {
         super('◎', "Magic Circle");
+        this.enableAbility(Ability.IS_MAGIC_CIRCLE);
     }
 
     /**

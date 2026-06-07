@@ -3,6 +3,7 @@ package game.teleportstrategies;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
+import game.enums.Ability;
 import game.items.Flask;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class MagicCircleStrategy extends BaseTeleportStrategy {
         for (int x : map.getXRange()) {
             for (int y : map.getYRange()) {
                 Location loc = map.at(x, y);
-                if (loc.getGround().getDisplayChar() == '◎'
+                if (loc.getGround().hasAbility(Ability.IS_MAGIC_CIRCLE)
                         && !loc.equals(target)
                         && !loc.containsAnActor()) {
                     validCircles.add(loc);
