@@ -12,6 +12,7 @@ import game.capabilities.Depositable;
  * Behaviour that causes an actor to steal any Sellable item from the ground.
  *
  * @author Aida
+ * VErsion 1.0
  */
 public class StealResourceBehaviour implements Behaviour<Actor, Action> {
 
