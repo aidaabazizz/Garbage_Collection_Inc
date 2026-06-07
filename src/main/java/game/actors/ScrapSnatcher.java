@@ -39,7 +39,6 @@ public class ScrapSnatcher extends NonPlayerCharacter implements Infectable {
     private static final int PUNCH_DAMAGE = 1;
     private static final int PUNCH_HIT_RATE = 10;
 
-
     private boolean isInfected = false;
     private int infectionDamageCounter = 0;
 
@@ -90,5 +89,15 @@ public class ScrapSnatcher extends NonPlayerCharacter implements Infectable {
     @Override
     public void updateInfection(Location location) {
         // Infection damage handled in playTurn
+    }
+
+    /**
+     * Checks if this ScrapSnatcher is currently infected.
+     * Used for testing and tracking infection state.
+     *
+     * @return true if infected, false otherwise
+     */
+    public boolean isInfected() {
+        return isInfected;
     }
 }

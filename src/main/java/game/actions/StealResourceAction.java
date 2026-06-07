@@ -9,7 +9,7 @@ import edu.monash.fit2099.engine.positions.Location;
 /**
  * Action for ScrapSnatcher to steal a depositable item from the ground.
  *
- * @author REQ2 Implementation
+ * @author Aida
  * @version 1.0
  */
 public class StealResourceAction extends Action {
