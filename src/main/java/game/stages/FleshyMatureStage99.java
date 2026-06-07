@@ -34,6 +34,11 @@ public class FleshyMatureStage99 implements TreeStage {
 
     @Override
     public TreeStage execute(Location location) {
+        // ADD THIS NULL CHECK
+        if (location == null) {
+            return this;
+        }
+
         age++;
 
         // Check for adjacent workers using SpatialSearch

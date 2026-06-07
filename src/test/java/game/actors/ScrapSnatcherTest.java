@@ -27,24 +27,20 @@ import static org.mockito.Mockito.*;
 /**
  * Unit testing suite for ScrapSnatcher (REQ2).
  *
- * <p>This suite validates the ScrapSnatcher's behavior including:
- * <ul>
- *   <li>Initialization (25 HP, display char 's')</li>
- *   <li>Behaviour priorities (stealing priority 1, wander priority 999)</li>
- *   <li>Stealing mechanics for depositable items</li>
- *   <li>Infection handling (rabid transformation)</li>
- *   <li>Damage over time when infected</li>
- *   <li>Weapon configuration (UndeadFist with 1 damage, 10% hit rate)</li>
- * </ul>
- * </p>
+ * This suite validates the ScrapSnatcher's behavior including:
  *
- * <p><b>Test Coverage:</b>
- * <ul>
- *   <li>Normal Cases: Standard expected behavior</li>
- *   <li>Edge Cases: Null inputs, boundary values, multiple infections</li>
- *   <li>Boundary Cases: Health limits, behaviour counts, death conditions</li>
- * </ul>
- * </p>
+ * Initialization (25 HP, display char 's')
+ * Behaviour priorities (stealing priority 1, wander priority 999)
+ * Stealing mechanics for depositable items
+ *Infection handling (rabid transformation)
+ *Damage over time when infected
+ *Weapon configuration (UndeadFist with 1 damage, 10% hit rate)
+
+ *
+ * Test Coverage:
+ *Normal Cases: Standard expected behavior
+ * Edge Cases: Null inputs, boundary values, multiple infections
+ * Boundary Cases: Health limits, behaviour counts, death conditions
  *
  * @author Aida
  * @version 2.0

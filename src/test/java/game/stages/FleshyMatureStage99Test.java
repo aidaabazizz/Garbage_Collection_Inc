@@ -1,10 +1,7 @@
 package game.stages;
 
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.displays.Display;
-import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import edu.monash.fit2099.engine.positions.NumberRange;
 import game.managers.Spawner;
 import game.utils.SpatialSearch;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,43 +18,41 @@ import static org.mockito.Mockito.*;
 /**
  * Unit testing suite for FleshyMatureStage99 (REQ2).
  *
- * This suite validates:
- * - Spawning ScrapSnatcher when workers are adjacent
- * - No spawning when no workers adjacent
- * - Display character 'Y'
- * - Growth to Monolith after threshold
+ * <p>This suite validates the Mature stage behavior on the 99-deprecated map:
+ * <ul>
+ *   <li>Spawns ScrapSnatcher when workers are adjacent (instead of Undead)</li>
+ *   <li>No spawning when no workers adjacent</li>
+ *   <li>Display character 'Y'</li>
+ *   <li>Growth to Fleshy Monolith after threshold (every 35 turns, 50% chance)</li>
+ * </ul>
  *
- * @author REQ2 Implementation
- * @version 1.0
+ * @author Aida
+ * @version 2.0
  */
 class FleshyMatureStage99Test {
 
     private FleshyMatureStage99 matureStage;
     private Spawner mockSpawner;
     private Location treeLoc;
-    private GameMap mockedMap;
     private Actor mockWorker;
-    private Display mockedDisplay;
 
     @BeforeEach
     void setUp() {
         mockSpawner = mock(Spawner.class);
         treeLoc = mock(Location.class);
-        mockedMap = mock(GameMap.class);
         mockWorker = mock(Actor.class);
-        mockedDisplay = mock(Display.class);
-
-        when(treeLoc.map()).thenReturn(mockedMap);
-        when(mockedMap.getXRange()).thenReturn(new NumberRange(0, 20));
-        when(mockedMap.getYRange()).thenReturn(new NumberRange(0, 20));
 
         matureStage = new FleshyMatureStage99(mockSpawner);
     }
 
+    // ==================== NORMAL CASES ====================
+
+    /**
+     * Normal Case: Verifies Mature stage spawns ScrapSnatcher when workers adjacent.
+     */
     @Test
     @DisplayName("Normal Case: Mature stage spawns ScrapSnatcher when workers adjacent")
     void testSpawnsScrapSnatcherWhenWorkersAdjacent() {
-        // Mock SpatialSearch
         try (MockedStatic<SpatialSearch> mockedSearch = mockStatic(SpatialSearch.class)) {
             mockedSearch.when(() -> SpatialSearch.getNearbyWorkers(treeLoc))
                     .thenReturn(List.of(mockWorker));
@@ -69,10 +64,23 @@ class FleshyMatureStage99Test {
         }
     }
 
+    /**
+     * Normal Case: Verifies Mature stage display character is 'Y'.
+     */
+    @Test
+    @DisplayName("Normal Case: Mature stage display character is 'Y'")
+    void testGetDisplayChar() {
+        assertEquals('Y', matureStage.getDisplayChar());
+    }
+
+    // ==================== EDGE CASES ====================
+
+    /**
+     * Edge Case: Verifies Mature stage does not spawn when no workers adjacent.
+     */
     @Test
     @DisplayName("Edge Case: Mature stage does not spawn when no workers adjacent")
     void testNoSpawnWhenNoWorkersAdjacent() {
-        // Mock SpatialSearch to return empty list
         try (MockedStatic<SpatialSearch> mockedSearch = mockStatic(SpatialSearch.class)) {
             mockedSearch.when(() -> SpatialSearch.getNearbyWorkers(treeLoc))
                     .thenReturn(new ArrayList<>());
@@ -84,14 +92,43 @@ class FleshyMatureStage99Test {
         }
     }
 
+    /**
+     * Edge Case: Verifies Mature stage handles null location gracefully.
+     */
     @Test
-    @DisplayName("Normal Case: Mature stage display character is 'Y'")
-    void testGetDisplayChar() {
-        assertEquals('Y', matureStage.getDisplayChar());
+    @DisplayName("Edge Case: Handles null location gracefully")
+    void testHandlesNullLocation() {
+        assertDoesNotThrow(() -> matureStage.execute(null));
     }
 
+    /**
+     * Edge Case: Verifies multiple workers trigger multiple ScrapSnatcher spawns.
+     */
     @Test
-    @DisplayName("Normal Case: MatureStage99 implements TreeStage interface")
+    @DisplayName("Edge Case: Multiple workers trigger multiple ScrapSnatcher spawns")
+    void testMultipleWorkersTriggerMultipleSpawns() {
+        Actor worker1 = mock(Actor.class);
+        Actor worker2 = mock(Actor.class);
+        Actor worker3 = mock(Actor.class);
+        List<Actor> workers = List.of(worker1, worker2, worker3);
+
+        try (MockedStatic<SpatialSearch> mockedSearch = mockStatic(SpatialSearch.class)) {
+            mockedSearch.when(() -> SpatialSearch.getNearbyWorkers(treeLoc))
+                    .thenReturn(workers);
+
+            matureStage.execute(treeLoc);
+
+            verify(mockSpawner, times(3)).spawnScrapSnatcher(treeLoc);
+        }
+    }
+
+    // ==================== BOUNDARY CASES ====================
+
+    /**
+     * Boundary Case: Verifies MatureStage99 implements TreeStage interface.
+     */
+    @Test
+    @DisplayName("Boundary Case: MatureStage99 implements TreeStage interface")
     void testImplementsTreeStage() {
         assertTrue(matureStage instanceof TreeStage);
     }
