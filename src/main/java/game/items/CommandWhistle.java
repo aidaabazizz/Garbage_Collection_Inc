@@ -13,15 +13,33 @@ import game.enums.Ability;
 import game.enums.ItemStatistics;
 import game.sanctuary.SanctuaryTool;
 
-
+/**
+ * A rare consumable item that allows an actor to inspire and motivate nearby workers.
+ *
+ * When used, the whistle identifies the nearest friendly worker within a specific radius
+ * and applies the MotivationStatus. This status causes the targeted worker
+ * to emit a powerful Area of Effect (AoE) pulse in the following turn. If no other
+ * workers are nearby, the user motivates themselves (provided they are a worker).
+ *
+ * The item is consumed upon use and can be purchased from the SuperComputer.
+ *
+ * @author Chathya Attanayake
+ * @version 1.0
+ */
 public class CommandWhistle extends Item implements SanctuaryTool, Purchasable {
-
+    /** The cost to purchase this item from a terminal. */
     private static final int PURCHASE_PRICE = 100;
+
+    /** The weight of the whistle in the actor's inventory. */
     private static final int WEIGHT = 1;
-    /** Maximum tile radius to search for a friendly worker. */
+
+    /** The maximum distance (Manhattan distance) to search for a friendly worker. */
     private static final int SEARCH_RADIUS = 5;
 
-
+    /**
+     * Constructor.
+     * Initializes the whistle with the 'f' symbol and sets its weight statistic.
+     */
     public CommandWhistle() {
         super("Command Whistle", 'f');
         this.makePortable();
@@ -91,12 +109,26 @@ public class CommandWhistle extends Item implements SanctuaryTool, Purchasable {
         return closest;
     }
 
-    // --- Purchasable Implementation ---
+
+    /**
+     * Returns the credits required to purchase the whistle.
+     *
+     * @return the purchase price as an integer.
+     */
     @Override
     public int getPurchasePrice() {
         return PURCHASE_PRICE; // Rare item price
     }
 
+    /**
+     * Handles the purchase transaction for the whistle.
+     * Deducts the price from the buyer's wallet and adds the whistle to their inventory.
+     *
+     * @param buyer  the actor purchasing the item.
+     * @param map    the map where the transaction occurs.
+     * @param wallet the credit holder from which funds are deducted.
+     * @return a message describing the successful purchase.
+     */
     @Override
     public String purchasedBy(Actor buyer, GameMap map, CreditHolder wallet) {
         wallet.deductCredits(this.getPurchasePrice());

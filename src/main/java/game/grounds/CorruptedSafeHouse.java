@@ -13,43 +13,78 @@ import game.sanctuary.DamageInterceptor;
 import game.sanctuary.DistortionSource;
 
 /**
- * A safe house that protects workers but creates a ring of BlueFire around it.
+ * A protective structure that acts as a haven for workers while generating a
+ * defensive perimeter of BlueFire.
  *
- * Lifecycle (per spec):
- * - Worker enters    → fresh SanctuaryStatus added; BlueFire spawns for 5 turns
- * - Worker stays 1-5 → BlueFire re-spawns each turn; damage halved; 30% heal
- * - Worker stays 6+  → BlueFire stops (isProtectionActive() false); healing continues
- * - Worker leaves    → SanctuaryStatus expires in tickStatus(); BlueFire stops next tick
- * - Worker re-enters → old status is inactive, new SanctuaryStatus added (full reset)
+ * The Corrupted Safe House has a complex lifecycle based on worker occupancy:
+ *     Entry: When a worker enters, they receive a SanctuaryStatus
+ *     and the surrounding area ignites with BlueFire.
+ *     Occupancy (Turns 1-5):The worker receives passive healing and damage reduction;
+ *     the surrounding BlueFire is refreshed each turn.
+ *     Occupancy (Turns 6+): Protection expires but healing continues. The
+ *     external fire ceases to spawn automatically.
+ *     Exit:<The status expires and fire production stops immediately.
+ *
+ *
+ * This ground can be "stabilized" to stop the spread of fire, or "audited" for
+ * credits at the cost of a violent energy burst and a cooldown period.
+ *
+ * @author Chathya Attanayake
+ * @version 1.0
  */
 public class CorruptedSafeHouse extends Ground implements DistortionSource {
 
+    /** Flag indicating if the safe house has been stabilized. */
     private boolean isStabilised = false;
 
+    /** Probability of a worker being healed while inside. */
     private static final double HEAL_CHANCE = 0.30;
+
+    /** Amount of health restored during a healing event. */
     private static final int HEAL_AMOUNT = 1;
+
+    /** The standard lifespan of spawned Blue Fire. */
     private static final int BLUE_FIRE_LIFESPAN = 3;
+
+    /** The lifespan of Blue Fire spawned during a violent audit burst. */
     private static final int BLUE_FIRE_BURST_LIFESPAN = 6;
+
+    /** Credits awarded to the company for auditing this structure. */
     private static final int AUDIT_CREDITS = 20;
+
+    /** Duration of the cooldown period following an audit. */
     private static final int AUDIT_COOLDOWN = 5;
 
-
+    /** Display for sanctuary-related messages. */
     private final Display display = new Display();
-    /** Cooldown turns after being audited. */
+
+    /** Remaining turns of the audit-induced cooldown. */
     private int auditCooldown = 0;
 
-
+    /**
+     * Constructor.
+     * Initializes the safe house with the '⌂' symbol and the CORRUPTED capability.
+     */
     public CorruptedSafeHouse() {
         super('⌂', "Corrupted Safe House");
         this.enableAbility(DistortionCapability.CORRUPTED);
     }
 
+    /**
+     * Updates the safe house state every turn.
+     *
+     * If not on cooldown or stabilized, the safe house checks for a worker. If a
+     * worker is present, it manages their SanctuaryStatus and handles the
+     * spawning of defensive  BlueFire on adjacent tiles.
+     *
+     * @param location The current location of the safe house.
+     */
     @Override
     public void tick(Location location) {
         if (auditCooldown > 0) {
             auditCooldown--;
             if (auditCooldown == 0) {
-                isStabilised = false; // cooldown over — safe house works normally again
+                isStabilised = false; // cooldown over safe house works normally again
             }
             return;
         }
@@ -80,22 +115,26 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
         }
         // If stabilised: no new status, no BlueFire, but existing status continues ticking naturally
     }
+
     /**
-     * Spawns BlueFire on adjacent exits.
-     * Guards: won't overwrite DistortionSources, impassable grounds, or existing hazards.
+     * Spawns BlueFire on adjacent tiles.
+     *
+     * This method implements complex interaction logic: if a tile already
+     * contains fire (implementing FireStackable), it refreshes that fire's
+     * lifespan instead of creating a new instance. It will not overwrite
+     * impassable ground, other corrupted tiles, or existing hazards.
+     *
+     * @param location The current location of the safe house.
      */
     private void spawnBlueFire(Location location) {
         for (Exit exit : location.getExits()) {
             Location dest = exit.getDestination();
             Ground existing = dest.getGround();
 
-            // Rule 2: Complex Interaction (Using an interface to modify existing ground)
-            // Check if the tile is ALREADY fire using the interface
+            // Check if the tile is already fire using the interface
             FireStackable fire = dest.getGroundAs(FireStackable.class);
 
             // Skip existing hazards (already burning)
-
-
             if (existing.hasAbility(DistortionCapability.ACTIVE_HAZARD)) {
                 continue;
             }
@@ -111,16 +150,16 @@ public class CorruptedSafeHouse extends Ground implements DistortionSource {
         }
     }
 
+    /**
+     * Suppresses the spatial distortion of the safe house.
+     * Prevents further spawning of Blue Fire and removes the CORRUPTED capability.
+     *
+     * @param location The location of the safe house.
+     */
     @Override
-    public String releaseDistortion(Actor actor, GameMap map, Location location) {
-        return actor + " enters the sanctuary — but the air around it ignites!";
-    }
-
-    @Override
-    public String stabilise(Location location) {
+    public void stabilise(Location location) {
         isStabilised = true;
         this.disableAbility(DistortionCapability.CORRUPTED);
-        return "Blue Fire spread has been suppressed!";
     }
 
 

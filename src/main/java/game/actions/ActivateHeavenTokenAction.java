@@ -3,12 +3,20 @@ package game.actions;
 import edu.monash.fit2099.engine.actions.Action;
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
-import edu.monash.fit2099.engine.positions.Location;
-import game.grounds.SanctuaryField;
-
 import game.sanctuary.DamageInterceptor;
 import game.sanctuary.SanctuaryTool;
 
+/**
+ * An action that triggers the deployment of a holy sanctuary field via a  SanctuaryTool.
+ * This action facilitates the transition from a portable item (Heaven Token) to a
+ * static environmental effect (Sanctuary Field). It leverages the SanctuaryTool interface
+ * to adhere to the Dependency Inversion Principle, allowing the action to remain decoupled
+ * from the concrete item implementation.
+ *
+ * @author Chathya Attanayake
+ * @version 1.0
+ *
+ */
 public class ActivateHeavenTokenAction extends Action {
     /** The token to consume on use. */
     private final SanctuaryTool tool;
@@ -27,11 +35,11 @@ public class ActivateHeavenTokenAction extends Action {
 
     /**
      * Executes the token use: removes the token from inventory, creates a
-     * {@link SanctuaryField} at the actor's location, and registers it with the
+     * SanctuaryField at the actor's location, and registers it with the
      * map so it ticks each turn independently.
      *
      * @param actor the actor using the token
-     * @param map   the current game map
+     * @param map  the current game map
      * @return a description of what happened
      */
     @Override
@@ -43,20 +51,6 @@ public class ActivateHeavenTokenAction extends Action {
 
         return result;
     }
-//        actor.getInventory().remove(token);
-//
-//        Location here = map.locationOf(actor);
-//        here.setGround(new SanctuaryField(FIELD_DURATION, here.getGround()));
-//
-//        // Set protection immediately — tick already ran this turn
-//        actor.enableAbility(DamageInterceptor.PROTECTED);
-//
-//        // FIX: Ensure both 'actor' and 'FIELD_DURATION' are passed to match %s and %d
-//        return String.format(
-//                "%s uses the Heaven Token! A holy sanctuary field manifests for %d turns.\n",
-//                        actor, FIELD_DURATION
-//
-//        );
 
 
     /**

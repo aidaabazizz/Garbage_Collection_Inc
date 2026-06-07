@@ -28,7 +28,8 @@ import java.util.List;
  *
  * @author Suchir
  * @author Victoria Tay (modified by)
- * @version 1.0
+ * @author Chathya Attanayake (modified by)
+ * @version 2.0
  */
 public class SuperComputer extends Ground implements SanctuaryTool {
 
@@ -65,7 +66,7 @@ public class SuperComputer extends Ground implements SanctuaryTool {
             return actions;
         }
 
-        // --- REQ4: DISTORTION AUDIT PROTOCOL ---
+        //REQ4: DISTORTION AUDIT PROTOCOL
         actions.add(new DistortionAuditAction(location, quotaManager));
 
 

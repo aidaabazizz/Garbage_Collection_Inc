@@ -10,21 +10,14 @@ import game.enums.Ability;
 
 /**
  * A status applied to a friendly actor (or the whistle-user) by a
- * {@link game.items.CommandWhistle}. On the first tick it fires an AoE knockback
- * pulse, pushing non-worker actors 2 tiles away from the whistle-user's original
+ * CommandWhistle.
+ * On the first tick it fires an AoE knockback pulse,
+ * pushing non-worker actors 2 tiles away from the whistle-user's original
  * position. Blocked paths deal impact damage instead.
  *
- * <p>Complex effect chain (Rule 2):
- * <pre>Status.tickStatus() → AoE scan from origin → map.moveActor() per enemy
- *     OR actor.hurt() on wall collision</pre>
- * </p>
  *
- * <p>Design: MotivationStatus owns the knockback physics (SRP).
- * The origin is stored at construction time so the pulse always radiates
- * from the whistle-user's tile, not from wherever the motivated actor is standing.
- * No instanceof checks — uses Ability.WORKER capability (DIP).</p>
- *
- * @author Your Name
+ * @author Chathya Attanayake
+ * @version 1.0
  */
 public class MotivationStatus implements Status {
 
@@ -66,7 +59,7 @@ public class MotivationStatus implements Status {
         hasPulsed = true;
 
         display.println("\u001B[33m>>> A tactical pulse erupts from " + entity + "!\u001B[0m");
-        // Move ALL the loop logic you had in the Whistle to HERE
+
         for (Exit exit : origin.getExits()) {
             Location adj = exit.getDestination();
             if (adj.containsAnActor() && !adj.getActor().hasAbility(Ability.WORKER)) {
@@ -78,12 +71,11 @@ public class MotivationStatus implements Status {
                     display.println(">>> " + enemy + " is blasted away!");
                 } else {
                     enemy.hurt(IMPACT_DAMAGE);
-                    // Rule 2: Complex Interaction (Environment-Aware Feedback)
+
                     String obstacleName = "an obstacle";
                     if (dest == null) {
                         obstacleName = "the facility boundary";
                     } else if (dest.containsAnActor()) {
-                        // FIX: This will now correctly name BOB or SARAH as the obstacle
                         obstacleName = dest.getActor().toString();
                     } else {
                         obstacleName = dest.getGround().toString();
@@ -95,24 +87,14 @@ public class MotivationStatus implements Status {
             }
         }
     }
-//
-//    /**
-//     * Searches the exits of {@code from} to find the tile in the same named
-//     * direction, giving us the "2 tiles away" destination.
-//     *
-//     * @param from          the adjacent tile the enemy currently occupies
-//     * @param directionName the exit name (e.g. "North") to follow
-//     * @return the destination 2 tiles from origin, or null if not found
-//     */
-//    private Location findKnockbackDestination(Location from, String directionName) {
-//        for (Exit pushExit : from.getExits()) {
-//            if (pushExit.getName().equals(directionName)) {
-//                return pushExit.getDestination();
-//            }
-//        }
-//        return null;
-//    }
 
+    /**
+     * Finds the tile one step further in the same direction from a given location.
+     *
+     * @param from the starting adjacent location
+     * @param dir  the direction name (exit name)
+     * @return the next location in that direction, or null if none exists
+     */
     private Location findKnockbackDest(Location from, String dir) {
         for (Exit e : from.getExits()) if (e.getName().equals(dir)) return e.getDestination();
         return null;
@@ -128,6 +110,11 @@ public class MotivationStatus implements Status {
         return !hasPulsed;
     }
 
+    /**
+     * Returns a readable description of this status.
+     *
+     * @return status label
+     */
     @Override
     public String toString() {
         return "Motivation (AoE pulse pending)";
