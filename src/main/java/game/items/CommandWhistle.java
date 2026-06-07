@@ -77,18 +77,15 @@ public class CommandWhistle extends Item implements SanctuaryTool, Purchasable {
         Actor closest = null;
         int minDist = Integer.MAX_VALUE;
 
-        for (int y : here.map().getYRange()) {
-            for (int x : here.map().getXRange()) {
-                Location loc = here.map().at(x, y);
-                if (!loc.containsAnActor()) continue;
-                Actor candidate = loc.getActor();
-                if (candidate == user) continue;
-                if (!candidate.hasAbility(Ability.WORKER)) continue;
-                int dist = Math.abs(loc.x() - here.x()) + Math.abs(loc.y() - here.y());
-                if (dist <= SEARCH_RADIUS && dist < minDist) {
-                    minDist = dist;
-                    closest = candidate;
-                }
+        for (Location loc : here.getNearbyLocations(SEARCH_RADIUS)) {
+            if (!loc.containsAnActor()) continue;
+            Actor candidate = loc.getActor();
+            if (candidate == user) continue;
+            if (!candidate.hasAbility(Ability.WORKER)) continue;
+            int dist = Math.abs(loc.x() - here.x()) + Math.abs(loc.y() - here.y());
+            if (dist < minDist) {
+                minDist = dist;
+                closest = candidate;
             }
         }
         return closest;
