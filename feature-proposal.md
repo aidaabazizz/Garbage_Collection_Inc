@@ -108,21 +108,22 @@ powering magnetic tools to harvest scrap remotely, and paralysing workers caught
 - Retrofitted existing classes: `Puddle`, `Wallet`, `CRTMonitor`, `FloppyDisk`, `Lantern`
   — all modified with meaningful, complex logic as required by Rule 2.
 
-> ## MARKER NOTE — Six Concrete Classes for REQ3 Assessment
+> ## MARKER NOTE — Seven Concrete Classes for REQ3 Assessment
 >
-> Per Rule 1 and Rule 2, the six concrete classes implementing the two abstractions (`ChargeSource` and `ChargeReactive`) are:
+> Per Rule 1 and Rule 2, the seven concrete classes implementing the two abstractions (`ChargeSource` and `ChargeReactive`) are:
 >
 >
-> | # | Class | Status | Abstraction Implemented | Complex Effect |
-> |---|---|---|---|---|
-> | 1 | `AtmosphericChargeSource` | **New** | `ChargeSource` | Random map-wide lightning strikes (10% chance, any coordinate) with cascading surge propagation via `ChargeUtils` |
-> | 2 | `TeslaCoil` | **New** | `ChargeSource`, `ChargeReactive` | 3-turn capacitor cycle + diamond-shaped AoE (Manhattan Distance ≤ 2) + overload chain reactions between coils |
-> | 3 | `PortableBattery` | **New** | `ChargeSource` | Single-use: center tile → permanent `PoweredFloor`; 8 neighbors → temporary `IonizedBarrier` walls; AoE zap of all occupants |
-> | 4 | `DormantStaticCreature` | **New** | `ChargeReactive` | Magnetic Anomaly accumulation (0→3); at max radius triggers diamond-shaped (Manhattan ≤ 3) item repulsion pulse pushing `MAGNETIC` items 2 tiles away; then hatches into `StaticStalker` |
-> | 5 | `Puddle` | **Retrofitted** (A1/A2) | `ChargeReactive` | Immediate occupant damage via `ChargeUtils.zapTile` + permanent structural terrain morphing into `ElectrifiedPuddle` |
-> | 6 | `Wallet` | **Retrofitted** (A1/A2) | `ChargeReactive` | 5×5 AoE magnetic item harvesting with ray-cast wall-based flux blocking (`isPathBlocked`) and inventory weight validation |
+> | # | Class                     | Status                  | Abstraction Implemented | Complex Effect |
+> |---|---------------------------|-------------------------|---|---|
+> | 1 | `AtmosphericChargeSource` | **New**                 | `ChargeSource` | Random map-wide lightning strikes (10% chance, any coordinate) with cascading surge propagation via `ChargeUtils` |
+> | 2 | `TeslaCoil`               | **New**                 | `ChargeSource`, `ChargeReactive` | 3-turn capacitor cycle + diamond-shaped AoE (Manhattan Distance ≤ 2) + overload chain reactions between coils |
+> | 3 | `PortableBattery`         | **New**                 | `ChargeSource` | Single-use: center tile → permanent `PoweredFloor`; 8 neighbors → temporary `IonizedBarrier` walls; AoE zap of all occupants |
+> | 4 | `DormantStaticCreature`   | **New**                 | `ChargeReactive` | Magnetic Anomaly accumulation (0→3); at max radius triggers diamond-shaped (Manhattan ≤ 3) item repulsion pulse pushing `MAGNETIC` items 2 tiles away; then hatches into `StaticStalker` |
+> | 5 | `Puddle`                  | **Retrofitted** (A1/A2) | `ChargeReactive` | Immediate occupant damage via `ChargeUtils.zapTile` + permanent structural terrain morphing into `ElectrifiedPuddle` |
+> | 6 | `Wallet`                  | **Retrofitted** (A1/A2) | `ChargeReactive` | 5×5 AoE magnetic item harvesting with ray-cast wall-based flux blocking (`isPathBlocked`) and inventory weight validation |
+> | 7 | `Electrified Puddle`      | **New**                 | `ChargeReactive` | Timed hazard (8 turns base, stacks to 24 via recharge) + on-tile contact: 1 damage + ShockedStatus (2 turns) + 8-direction AoE arcing: 20% ParalyzedStatus to neighbors|
 >
-> *Please focus your assessment on these six classes when evaluating REQ3.*
+> *Please focus your assessment on these seven classes when evaluating REQ3.*
 ---
 
 ***
