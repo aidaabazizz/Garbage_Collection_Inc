@@ -123,6 +123,8 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
 //        // Reset protection flag every turn (KISS Reset Pattern) [YOUR ADDITION]
 //        this.disableAbility(DamageInterceptor.PROTECTED);
 
+       
+
         // Validate consciousness
         if (!this.isConscious()) {
             String deathMessage = this.unconscious(map);
@@ -223,7 +225,7 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     @Override
     public void hurt(int points) {
         if (this.hasAbility(DamageInterceptor.PROTECTED)) {
-           display.println("\u001B[35m>>> Sanctuary Field Deflection: The blow bounces off the holy shield! (0 damage taken)\u001B[0m");
+            display.println("\u001B[35m>>> Sanctuary Field Deflection: The blow bounces off the holy shield! (0 damage taken)\u001B[0m");
             return;
         }
         super.hurt(points);
