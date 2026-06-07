@@ -25,7 +25,6 @@ import static org.mockito.Mockito.*;
  * - Handling case when item is already gone
  *
  * @author Aida
- * @version 1.0
  */
 class StealResourceActionTest {
 
