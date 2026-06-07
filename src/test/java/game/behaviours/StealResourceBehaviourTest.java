@@ -19,18 +19,16 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit testing suite for StealResourceBehaviour (REQ2).
- *
- * <p>This suite validates the stealing behaviour's ability to:
- * <ul>
- *   <li>Detect Depositable items on the ground</li>
- *   <li>Create StealResourceAction for depositable items</li>
- *   <li>Return null when no depositable items are present</li>
- *   <li>Handle edge cases like null parameters or empty item lists</li>
- * </ul>
- *
- * <p>This behaviour is used by ScrapSnatcher to identify and steal items
+
+ * This suite validates the stealing behaviour's ability to:
+ *   Detect Depositable items on the ground
+ *   Create StealResourceAction for depositable items
+ *   Return null when no depositable items are present
+ *   Handle edge cases like null parameters or empty item lists
+
+ * This behaviour is used by ScrapSnatcher to identify and steal items
  * that can be deposited to the Supercomputer.
- *
+
  * @author Aida
  * @version 2.0
  */

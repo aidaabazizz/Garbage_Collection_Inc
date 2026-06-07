@@ -19,13 +19,13 @@ import static org.mockito.Mockito.*;
 /**
  * Unit testing suite for FleshyMonolithStage (REQ2).
  *
- * <p>This suite validates the Monolith stage behavior on the 99-deprecated map:
- * <ul>
- *   <li>Violently warps adjacent workers to random valid locations</li>
- *   <li>Display character 'H' (per edit 25th May - changed from 'M')</li>
- *   <li>Cannot grow further (terminal stage)</li>
- *   <li>No warping when no workers adjacent</li>
- * </ul>
+ * This suite validates the Monolith stage behavior on the 99-deprecated map:
+ *
+ *   Violently warps adjacent workers to random valid locations
+ *   Display character 'H' (per edit 25th May - changed from 'M')
+ *   Cannot grow further (terminal stage)
+ *   No warping when no workers adjacent
+ *
  *
  * @author Aida
  * @version 2.0

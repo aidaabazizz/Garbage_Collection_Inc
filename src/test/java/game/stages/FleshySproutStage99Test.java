@@ -17,15 +17,12 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit testing suite for FleshySproutStage99 (REQ2).
- *
- * <p>This suite validates the Sprout stage behavior on the 99-deprecated map:
- * <ul>
- *   <li>Spawns Undead when workers are adjacent (instead of Slime)</li>
- *   <li>No spawning when no workers adjacent</li>
- *   <li>Display character 'y'</li>
- *   <li>Growth to Mature stage after threshold (every 20 turns, 25% chance)</li>
- *   <li>No Sapling stage - sprouts grow directly to Mature</li>
- * </ul>
+ * This suite validates the Sprout stage behavior on the 99-deprecated map:
+ *   Spawns Undead when workers are adjacent (instead of Slime)
+ *   No spawning when no workers adjacent
+ *   Display character 'y'
+ *   Growth to Mature stage after threshold (every 20 turns, 25% chance)
+ *   No Sapling stage - sprouts grow directly to Mature
  *
  * @author Aida
  * @version 2.0

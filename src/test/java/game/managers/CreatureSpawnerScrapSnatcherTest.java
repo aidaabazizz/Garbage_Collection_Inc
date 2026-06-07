@@ -24,16 +24,16 @@ import static org.mockito.Mockito.*;
 /**
  * Unit testing suite for ScrapSnatcher spawning in CreatureSpawner (REQ2).
  *
- * <p>This suite validates the ScrapSnatcher spawning mechanics:
- * <ul>
- *   <li>ScrapSnatcher creation with correct stats (25 HP, 's' char)</li>
- *   <li>Loot explosion spawns depositable items on adjacent tiles</li>
- *   <li>Each adjacent tile gets exactly one random depositable item</li>
- *   <li>Items are from the depositable resources pool (AluminiumScrap,
- *       IndustrialFan, AlienArtifact)</li>
- * </ul>
+ * This suite validates the ScrapSnatcher spawning mechanics:
  *
- * <p>Per the 29/05 edit, the "empty" check was removed - items spawn
+ *   ScrapSnatcher creation with correct stats (25 HP, 's' char)
+ *   Loot explosion spawns depositable items on adjacent tiles
+ *   Each adjacent tile gets exactly one random depositable item
+ *   Items are from the depositable resources pool (AluminiumScrap,
+ *       IndustrialFan, AlienArtifact)
+ *
+ *
+ * Per the 29/05 edit, the "empty" check was removed - items spawn
  * on traversable tiles regardless of existing items.
  *
  * @author Aida

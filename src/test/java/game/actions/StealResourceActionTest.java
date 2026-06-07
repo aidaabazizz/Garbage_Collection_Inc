@@ -18,17 +18,14 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit testing suite for StealResourceAction (REQ2).
+ * This suite validates the stealing action's behavior:
+ *Successfully stealing depositable items from ground
+ * Adding items to actor's inventory
+ * Removing items from ground
+ * Handling cases when items are already gone
+ * Menu description format
  *
- * <p>This suite validates the stealing action's behavior:
- * <ul>
- *   <li>Successfully stealing depositable items from ground</li>
- *   <li>Adding items to actor's inventory</li>
- *   <li>Removing items from ground</li>
- *   <li>Handling cases when items are already gone</li>
- *   <li>Menu description format</li>
- * </ul>
- *
- * <p>Test coverage includes normal cases, edge cases, and boundary cases.
+ *Test coverage includes normal cases, edge cases, and boundary cases.
  *
  * @author Aida
  * @version 2.0

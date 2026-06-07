@@ -18,13 +18,12 @@ import static org.mockito.Mockito.*;
 /**
  * Unit testing suite for FleshyMatureStage99 (REQ2).
  *
- * <p>This suite validates the Mature stage behavior on the 99-deprecated map:
- * <ul>
- *   <li>Spawns ScrapSnatcher when workers are adjacent (instead of Undead)</li>
- *   <li>No spawning when no workers adjacent</li>
- *   <li>Display character 'Y'</li>
- *   <li>Growth to Fleshy Monolith after threshold (every 35 turns, 50% chance)</li>
- * </ul>
+ * This suite validates the Mature stage behavior on the 99-deprecated map:
+ *   Spawns ScrapSnatcher when workers are adjacent (instead of Undead)
+ *   No spawning when no workers adjacent
+ *   Display character 'Y'
+ *   Growth to Fleshy Monolith after threshold (every 35 turns, 50% chance)
+
  *
  * @author Aida
  * @version 2.0
