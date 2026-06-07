@@ -35,6 +35,12 @@ public class FleshySproutStage99 implements TreeStage {
 
     @Override
     public TreeStage execute(Location location) {
+        // Add null check - handles edge case for testing
+        if (location == null) {
+            display.println("Fleshy Sprout: Location is null, cannot execute");
+            return this;
+        }
+
         // Internal state update happens every turn (age increments regardless)
         age++;
         display.println("Fleshy Sprout at " + location + " current age: (" + age + "/" + GROWTH_THRESHOLD + ")");

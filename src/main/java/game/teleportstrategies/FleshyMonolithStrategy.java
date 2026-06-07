@@ -9,7 +9,7 @@ import edu.monash.fit2099.engine.positions.Location;
  * Teleportation strategy for the Fleshy Monolith.
  * When a worker is adjacent, the Monolith violently warps them to a random valid location.
  *
- * @author REQ2 Implementation
+ * @author Aida
  * @version 1.0
  */
 public class FleshyMonolithStrategy extends BaseTeleportStrategy {

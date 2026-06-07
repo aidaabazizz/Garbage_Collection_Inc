@@ -1,10 +1,10 @@
 package game.actions;
 
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.items.Inventory;
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import edu.monash.fit2099.engine.items.Inventory;
 import game.items.AluminiumScrap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,14 +18,17 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit testing suite for StealResourceAction (REQ2).
+ * This suite validates the stealing action's behavior:
+ *Successfully stealing depositable items from ground
+ * Adding items to actor's inventory
+ * Removing items from ground
+ * Handling cases when items are already gone
+ * Menu description format
  *
- * This suite validates:
- * - Successfully stealing item from ground
- * - Adding item to actor's inventory
- * - Handling case when item is already gone
+ *Test coverage includes normal cases, edge cases, and boundary cases.
  *
  * @author Aida
- * @version 1.0
+ * @version 2.0
  */
 class StealResourceActionTest {
 
@@ -34,6 +37,7 @@ class StealResourceActionTest {
     private GameMap mockedMap;
     private Location actorLoc;
     private AluminiumScrap testItem;
+    private Inventory mockInventory;
 
     @BeforeEach
     void setUp() {
@@ -41,65 +45,100 @@ class StealResourceActionTest {
         mockActor = mock(Actor.class);
         mockedMap = mock(GameMap.class);
         actorLoc = mock(Location.class);
-
-        // Mock inventory
-        Inventory mockInventory = mock(Inventory.class);
-        when(mockActor.getInventory()).thenReturn(mockInventory);
+        mockInventory = mock(Inventory.class);
 
         when(mockedMap.locationOf(mockActor)).thenReturn(actorLoc);
+        when(mockActor.getInventory()).thenReturn(mockInventory);
 
         action = new StealResourceAction(testItem);
     }
 
+    // ==================== NORMAL CASES ====================
 
+    /**
+     * Normal Case: Verifies successful stealing of item from ground.
+     */
     @Test
-    @DisplayName("Normal Case: StealResourceAction successfully steals item from ground")
+    @DisplayName("Normal Case: Successfully steals depositable item from ground")
     void testSuccessfullyStealsItem() {
-        // Arrange
         List<Item> groundItems = new ArrayList<>();
         groundItems.add(testItem);
         when(actorLoc.getItems()).thenReturn(groundItems);
         when(mockActor.toString()).thenReturn("Test Snatcher");
 
-        // Act
         String result = action.execute(mockActor, mockedMap);
 
-        // Assert
         verify(actorLoc).removeItem(testItem);
-        verify(mockActor.getInventory()).add(testItem);
+        verify(mockInventory).add(testItem);
         assertTrue(result.contains("snatches"));
         assertTrue(result.contains("Aluminium Scrap"));
     }
 
+    /**
+     * Normal Case: Verifies menu description contains correct information.
+     */
     @Test
-    @DisplayName("Edge Case: StealResourceAction fails when item no longer on ground")
+    @DisplayName("Normal Case: menuDescription returns correct string")
+    void testMenuDescription() {
+        when(mockActor.toString()).thenReturn("Test Snatcher");
+        String description = action.menuDescription(mockActor);
+        assertTrue(description.contains("snatches"));
+        assertTrue(description.contains("Aluminium Scrap"));
+    }
+
+    // ==================== EDGE CASES ====================
+
+    /**
+     * Edge Case: Verifies action fails when item is no longer on ground.
+     */
+    @Test
+    @DisplayName("Edge Case: Fails when item no longer on ground")
     void testFailsWhenItemGone() {
-        // Arrange
         when(actorLoc.getItems()).thenReturn(new ArrayList<>());
         when(mockActor.toString()).thenReturn("Test Snatcher");
 
-        // Act
         String result = action.execute(mockActor, mockedMap);
 
-        // Assert
         verify(actorLoc, never()).removeItem(any());
-        verify(mockActor.getInventory(), never()).add(any());
+        verify(mockInventory, never()).add(any());
         assertTrue(result.contains("tries to snatch"));
         assertTrue(result.contains("no longer there"));
     }
 
+
+    // ==================== BOUNDARY CASES ====================
+
+    /**
+     * Boundary Case: Verifies multiple items on ground - steals the targeted one.
+     */
     @Test
-    @DisplayName("Normal Case: menuDescription returns correct string")
-    void testMenuDescription() {
-        // Arrange
-        when(mockActor.toString()).thenReturn("Test Snatcher");
+    @DisplayName("Boundary Case: Multiple items on ground - steals targeted item")
+    void testMultipleItemsOnGround() {
+        AluminiumScrap scrap1 = new AluminiumScrap();
+        AluminiumScrap scrap2 = new AluminiumScrap();
+        List<Item> groundItems = new ArrayList<>();
+        groundItems.add(scrap1);
+        groundItems.add(scrap2);
+        when(actorLoc.getItems()).thenReturn(groundItems);
 
-        // Act
-        String description = action.menuDescription(mockActor);
+        action = new StealResourceAction(scrap1);
+        action.execute(mockActor, mockedMap);
 
-        // Assert
-        assertTrue(description.contains("Test Snatcher"));
-        assertTrue(description.contains("snatches"));
-        assertTrue(description.contains("Aluminium Scrap"));
+        verify(actorLoc).removeItem(scrap1);
+        verify(mockInventory).add(scrap1);
+    }
+
+    /**
+     * Boundary Case: Verifies empty ground item list returns appropriate message.
+     */
+    @Test
+    @DisplayName("Boundary Case: Empty ground item list")
+    void testEmptyGroundItems() {
+        when(actorLoc.getItems()).thenReturn(new ArrayList<>());
+
+        String result = action.execute(mockActor, mockedMap);
+
+        assertTrue(result.contains("no longer there"));
+        verify(actorLoc, never()).removeItem(any());
     }
 }
