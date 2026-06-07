@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
-class ContractedWorkerHurtTest {
+class ContractedWorkerTest {
 
     private ContractedWorker worker;
     private CreatureSpawner spawner;
