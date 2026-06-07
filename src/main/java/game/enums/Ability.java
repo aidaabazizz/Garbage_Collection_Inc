@@ -15,6 +15,8 @@ public enum Ability {
     WORKER,
     /** Ability for items that should not be removed by random effects. */
     ESSENTIAL,
+    /** For the teleportation tube ability. **/
+    IS_TELEPORTATION_TUBE,
     /** For the magic circle teleportation ability **/
     IS_MAGIC_CIRCLE,
     /** Able to be cut by Plasma Cutter **/

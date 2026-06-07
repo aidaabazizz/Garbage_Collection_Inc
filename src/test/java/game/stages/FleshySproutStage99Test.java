@@ -1,9 +1,7 @@
 package game.stages;
 
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
-import edu.monash.fit2099.engine.positions.NumberRange;
 import game.managers.Spawner;
 import game.utils.SpatialSearch;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,39 +17,39 @@ import static org.mockito.Mockito.*;
 
 /**
  * Unit testing suite for FleshySproutStage99 (REQ2).
- *
- * This suite validates:
- * - Spawning Undead when workers are adjacent
- * - No spawning when no workers adjacent
- * - Display character 'y'
+ * This suite validates the Sprout stage behavior on the 99-deprecated map:
+ *   Spawns Undead when workers are adjacent (instead of Slime)
+ *   No spawning when no workers adjacent
+ *   Display character 'y'
+ *   Growth to Mature stage after threshold (every 20 turns, 25% chance)
+ *   No Sapling stage - sprouts grow directly to Mature
  *
  * @author Aida
- * @version 1.0
+ * @version 2.0
  */
 class FleshySproutStage99Test {
 
     private FleshySproutStage99 sproutStage;
     private Spawner mockSpawner;
     private Location treeLoc;
-    private GameMap mockedMap;
     private Actor mockWorker;
 
     @BeforeEach
     void setUp() {
         mockSpawner = mock(Spawner.class);
         treeLoc = mock(Location.class);
-        mockedMap = mock(GameMap.class);
         mockWorker = mock(Actor.class);
-
-        when(treeLoc.map()).thenReturn(mockedMap);
-        when(mockedMap.getXRange()).thenReturn(new NumberRange(0, 20));
-        when(mockedMap.getYRange()).thenReturn(new NumberRange(0, 20));
 
         sproutStage = new FleshySproutStage99(mockSpawner);
     }
 
+    // ==================== NORMAL CASES ====================
+
+    /**
+     * Normal Case: Verifies Sprout spawns Undead when workers are adjacent.
+     */
     @Test
-    @DisplayName("Normal Case: Sprout stage spawns Undead when workers adjacent")
+    @DisplayName("Normal Case: Sprout spawns Undead when workers adjacent")
     void testSpawnsUndeadWhenWorkersAdjacent() {
         try (MockedStatic<SpatialSearch> mockedSearch = mockStatic(SpatialSearch.class)) {
             mockedSearch.when(() -> SpatialSearch.getNearbyWorkers(treeLoc))
@@ -64,8 +62,22 @@ class FleshySproutStage99Test {
         }
     }
 
+    /**
+     * Normal Case: Verifies Sprout display character is 'y'.
+     */
     @Test
-    @DisplayName("Edge Case: Sprout stage does not spawn when no workers adjacent")
+    @DisplayName("Normal Case: Sprout display character is 'y'")
+    void testGetDisplayChar() {
+        assertEquals('y', sproutStage.getDisplayChar());
+    }
+
+    // ==================== EDGE CASES ====================
+
+    /**
+     * Edge Case: Verifies Sprout does not spawn when no workers adjacent.
+     */
+    @Test
+    @DisplayName("Edge Case: Sprout does not spawn when no workers adjacent")
     void testNoSpawnWhenNoWorkersAdjacent() {
         try (MockedStatic<SpatialSearch> mockedSearch = mockStatic(SpatialSearch.class)) {
             mockedSearch.when(() -> SpatialSearch.getNearbyWorkers(treeLoc))
@@ -78,14 +90,51 @@ class FleshySproutStage99Test {
         }
     }
 
+
+    /**
+     * Edge Case: Verifies multiple workers trigger multiple Undead spawns.
+     */
     @Test
-    @DisplayName("Normal Case: Sprout stage display character is 'y'")
-    void testGetDisplayChar() {
-        assertEquals('y', sproutStage.getDisplayChar());
+    @DisplayName("Edge Case: Multiple workers trigger multiple Undead spawns")
+    void testMultipleWorkersTriggerMultipleSpawns() {
+        Actor worker1 = mock(Actor.class);
+        Actor worker2 = mock(Actor.class);
+        List<Actor> workers = List.of(worker1, worker2);
+
+        try (MockedStatic<SpatialSearch> mockedSearch = mockStatic(SpatialSearch.class)) {
+            mockedSearch.when(() -> SpatialSearch.getNearbyWorkers(treeLoc))
+                    .thenReturn(workers);
+
+            sproutStage.execute(treeLoc);
+
+            verify(mockSpawner, times(2)).spawnUndead(treeLoc);
+        }
     }
 
+    // ==================== BOUNDARY CASES ====================
+
+    /**
+     * Boundary Case: Verifies spawning prevents growth in the same turn.
+     */
     @Test
-    @DisplayName("Normal Case: SproutStage99 implements TreeStage interface")
+    @DisplayName("Boundary Case: Spawning prevents growth in same turn")
+    void testSpawnPreventsGrowthSameTurn() {
+        try (MockedStatic<SpatialSearch> mockedSearch = mockStatic(SpatialSearch.class)) {
+            mockedSearch.when(() -> SpatialSearch.getNearbyWorkers(treeLoc))
+                    .thenReturn(List.of(mockWorker));
+
+            TreeStage result = sproutStage.execute(treeLoc);
+
+            assertSame(sproutStage, result);
+            verify(mockSpawner).spawnUndead(treeLoc);
+        }
+    }
+
+    /**
+     * Boundary Case: Verifies SproutStage99 implements TreeStage interface.
+     */
+    @Test
+    @DisplayName("Boundary Case: SproutStage99 implements TreeStage interface")
     void testImplementsTreeStage() {
         assertTrue(sproutStage instanceof TreeStage);
     }

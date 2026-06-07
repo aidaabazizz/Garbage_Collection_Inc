@@ -25,9 +25,21 @@ public class FleshyMonolithStage implements TreeStage {
 
     @Override
     public TreeStage execute(Location location) {
+        // Add null check - handles edge case for testing
+        if (location == null) {
+            display.println("Fleshy Monolith: Location is null, cannot execute");
+            return this;
+        }
+
         GameMap map = location.map();
 
-        // Find adjacent workers using SpatialSearch (NO instanceof!)
+        // Add map null check
+        if (map == null) {
+            display.println("Fleshy Monolith: Map is null, cannot execute");
+            return this;
+        }
+
+        // Find adjacent workers using SpatialSearch
         List<Actor> adjacentWorkers = SpatialSearch.getNearbyWorkers(location);
 
         for (Actor worker : adjacentWorkers) {
