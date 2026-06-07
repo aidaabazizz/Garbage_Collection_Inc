@@ -35,11 +35,8 @@ import static org.mockito.Mockito.*;
  * @author Jewell Gomes
  */
 class PuddleTest {
-    /** The harmless puddle under test. */
     private Puddle puddle;
-    /** Mocked location context to verify map changes. */
     private Location mockedLocation;
-    /** Mocked terminal interface. */
     private Display mockedDisplay;
 
     /**
