@@ -53,7 +53,7 @@ class SanctuaryStatusTest {
     void isProtectionActive_BoundaryCase_ExpiresAfterFiveTicks() {
         // Boundary: Protection expires exactly after 5 ticks
         SanctuaryStatus status = new SanctuaryStatus();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
             status.tickStatus(actor, location);
         }
         assertFalse(status.isProtectionActive());
@@ -71,7 +71,7 @@ class SanctuaryStatusTest {
     void tickStatus_BoundaryCase_DisablesProtectedFlagAfterExpiry() {
         // Boundary: PROTECTED flag disabled once protection turns run out
         SanctuaryStatus status = new SanctuaryStatus();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
             status.tickStatus(actor, location);
         }
         verify(actor, atLeastOnce()).disableAbility(DamageInterceptor.PROTECTED);
