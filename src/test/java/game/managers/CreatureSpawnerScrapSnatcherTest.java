@@ -1,8 +1,6 @@
 package game.managers;
 
-import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.actors.ActorStatistics;
-import edu.monash.fit2099.engine.displays.Display;
 import edu.monash.fit2099.engine.positions.*;
 import game.actors.ScrapSnatcher;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,7 +65,7 @@ class CreatureSpawnerScrapSnatcherTest {
 
     @Test
     @DisplayName("Normal Case: ScrapSnatcher can be created with correct stats")
-    void testScrapSnatcherCanBeCreated() {
+     void testScrapSnatcherCanBeCreated() {
         ScrapSnatcher snatcher = new ScrapSnatcher();
 
         assertNotNull(snatcher);

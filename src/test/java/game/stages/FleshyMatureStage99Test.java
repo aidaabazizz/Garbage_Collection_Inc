@@ -2,7 +2,6 @@ package game.stages;
 
 import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.displays.Display;
-import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.NumberRange;
@@ -11,6 +10,7 @@ import game.utils.SpatialSearch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
  * - Display character 'Y'
  * - Growth to Monolith after threshold
  *
- * @author Aida
+ * @author REQ2 Implementation
  * @version 1.0
  */
 class FleshyMatureStage99Test {
@@ -57,34 +57,31 @@ class FleshyMatureStage99Test {
     @Test
     @DisplayName("Normal Case: Mature stage spawns ScrapSnatcher when workers adjacent")
     void testSpawnsScrapSnatcherWhenWorkersAdjacent() {
-        // Arrange - setup adjacent worker
-        Exit mockExit = mock(Exit.class);
-        Location adjacentLoc = mock(Location.class);
-        when(mockExit.getDestination()).thenReturn(adjacentLoc);
-        when(treeLoc.getExits()).thenReturn(List.of(mockExit));
-        when(adjacentLoc.containsAnActor()).thenReturn(true);
-        when(adjacentLoc.getActor()).thenReturn(mockWorker);
+        // Mock SpatialSearch
+        try (MockedStatic<SpatialSearch> mockedSearch = mockStatic(SpatialSearch.class)) {
+            mockedSearch.when(() -> SpatialSearch.getNearbyWorkers(treeLoc))
+                    .thenReturn(List.of(mockWorker));
 
-        // Act
-        TreeStage result = matureStage.execute(treeLoc);
+            TreeStage result = matureStage.execute(treeLoc);
 
-        // Assert
-        verify(mockSpawner).spawnScrapSnatcher(treeLoc);
-        assertSame(matureStage, result);
+            verify(mockSpawner).spawnScrapSnatcher(treeLoc);
+            assertSame(matureStage, result);
+        }
     }
 
     @Test
     @DisplayName("Edge Case: Mature stage does not spawn when no workers adjacent")
     void testNoSpawnWhenNoWorkersAdjacent() {
-        // Arrange
-        when(treeLoc.getExits()).thenReturn(new ArrayList<>());
+        // Mock SpatialSearch to return empty list
+        try (MockedStatic<SpatialSearch> mockedSearch = mockStatic(SpatialSearch.class)) {
+            mockedSearch.when(() -> SpatialSearch.getNearbyWorkers(treeLoc))
+                    .thenReturn(new ArrayList<>());
 
-        // Act
-        TreeStage result = matureStage.execute(treeLoc);
+            TreeStage result = matureStage.execute(treeLoc);
 
-        // Assert
-        verify(mockSpawner, never()).spawnScrapSnatcher(any());
-        assertSame(matureStage, result);
+            verify(mockSpawner, never()).spawnScrapSnatcher(any());
+            assertSame(matureStage, result);
+        }
     }
 
     @Test

@@ -1,15 +1,15 @@
 package game.stages;
 
 import edu.monash.fit2099.engine.actors.Actor;
-import edu.monash.fit2099.engine.displays.Display;
-import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import edu.monash.fit2099.engine.positions.NumberRange;
 import game.managers.Spawner;
+import game.utils.SpatialSearch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,34 +53,29 @@ class FleshySproutStage99Test {
     @Test
     @DisplayName("Normal Case: Sprout stage spawns Undead when workers adjacent")
     void testSpawnsUndeadWhenWorkersAdjacent() {
-        // Arrange - setup adjacent worker
-        Exit mockExit = mock(Exit.class);
-        Location adjacentLoc = mock(Location.class);
-        when(mockExit.getDestination()).thenReturn(adjacentLoc);
-        when(treeLoc.getExits()).thenReturn(List.of(mockExit));
-        when(adjacentLoc.containsAnActor()).thenReturn(true);
-        when(adjacentLoc.getActor()).thenReturn(mockWorker);
+        try (MockedStatic<SpatialSearch> mockedSearch = mockStatic(SpatialSearch.class)) {
+            mockedSearch.when(() -> SpatialSearch.getNearbyWorkers(treeLoc))
+                    .thenReturn(List.of(mockWorker));
 
-        // Act
-        TreeStage result = sproutStage.execute(treeLoc);
+            TreeStage result = sproutStage.execute(treeLoc);
 
-        // Assert
-        verify(mockSpawner).spawnUndead(treeLoc);
-        assertSame(sproutStage, result);
+            verify(mockSpawner).spawnUndead(treeLoc);
+            assertSame(sproutStage, result);
+        }
     }
 
     @Test
     @DisplayName("Edge Case: Sprout stage does not spawn when no workers adjacent")
     void testNoSpawnWhenNoWorkersAdjacent() {
-        // Arrange
-        when(treeLoc.getExits()).thenReturn(new ArrayList<>());
+        try (MockedStatic<SpatialSearch> mockedSearch = mockStatic(SpatialSearch.class)) {
+            mockedSearch.when(() -> SpatialSearch.getNearbyWorkers(treeLoc))
+                    .thenReturn(new ArrayList<>());
 
-        // Act
-        TreeStage result = sproutStage.execute(treeLoc);
+            TreeStage result = sproutStage.execute(treeLoc);
 
-        // Assert
-        verify(mockSpawner, never()).spawnUndead(any());
-        assertSame(sproutStage, result);
+            verify(mockSpawner, never()).spawnUndead(any());
+            assertSame(sproutStage, result);
+        }
     }
 
     @Test

@@ -6,7 +6,7 @@ import edu.monash.fit2099.engine.behaviours.Behaviour;
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.StealResourceAction;
-import game.capabilities.Sellable;
+import game.capabilities.Depositable;
 
 /**
  * Behaviour that causes an actor to steal any Sellable item from the ground.
@@ -18,7 +18,8 @@ public class StealResourceBehaviour implements Behaviour<Actor, Action> {
     @Override
     public Action operate(Actor actor, Location location) {
         for (Item item : location.getItems()) {
-            if (item.asCapability(Sellable.class).isPresent()) {
+            // Check for Depositable (items that can be deposited to Supercomputer)
+            if (item.asCapability(Depositable.class).isPresent()) {
                 return new StealResourceAction(item);
             }
         }

@@ -4,6 +4,7 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.items.Item;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
+import edu.monash.fit2099.engine.items.Inventory;
 import game.items.AluminiumScrap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,10 +42,15 @@ class StealResourceActionTest {
         mockedMap = mock(GameMap.class);
         actorLoc = mock(Location.class);
 
+        // Mock inventory
+        Inventory mockInventory = mock(Inventory.class);
+        when(mockActor.getInventory()).thenReturn(mockInventory);
+
         when(mockedMap.locationOf(mockActor)).thenReturn(actorLoc);
 
         action = new StealResourceAction(testItem);
     }
+
 
     @Test
     @DisplayName("Normal Case: StealResourceAction successfully steals item from ground")

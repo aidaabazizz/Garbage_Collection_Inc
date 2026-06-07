@@ -42,6 +42,6 @@ public class FleshyMonolithStage implements TreeStage {
 
     @Override
     public char getDisplayChar() {
-        return 'M';
+        return 'H';
     }
 }
