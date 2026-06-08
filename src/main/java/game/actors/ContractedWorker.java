@@ -44,8 +44,11 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     private final Spawner spawner;
     /** Radius used to scan for targets when Killer Instinct is active. */
     private static final int RAGE_STRIKE_RADIUS = 3;
+    /** Hit rate (accuracy percentage) of the worker’s intrinsic weapon. */
     private static final int RAGE_STRIKE_HIT_RATE = 100;
+    /** Damage dealt by the worker’s intrinsic weapon (WorkerFists). */
     private static final int RAGE_STRIKE_DAMAGE = 2;
+    /** Display instance used for printing game messages. */
     private final Display display = new Display();
 
     /**
@@ -118,11 +121,6 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
     public Action playTurn(ActionList actions, Action lastAction, GameMap map, Display display) {
 
         display.endLine();
-
-
-//        // Reset protection flag every turn (KISS Reset Pattern) [YOUR ADDITION]
-//        this.disableAbility(DamageInterceptor.PROTECTED);
-
        
 
         // Validate consciousness
@@ -200,7 +198,6 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
 
     /**
      * REQ4 Helper: Scans a 3-tile radius and injects RageStrikeAction for each nearby actor.
-     * [YOUR ADDITION]
      *
      * @param actions The current action list to inject into.
      * @param map     The game map used to locate this worker.
@@ -218,7 +215,7 @@ public class ContractedWorker extends Actor implements Infectable, Freezable, Di
 
     /**
      * REQ4: Applies damage mitigation if the PROTECTED ability is active.
-     * Halves incoming damage, with a minimum of 1. [YOUR ADDITION]
+     * Halves incoming damage, with a minimum of 1.
      *
      * @param points The raw incoming damage.
      */

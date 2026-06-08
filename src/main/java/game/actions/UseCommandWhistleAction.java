@@ -11,38 +11,35 @@ import game.sanctuary.SanctuaryTool;
 import game.utils.SpatialSearch;
 
 /**
- * An action that activates the {@link CommandWhistle}.
+ * An action that activates the  CommandWhistle.
  *
- * <p>Scans all actors adjacent to the whistle-user. If a friendly actor (WORKER)
- * is found nearby, that actor receives {@link MotivationStatus}. If none is found,
+ * Scans all actors adjacent to the whistle-user. If a friendly actor (WORKER)
+ * is found nearby, that actor receives MotivationStatus. If none is found,
  * the whistle-user receives it instead. The status then fires an AoE knockback
- * pulse on its next tick.</p>
+ * pulse on its next tick.
  *
- * <p>Complex effect chain (Rule 2):
- * <pre>Item → Action → target scan → MotivationStatus applied
- *     → Status.tickStatus() → AoE knockback + wall-collision damage</pre>
- * </p>
- *
- * <p>Design: This action owns only "find target + apply status". All knockback
- * physics are in MotivationStatus (SRP). This action never references concrete
- * actor types — it queries Ability.WORKER capability (DIP).</p>
- *
- * @author Your Name
+ * @author Chathya Attanayake
+ * @version 1.0
  */
 public class UseCommandWhistleAction extends Action {
 
-
+    /**
+     * The sanctuary tool responsible for executing whistle effects.
+     */
     private final SanctuaryTool tool;
 
-
-
+    /**
+     * Constructs a new {@code UseCommandWhistleAction}.
+     *
+     * @param tool the sanctuary tool that handles whistle activation logic
+     */
     public UseCommandWhistleAction(SanctuaryTool tool) {
         this.tool = tool;
     }
 
     /**
      * Finds the nearest friendly actor (or self if none), grants them
-     * {@link MotivationStatus}, and lets the status handle knockback next tick.
+     * MotivationStatus, and lets the status handle knockback next tick.
      *
      * @param actor the actor using the whistle
      * @param map   the game map
@@ -52,51 +49,6 @@ public class UseCommandWhistleAction extends Action {
     public String execute(Actor actor, GameMap map) {
         return tool.activateSanctuaryEffect(actor, map, map.locationOf(actor));
     }
-//        Location here = map.locationOf(actor);
-//        Actor target = findNearestFriendly(actor,here);
-//
-//        if (target == null) {
-//            // No friendly found — apply to self
-//            target = actor;
-//        }
-//
-//        // Apply motivation status — knockback fires on next tick
-//        target.addStatus(new MotivationStatus(map.locationOf(target)));
-//
-//        return String.format(
-//                "%s blows the Command Whistle! %s is motivated — an AoE pulse will fire next turn!",
-//                actor, target
-//        );
-//    }
-//
-//    /**
-//     * Scans all exits from the whistle-user's location for a friendly (WORKER) actor.
-//     * Uses Ability.WORKER capability check — no instanceof (DIP).
-//     *
-//     * @param user the actor using the whistle (excluded from search)
-//     * @param here the whistle-user's location
-//     * @return the first friendly actor found, or null if none
-//     */
-//    private Actor findNearestFriendly(Actor user, Location here) {
-//        Actor closest = null;
-//        int minDist = Integer.MAX_VALUE;
-//
-//        for (int y : here.map().getYRange()) {
-//            for (int x : here.map().getXRange()) {
-//                Location loc = here.map().at(x, y);
-//                if (!loc.containsAnActor()) continue;
-//                Actor candidate = loc.getActor();
-//                if (candidate == user) continue;
-//                if (!candidate.hasAbility(Ability.WORKER)) continue;
-//                int dist = Math.abs(loc.x() - here.x()) + Math.abs(loc.y() - here.y());
-//                if (dist <= SEARCH_RADIUS && dist < minDist) {
-//                    minDist = dist;
-//                    closest = candidate;
-//                }
-//            }
-//        }
-//        return closest;
-//    }
 
     /**
      * Returns the menu text for this action.

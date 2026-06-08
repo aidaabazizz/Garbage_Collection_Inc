@@ -11,23 +11,51 @@ import game.managers.QuotaManager;
 import game.sanctuary.DistortionSource;
 import java.util.Random;
 
+/**
+ * A volatile ground type that grants combat bonuses to workers before relocating itself.
+ *
+ * The Rage Ground acts as a dynamic hazard. When an actor with the WORKER
+ * capability steps on it, they are granted KillerInstinctStatus. Immediately after
+ * triggering, the ground vanishes from its current location and reappears at a random
+ * valid location on the map.
+ *
+ * It provides high-risk utility: while it buffs workers, its unpredictable relocation
+ * and "burst" audit effect can lead to chaotic combat scenarios.
+ *
+ * @author Chathya Attanayake
+ * @version 1.0
+ */
 public class RageGround extends Ground implements DistortionSource {
-
+    /** Random number generator for relocation logic. */
     private final Random random = new Random();
+
+    /** The number of turns the Killer Instinct status lasts once applied. */
     private static final int KILLER_INSTINCT_SPAN = 3;
 
+    /**
+     * Constructor.
+     * Initializes the ground with the '╬' symbol and the CORRUPTED capability.
+     */
     public RageGround() {
         super('╬', "Rage Ground");
         this.enableAbility(DistortionCapability.CORRUPTED);
     }
 
+    /**
+     * Updates the ground's state each turn.
+     *
+     * If a worker steps on this tile and does not already possess the  KillerInstinctStatus,
+     * the status is applied and the ground immediately triggers its relocate logic.
+     *
+     * @param location The current location of the Rage Ground.
+     */
     @Override
     public void tick(Location location) {
         Display display = new Display();
-        // 1. Trigger relocation only when a Worker steps on it
+        // Trigger relocation only when a Worker steps on it
         if (location.containsAnActor()) {
             Actor actor = location.getActor();
-            // Only trigger if Bob doesn't already have the status (SOLID Entry Trigger)
+            // Only trigger if worker doesn't already have the status
             if (!actor.hasStatus(KillerInstinctStatus.class) && actor.hasAbility(Ability.WORKER)) {
                 actor.addStatus(new KillerInstinctStatus(KILLER_INSTINCT_SPAN));
                 display.println("\u001B[31m>>> " + actor + " triggers the Rage Ground! It will vanish soon...\u001B[0m");
@@ -36,6 +64,17 @@ public class RageGround extends Ground implements DistortionSource {
         }
     }
 
+    /**
+     * Removes the Rage Ground from its current location and spawns a new one at a random
+     * valid tile on the map.
+     *
+     * A valid location must:
+     *     Be traversable by actors.
+     *     Not currently contain an actor.
+     *     Not already be a corrupted ground type.
+     *
+     * @param currentLocation The current location of this ground instance.
+     */
     private void relocate(Location currentLocation) {
         GameMap map = currentLocation.map();
         currentLocation.setGround(new Floor()); // Disappear
@@ -47,7 +86,7 @@ public class RageGround extends Ground implements DistortionSource {
             x = random.nextInt(map.getXRange().max());
             y = random.nextInt(map.getYRange().max());
             newLoc = map.at(x, y);
-            // FIX: Ensure we don't spawn under an actor (prevents infinite loops)
+            // Ensure we don't spawn under an actor (prevents infinite loops)
         } while (!newLoc.getGround().canActorEnter(null) ||
                 newLoc.containsAnActor() ||
                 newLoc.getGround().hasAbility(DistortionCapability.CORRUPTED));
@@ -55,17 +94,20 @@ public class RageGround extends Ground implements DistortionSource {
         newLoc.setGround(new RageGround());
     }
 
+    /**
+     * Neutralizes the Rage Ground, turning it back into a standard Floor.
+     *
+     * If a worker is currently standing on the tile, their KillerInstinctStatus
+     * is removed immediately to suppress the rage.
+     *
+     * @param location The location of the ground to be stabilized.
+     * @return A message indicating the neutralization of the ground.
+     */
     @Override
-    public String releaseDistortion(Actor a, GameMap m, Location l) {
-        return "";
-    }
-
-    @Override
-    public String stabilise(Location location) {
+    public void stabilise(Location location) {
         location.setGround(new Floor());
 
         // Remove KillerInstinctStatus from any worker on this tile
-        // Uses statuses() list scan — no instanceof, uses class comparison (DIP)
         if (location.containsAnActor()) {
             Actor actor = location.getActor();
             if (actor.hasAbility(Ability.WORKER)) {
@@ -78,7 +120,6 @@ public class RageGround extends Ground implements DistortionSource {
             }
         }
 
-        return "The Rage Ground has been neutralized — Killer Instinct suppressed!";
     }
 
     /**

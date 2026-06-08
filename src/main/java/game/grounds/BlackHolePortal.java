@@ -7,9 +7,20 @@ import game.enums.DistortionCapability;
 import game.managers.QuotaManager;
 import game.sanctuary.DistortionSource;
 import game.utils.SpatialSearch;
-
 import java.util.List;
 
+/**
+ * A hazardous ground type that represents a spatial rift.
+ *
+ * The Black Hole Portal acts as a DistortionSource. It exerts a "warp"
+ * effect on any actor standing on it and can be "audited" to generate company credits,
+ * though doing so causes a gravity flare that displaces nearby entities.
+ *
+ * It is initialized with the CORRUPTED capability, allowing it to be stabilized by workers
+ *
+ * @author Chathya Attanayake
+ * @version 1.0
+ */
 public class BlackHolePortal  extends Ground implements DistortionSource {
     /** Duration of the warp status applied to actors entering the portal. */
     private static final int WARP_DURATION = 10;
@@ -32,15 +43,27 @@ public class BlackHolePortal  extends Ground implements DistortionSource {
     /** Cooldown turns after being audited. */
     private int auditCooldown = 0;
 
+    /**
+     * Constructor that initializes the portal with the 'Ω' symbol and identifies it as corrupted.
+     */
     public BlackHolePortal() {
         super('Ω', "Black Hole Portal");
         this.enableAbility(DistortionCapability.CORRUPTED);
     }
 
+    /**
+     * Updates the portal's state every turn.
+     *
+     * If the portal is on an audit cooldown, it is considered "weakened" and
+     * will not affect actors. Otherwise, if an actor is standing on the portal,
+     * it applies a BlackHoleStatus to them.
+     *
+     * @param location The current location of the Black Hole Portal.
+     */
     @Override
     public void tick(Location location) {
 
-        // Respect audit cooldown — portal is weakened and won't apply warp
+        // portal is weakened and won't apply warp
         if (auditCooldown > 0) {
             auditCooldown--;
             return;
@@ -48,13 +71,24 @@ public class BlackHolePortal  extends Ground implements DistortionSource {
 
         if (location.containsAnActor()) {
             Actor actor = location.getActor();
-            // RULE: If Bob enters, he starts warping for 10 turns
+            // If worker enters, he starts warping for 10 turns
             if (!actor.hasStatus(BlackHoleStatus.class)) {
                 actor.addStatus(new BlackHoleStatus(WARP_DURATION));
             }
         }
     }
 
+    /**
+     * Performs an audit on the portal, generating resources at the risk of a gravity spike.
+     *
+     * This action awards credits to the QuotaManager and puts the portal into
+     * a cooldown state. Additionally, it triggers a "flare" that warps the first
+     * detected nearby actor to a safe destination (0, 0).
+     *
+     * @param manager  The QuotaManager to receive the credits.
+     * @param location The location of the portal being audited.
+     * @return A string describing the result of the audit and the flare effect.
+     */
     @Override
     public String audit(QuotaManager manager, Location location) {
         manager.addCompanyCredits(AUDIT_CREDITS);
@@ -74,13 +108,15 @@ public class BlackHolePortal  extends Ground implements DistortionSource {
         return effect + " [Quota +" + AUDIT_CREDITS + "]";
     }
 
-    @Override public String releaseDistortion(Actor a, GameMap m, Location l) { return ""; }
 
+    /**
+     * Stabilizes the spatial rift, removing the hazard from the map.
+     *
+     * @param location The location of the portal to be stabilized.
+     */
     @Override
-    public String stabilise(Location location) {
+    public void stabilise(Location location) {
         location.setGround(new Floor());
-        return "The Black Hole has been stabilized and collapsed.";
     }
-
 
 }

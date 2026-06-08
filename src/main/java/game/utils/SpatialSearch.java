@@ -22,6 +22,8 @@ import java.util.List;
  *
  * @author Jewell Gomes
  * @author Aida (Extended with additional helper methods for REQ5)
+ * @author Chathya Attanayake (Extended with additional helper methods for REQ4 A3)
+ *
  */
 public class SpatialSearch {
 
@@ -296,7 +298,8 @@ public class SpatialSearch {
     }
 
     /**
-     * REQ4: Collects all actors within a radius (radial search).
+     * Performs a radial search to collect all actors within a specified
+     * tile radius from the center location.
      */
     public static List<Actor> getActorsWithinDistance(Location center, int radius) {
         List<Actor> actors = new ArrayList<>();
@@ -308,19 +311,6 @@ public class SpatialSearch {
         return actors;
     }
 
-    /**
-     * REQ4: Finds adjacent tiles that have a specific capability (e.g., CORRUPTED).
-     */
-    public static List<Location> getAdjacentLocationsWithCapability(Location center, Enum<?> capability) {
-        List<Location> matches = new ArrayList<>();
-        for (Exit exit : center.getExits()) {
-            Location adj = exit.getDestination();
-            if (adj.getGround().hasAbility(capability)) {
-                matches.add(adj);
-            }
-        }
-        return matches;
-    }
 
     /**
      * Returns all locations within a specified radius from the center.
