@@ -14,6 +14,7 @@ import java.util.Random;
  * both Requirement 2 and Requirement 3 features.
  *
  * @author Jewell Gomes
+ * @author Victoria Tay Wen Xie (modified by)
  */
 public abstract class BaseTeleportStrategy {
 

@@ -104,7 +104,7 @@ public class Vent extends Ground implements Cuttable {
     /**
      * Executes the cutting logic which replaces this vent with a walkable Floor tile,
      * permanently making it inactive.
-     *
+     * Once cut, instantly spawns an Undead on that exact tile
      * @param actor The actor performing the cut action.
      * @param map The current game map containing the vent.
      * @param targetLocation The exact map coordinates where this vent ground sits.
@@ -114,7 +114,12 @@ public class Vent extends Ground implements Cuttable {
     public String executeCut(Actor actor, GameMap map, Location targetLocation) {
         targetLocation.setGround(new Floor());
         targetLocation.addItem(new IndustrialFan(this.spawner));
-        return actor + " cuts through the vent, vent becomes industrial fan.";
+        if (!targetLocation.containsAnActor()) {
+            spawner.spawnUndead(targetLocation);
+            return actor + " cuts through the vent, converting it into a floor tile. An Industrial Fan drops and an Undead entity breaks out!";
+        }
+        return actor + " cuts through the vent and drops an Industrial Fan! (The Undead creature failed to emerge because the tile is currently occupied).";
+
     }
 
     /**

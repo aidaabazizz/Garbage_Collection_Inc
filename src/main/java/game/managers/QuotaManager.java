@@ -6,6 +6,7 @@ import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.enums.Ability;
+import game.enums.FacilityCapability;
 
 /**
  * Manages global corporate quota cycles, company ranking tiers, and deadlines.
@@ -176,7 +177,8 @@ public class QuotaManager {
             for (int x : map.getXRange()) {
                 Location location = map.at(x, y);
                 if (location.getGround() != null
-                        && location.getGround().toString().contains("Supercomputer")) {
+                        && location.getGround().hasAbility(FacilityCapability.FACILITY_TERMINAL)
+                ) {
                     for (Exit exit : location.getExits()) {
                         Location adjacentLocation = exit.getDestination();
                         if (adjacentLocation.containsAnActor()) {
