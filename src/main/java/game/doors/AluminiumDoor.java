@@ -28,6 +28,8 @@ public class AluminiumDoor extends Door implements Cuttable {
     private static final int SHOCK_DAMAGE = 2;
     /** The chances of the Aluminium Door blowing up once cut. */
     private static final int BLOW_UP_CHANCE = 25;
+    /** Random number generator for spawning decisions and target selection. */
+    private final Random rand = new Random();
 
     /** Constructor for a new Aluminium Door with level 1 clearance requirement */
     public AluminiumDoor() {
@@ -73,8 +75,8 @@ public class AluminiumDoor extends Door implements Cuttable {
     @Override
     public String executeCut(Actor actor, GameMap map, Location targetLocation) {
         targetLocation.setGround(new Floor());
-        AluminiumScrap scrap = new AluminiumScrap();
-        if (new Random().nextInt(100) < BLOW_UP_CHANCE) {
+        targetLocation.addItem(new AluminiumScrap());
+        if (rand.nextInt(100) < BLOW_UP_CHANCE) {
             StringBuilder explosionMsg = new StringBuilder();
             for (Exit exit : targetLocation.getExits()) {
                 Location adjacent = exit.getDestination();
