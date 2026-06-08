@@ -45,6 +45,11 @@ public class PlasmaCutter extends Item implements Purchasable {
     private static final int BURN_DAMAGE = 1;
 
     /**
+     * Damage when buying plasma cutter.
+     */
+    private static final int BUY_DAMAGE = 5;
+
+    /**
      * Duration of the burning effect.
      */
     private static final int BURN_DURATION = 5;
@@ -71,7 +76,8 @@ public class PlasmaCutter extends Item implements Purchasable {
     }
 
     /**
-     * Applies the effects of purchasing the Plasma Cutter.
+     * Applies the effects of purchasing the Plasma Cutter which is
+     * buyer takes 5 damage and is burned for 5 turns.
      * @param buyer the actor purchasing the item
      * @param map the map the actor is on
      * @param wallet the wallet used for the purchase
@@ -79,6 +85,7 @@ public class PlasmaCutter extends Item implements Purchasable {
      */
     @Override
     public String purchasedBy(Actor buyer, GameMap map, CreditHolder wallet) {
+        buyer.hurt(BUY_DAMAGE);
         buyer.addStatus(new BurningStatus(BURN_DURATION));
         return buyer + " suffers " + BURN_DAMAGE + " damage and burn for " + BURN_DURATION + " turns due to the searing chute temperatures!";
     }
