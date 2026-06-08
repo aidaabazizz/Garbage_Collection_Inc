@@ -114,7 +114,12 @@ public class Vent extends Ground implements Cuttable {
     public String executeCut(Actor actor, GameMap map, Location targetLocation) {
         targetLocation.setGround(new Floor());
         targetLocation.addItem(new IndustrialFan(this.spawner));
-        return actor + " cuts through the vent, vent becomes industrial fan.";
+        if (!targetLocation.containsAnActor()) {
+            spawner.spawnUndead(targetLocation);
+            return actor + " cuts through the vent, converting it into a floor tile. An Industrial Fan drops and an Undead entity breaks out!";
+        }
+        return actor + " cuts through the vent and drops an Industrial Fan! (The Undead creature failed to emerge because the tile is currently occupied).";
+
     }
 
     /**
