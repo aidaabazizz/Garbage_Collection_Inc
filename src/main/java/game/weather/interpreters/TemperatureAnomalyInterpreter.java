@@ -7,8 +7,8 @@ import game.weather.WeatherSnapshot;
 /**
  * Interprets high temperature as heat distortion.
  * <p>
- * High temperature is used to destabilise blue fire, safehouses, and spatial
- * distortion systems from REQ4.
+ * High temperature is used to destabilise fire hazards, corrupted terrain,
+ * sanctuary terrain, and distortion systems from REQ4.
  * </p>
  *
  * @author Suchir

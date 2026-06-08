@@ -17,10 +17,10 @@ import game.weather.WeatherSnapshot;
 public interface WeatherAnomalyInterpreter {
 
     /**
-     * Checks whether this interpreter can interpret the given snapshot.
+     * Checks whether the given weather snapshot matches this anomaly condition.
      *
      * @param snapshot the weather snapshot
-     * @return true if this interpreter should respond to the snapshot
+     * @return true if this anomaly condition is present in the snapshot
      */
     boolean canInterpret(WeatherSnapshot snapshot);
 

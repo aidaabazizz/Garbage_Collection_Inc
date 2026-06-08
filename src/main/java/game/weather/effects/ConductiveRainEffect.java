@@ -21,10 +21,10 @@ import java.util.Random;
 /**
  * Weather effect that turns high humidity or rain into conductive moisture.
  * <p>
- * This effect connects the API system in REQ5 to both the High-Voltage system
+ * This effect connects the API system in REQ5 to the High-Voltage system
  * from REQ3 and the Distorted Sanctuary system from REQ4. It creates puddles,
  * triggers charge-reactive terrain, and may suppress extinguishable hazards
- * such as BlueFire without depending on concrete hazard classes.
+ * without depending on concrete hazard classes.
  * </p>
  *
  * @author Suchir
