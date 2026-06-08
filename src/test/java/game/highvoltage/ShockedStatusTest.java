@@ -4,8 +4,6 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.actors.ActorStatistics;
 import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.Location;
-import edu.monash.fit2099.engine.statistics.BaseStatistic;
-import edu.monash.fit2099.engine.statistics.StatisticOperations;
 import game.enums.MaterialCapability;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,17 +45,16 @@ class ShockedStatusTest {
 
         when(mockedBob.toString()).thenReturn("#1 Bob");
 
-        // tell the actor it has health
-        when(mockedBob.hasStatistic(ActorStatistics.HEALTH)).thenReturn(true);
+        // link the actor mock to the location mock
+        when(bobLoc.containsAnActor()).thenReturn(true);
+        when(bobLoc.getActor()).thenReturn(mockedBob);
 
-        // stub the int directly
-        // getStatistic(HEALTH) returns an int, not an object.
+        // tell the actor it has health statistics
+        when(mockedBob.hasStatistic(ActorStatistics.HEALTH)).thenReturn(true);
         when(mockedBob.getStatistic(ActorStatistics.HEALTH)).thenReturn(100);
 
-        // standard exit stubbing
         when(bobLoc.getExits()).thenReturn(new ArrayList<>());
     }
-
     /**
      * Verifies that the host actor is granted the CONDUCTIVE capability
      * while the status effect is active.
@@ -90,13 +87,7 @@ class ShockedStatusTest {
     @DisplayName("REQ 3.1: Lifecycle - SRP Attrition (Health Drain)")
     void testHealthAttrition() {
         status.tickStatus(mockedBob, bobLoc);
-
-        // This will now be invoked because getStatistic returned 100
-        verify(mockedBob).modifyStatistic(
-                eq(ActorStatistics.HEALTH),
-                any(),
-                eq(1) // Ensure this damage amount matches your ShockedStatus logic
-        );
+        verify(mockedBob).hurt(1);
     }
 
     /**

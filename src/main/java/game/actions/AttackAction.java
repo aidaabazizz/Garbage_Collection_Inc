@@ -56,7 +56,10 @@ public class AttackAction extends Action {
         // If the target is paralyzed, they act as a "Reflective Surface".
         // The attacker takes damage from the "Thorns" effect of the target's suit.
         // The kinetic energy of the hit triggers a secondary status on the attacker.
-        if (target.hasAbility(MaterialCapability.REFLECTIVE)) {
+        // Most engine weapons return a string containing "misses" on a failure
+        boolean hitSuccessful = !result.contains("misses");
+
+        if (hitSuccessful && target.hasAbility(MaterialCapability.REFLECTIVE)) {
             result += processReflectiveFeedback(actor, target);
         }
 

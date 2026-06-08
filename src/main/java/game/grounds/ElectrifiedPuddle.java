@@ -98,8 +98,6 @@ public class ElectrifiedPuddle extends Ground  implements ChargeReactive {
                 Actor neighbor = adj.getActor();
                 if (Math.random() < PARALYZED_CHANCE) {
                     neighbor.addStatus(new ParalyzedStatus(1));
-                    neighbor.enableAbility(MaterialCapability.PARALYZED);
-                    neighbor.enableAbility(MaterialCapability.REFLECTIVE);
                     display.println("\u001B[33m" + " Arcs of electricity jump from the puddle and paralyze " + neighbor + "!" + "\u001B[0m");
                 }
             }
