@@ -114,6 +114,8 @@ public class StaticStalker extends NonPlayerCharacter{
                 Actor target = adj.getActor();
                 if (target != this && Math.random() < currentStunChance) {
                     target.addStatus(new ParalyzedStatus(1));
+                    target.enableAbility(MaterialCapability.PARALYZED);
+                    target.enableAbility(MaterialCapability.REFLECTIVE);
                     display.println("\u001B[35m" + this + " arced a spark into " + target + "!\u001B[0m");
                 }
 
