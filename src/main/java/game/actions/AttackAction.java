@@ -5,6 +5,7 @@ import edu.monash.fit2099.engine.actors.Actor;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.weapons.Weapon;
 import game.enums.MaterialCapability;
+import game.highvoltage.ParalyzedStatus;
 import game.highvoltage.ShockedStatus;
 
 /**
@@ -63,7 +64,10 @@ public class AttackAction extends Action {
         // Most engine weapons return a string containing "misses" on a failure
         boolean hitSuccessful = !result.contains("misses");
 
-        if (hitSuccessful && target.hasAbility(MaterialCapability.REFLECTIVE)) {
+        boolean isReflective = target.hasAbility(MaterialCapability.REFLECTIVE) ||
+                target.hasStatus(ParalyzedStatus.class);
+
+        if (hitSuccessful && isReflective) {
             result += processReflectiveFeedback(actor, target);
         }
 

@@ -1,3 +1,4 @@
+
 package game.highvoltage;
 
 import edu.monash.fit2099.engine.GameEntity;
@@ -55,11 +56,11 @@ public class ParalyzedStatus implements Status {
         if (isStatusActive()) {
             entity.enableAbility(MaterialCapability.REFLECTIVE);
             entity.enableAbility(MaterialCapability.PARALYZED);
-        }
 
-        remainingTurns--;
-
-        if (remainingTurns <= 0) {
+            remainingTurns--;
+        } else {
+            // only disable if it is NO LONGER active
+            // this ensures it stays on for at least one full cycle
             entity.disableAbility(MaterialCapability.REFLECTIVE);
             entity.disableAbility(MaterialCapability.PARALYZED);
         }
