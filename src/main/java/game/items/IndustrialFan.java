@@ -9,6 +9,7 @@ import edu.monash.fit2099.engine.statistics.BaseStatistic;
 import game.capabilities.CreditHolder;
 import game.capabilities.Depositable;
 import game.capabilities.Sellable;
+import game.enums.FacilityCapability;
 import game.enums.ItemStatistics;
 import game.managers.QuotaManager;
 import game.managers.Spawner;
@@ -89,7 +90,7 @@ public class IndustrialFan extends Item implements Sellable, Depositable {
 
         for (Exit exit : sellerLoc.getExits()) {
             Location adj = exit.getDestination();
-            if (adj.getGround() != null && adj.getGround().toString().contains("Supercomputer")) {
+            if (adj.getGround().hasAbility(FacilityCapability.FACILITY_TERMINAL)) {
                 for (Exit comExit : adj.getExits()) {
                     Location slimeSpawnTile = comExit.getDestination();
                     if (!slimeSpawnTile.containsAnActor() && slimeSpawnTile.canActorEnter(seller)) {
