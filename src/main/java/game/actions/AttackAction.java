@@ -53,6 +53,10 @@ public class AttackAction extends Action {
     public String execute(Actor actor, GameMap map) {
         String result = weapon.attack(actor, target, map);
 
+        if (result == null) {
+            result = "";
+        }
+
         // If the target is paralyzed, they act as a "Reflective Surface".
         // The attacker takes damage from the "Thorns" effect of the target's suit.
         // The kinetic energy of the hit triggers a secondary status on the attacker.
