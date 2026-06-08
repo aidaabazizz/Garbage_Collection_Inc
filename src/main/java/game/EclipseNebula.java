@@ -88,8 +88,8 @@ public class EclipseNebula extends World {
 
         // Alien Cubes are found scattered in 20-overflow
         spawnOverflowUniqueItems(overflowMap);
-        spawnOverflowActors(overflowMap);
-
+        spawnCommonActors(overflowMap);
+        spawnCommonActors(moonMap);
         // 7. Setup players
         // Start them on Moon 99 so they pick up the starting card and use the Tube
         setupContractedWorkers(moonMap, globalSpawner);
@@ -318,7 +318,7 @@ public class EclipseNebula extends World {
      *
      * @param map the GameMap to populate
      */
-    private void spawnOverflowActors(GameMap map) {
+    private void spawnCommonActors(GameMap map) {
         try {
             map.at(6, 7).addActor(new DormantStaticCreature());
         } catch (Exception e) {
