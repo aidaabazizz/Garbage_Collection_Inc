@@ -54,6 +54,7 @@ class AtmosphericChargeSourceTest {
         mockedDisplay = mock(Display.class);
         mockedCharge = mock(ChargeContext.class);
         targetLoc = mock(Location.class);
+        when(mockedMap.at(anyInt(), anyInt())).thenReturn(targetLoc);
 
         // standard stubs for the charge context
         when(mockedCharge.getDisplay()).thenReturn(mockedDisplay);
