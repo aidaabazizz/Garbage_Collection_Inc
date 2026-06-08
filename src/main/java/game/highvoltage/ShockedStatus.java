@@ -99,6 +99,6 @@ public class ShockedStatus implements Status {
      */
     @Override
     public String toString() {
-        return "Shocked (Conductive Conduit)";
+        return String.format("Shocked (%d turns remaining)", remainingTurns);
     }
 }
