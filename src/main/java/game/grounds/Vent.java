@@ -104,7 +104,7 @@ public class Vent extends Ground implements Cuttable {
     /**
      * Executes the cutting logic which replaces this vent with a walkable Floor tile,
      * permanently making it inactive.
-     *
+     * Once cut, instantly spawns an Undead on that exact tile
      * @param actor The actor performing the cut action.
      * @param map The current game map containing the vent.
      * @param targetLocation The exact map coordinates where this vent ground sits.

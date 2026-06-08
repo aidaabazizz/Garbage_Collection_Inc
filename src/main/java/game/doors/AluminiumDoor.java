@@ -2,14 +2,18 @@ package game.doors;
 
 import edu.monash.fit2099.engine.actions.ActionList;
 import edu.monash.fit2099.engine.actors.Actor;
+import edu.monash.fit2099.engine.positions.Exit;
 import edu.monash.fit2099.engine.positions.GameMap;
 import edu.monash.fit2099.engine.positions.Location;
 import game.actions.CutAction;
 import game.capabilities.Cuttable;
+import game.enums.Ability;
 import game.enums.AccessLevel;
 import game.grounds.Door;
 import game.grounds.Floor;
 import game.items.AluminiumScrap;
+
+import java.util.Random;
 
 /**
  * An Aluminium Door that requires clearance level1 or higher. Unlocking
@@ -22,10 +26,13 @@ import game.items.AluminiumScrap;
 public class AluminiumDoor extends Door implements Cuttable {
     /** The amount of damage dealt to the worker when unlocking this door. */
     private static final int SHOCK_DAMAGE = 2;
+    /** The chances of the Aluminium Door blowing up once cut. */
+    private static final int BLOW_UP_CHANCE = 25;
 
     /** Constructor for a new Aluminium Door with level 1 clearance requirement */
     public AluminiumDoor() {
         super(AccessLevel.LEVEL_ONE);
+        this.enableAbility(Ability.CUTTABLE);
     }
 
     /**
@@ -56,6 +63,8 @@ public class AluminiumDoor extends Door implements Cuttable {
     /**
      * Handles cutting the door using a Plasma Cutter.
      * The door is replaced with floor and drops Aluminium Scrap.
+     * When cut, the door has a 25% chance of blowing up, dealing 100
+     * damage points to any entities within its adjacent tiles.
      * @param actor the actor performing the cut
      * @param map the game map
      * @param targetLocation the location of the door being cut
@@ -65,10 +74,22 @@ public class AluminiumDoor extends Door implements Cuttable {
     public String executeCut(Actor actor, GameMap map, Location targetLocation) {
         targetLocation.setGround(new Floor());
         AluminiumScrap scrap = new AluminiumScrap();
-        targetLocation.addItem(scrap);
-        return actor + " uses the searing beam of the Plasma Cutter to completely slice through and destroy the Aluminium Door from an adjacent tile.\n " +
-                "The door collapses into Aluminium Scraps.";
+        if (new Random().nextInt(100) < BLOW_UP_CHANCE) {
+            StringBuilder explosionMsg = new StringBuilder();
+            for (Exit exit : targetLocation.getExits()) {
+                Location adjacent = exit.getDestination();
+                if (adjacent.containsAnActor()) {
+                    adjacent.getActor().hurt(100);
+                    explosionMsg.append("\n ").append(adjacent.getActor())
+                            .append(" takes 100 damage from the explosion!");
+                }
+            }
+            return actor + " slices through the Aluminium Door, it EXPLODES!" + explosionMsg;
+        }
+        return actor + " uses the searing beam of the Plasma Cutter to completely slice through and destroy the Aluminium Door from an adjacent tile.\n" +
+                " The door collapses into Aluminium Scraps.";
     }
+
 
     /**
      * Provides cut action if the actor has the plasma cutter.
