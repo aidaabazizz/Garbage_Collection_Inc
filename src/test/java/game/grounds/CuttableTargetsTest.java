@@ -52,11 +52,13 @@ public class CuttableTargetsTest {
     @Test
     public void cuttingAluminiumDoorTransformsFloorAndDropsScrap() {
         AluminiumDoor door = new AluminiumDoor();
+        when(mockLocation.getExits()).thenReturn(new java.util.ArrayList<>());
 
         String result = door.executeCut(mockActor, mockMap, mockLocation);
 
         verify(mockLocation, times(1)).setGround(any(Floor.class));
-        assertTrue(result.contains("Aluminium Scrap") || result.contains("dropped"));
+        verify(mockLocation, times(1)).addItem(any(game.items.AluminiumScrap.class));
+        assertTrue(result.contains("EXPLODES") || result.contains("Aluminium Scraps"));
     }
 
     /**
@@ -66,9 +68,13 @@ public class CuttableTargetsTest {
     @Test
     public void cuttingVentTransformsFloorAndSpawnsUndead() {
         Vent vent = new Vent(mockSpawner);
+        when(mockLocation.containsAnActor()).thenReturn(false); // tile is empty, undead can spawn
+
         String result = vent.executeCut(mockActor, mockMap, mockLocation);
         verify(mockLocation, times(1)).setGround(any(Floor.class));
-        assertTrue(result.contains("vent") || result.contains("industrial fan"));
+        verify(mockLocation, times(1)).addItem(any(game.items.IndustrialFan.class));
+        verify(mockSpawner, times(1)).spawnUndead(mockLocation); // verify undead spawn called
+        assertTrue(result.contains("Undead"));
     }
 
     /**
